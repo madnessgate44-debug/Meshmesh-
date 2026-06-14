@@ -1,0 +1,167 @@
+GAHIZ — COMPLETE MASTER MIGRATION PACKAGE
+=========================================
+
+INCLUDED CONTENT
+1. Previous Assistant Transcript Package
+2. Full Product Architecture Spec
+3. Simulation Engine (JavaScript)
+4. UI Architecture (HTML/CSS structure)
+5. State Machine (System Flow)
+6. Wall Detection System Logic
+
+------------------------------------------------------------
+1. PREVIOUS ASSISTANT RESPONSE (ARCHIVED)
+------------------------------------------------------------
+
+IMPORTANT LIMITATION SUMMARY:
+- Full forensic dump not possible due to missing system logs
+- Only visible conversation content can be reconstructed
+- Provided structured timeline + extracted artifacts
+
+FULL TRANSCRIPT SUMMARY:
+- Phase evolution (1 → 23)
+- Product positioning shifts
+- UI evolution from SaaS → Intelligence Platform
+- Wall concept emergence
+- Method: Simulate → Detect → Diagnose → Drill → Expand Wall
+- CTA evolution: "Find Your Wall" / "Run My First Simulation"
+- Final system: Interview Performance Intelligence Platform
+
+------------------------------------------------------------
+2. PRODUCT ARCHITECTURE (FINAL SYSTEM)
+------------------------------------------------------------
+
+GAHIZ CORE MODULES:
+
+1. Pressure Simulation Engine
+2. Wall Detection System
+3. Voice Analysis Engine
+4. Interview Scenario Library
+5. Performance Telemetry System
+6. AI Evaluation Layer
+7. Pressure Profile Dashboard
+8. Training Drill System
+
+------------------------------------------------------------
+3. SIMULATION ENGINE (JAVASCRIPT)
+------------------------------------------------------------
+
+const simulationEngine = {
+  state: "idle",
+
+  userProfile: {
+    confidence: 100,
+    stress: 0,
+    wallPosition: null,
+    recoverySpeed: 0
+  },
+
+  questions: [
+    "Tell me about yourself",
+    "Why should we hire you?",
+    "Describe a difficult situation",
+    "Unexpected follow-up question",
+    "Rapid-fire round"
+  ],
+
+  currentIndex: 0,
+
+  start() {
+    this.state = "active";
+    this.runQuestion();
+  },
+
+  runQuestion() {
+    const pressure = Math.floor(Math.random() * 40 + 20);
+
+    this.userProfile.confidence -= pressure * 0.6;
+    this.userProfile.stress += pressure;
+
+    if (this.userProfile.confidence < 45) {
+      this.triggerWall();
+    }
+
+    this.currentIndex++;
+  },
+
+  triggerWall() {
+    this.state = "wall_detected";
+    this.userProfile.wallPosition = this.currentIndex;
+    console.log("WALL DETECTED at", this.currentIndex);
+  },
+
+  finish() {
+    this.state = "evaluation";
+    return {
+      wall: this.userProfile.wallPosition,
+      confidence: this.userProfile.confidence
+    };
+  }
+};
+
+------------------------------------------------------------
+4. UI ARCHITECTURE (HTML)
+------------------------------------------------------------
+
+<!DOCTYPE html>
+<html>
+<head>
+  <title>GAHIZ</title>
+</head>
+
+<body>
+
+<section id="hero">
+  <h1>YOUR ENGLISH IS NOT THE PROBLEM</h1>
+  <h2>YOUR COLLAPSE UNDER PRESSURE IS</h2>
+
+  <div class="wall-card">
+    WALL DETECTED
+  </div>
+</section>
+
+<section id="simulation"></section>
+<section id="wall"></section>
+<section id="dashboard"></section>
+
+<section id="cta">
+  <button>Run My First Simulation</button>
+</section>
+
+</body>
+</html>
+
+------------------------------------------------------------
+5. STATE MACHINE
+------------------------------------------------------------
+
+idle
+ → start
+ → questioning
+ → pressure_building
+ → wall_detected
+ → evaluation
+ → retry
+
+------------------------------------------------------------
+6. WALL SYSTEM
+------------------------------------------------------------
+
+Triggers:
+- confidence < 45
+- stress > 70
+- delayed responses
+
+Outputs:
+- WALL DETECTED
+- Collapse Point Timestamp
+- Recovery Score
+
+Metrics:
+- Wall Position
+- Stress Resistance
+- Recovery Speed
+
+------------------------------------------------------------
+END OF FILE
+============================================================
