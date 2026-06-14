@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mission Runner</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#0b0f19;color:#e6e6e6;min-height:100vh;display:flex;flex-direction:column}
+header{background:#111827;padding:12px 16px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid #1f2937;position:sticky;top:0;z-index:10}
+.logo{font-weight:700;font-size:16px;display:flex;align-items:center;gap:8px}
+.logo-icon{width:28px;height:28px;background:linear-gradient(135deg,#7c3aed,#a855f7);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:14px;color:#fff}
+.badge{font-size:11px;background:#1e293b;padding:4px 10px;border-radius:20px;display:flex;align-items:center;gap:6px;color:#94a3b8}
+.dot{width:7px;height:7px;border-radius:50%;background:#475569}
+.dot.on{background:#22c55e}
+main{flex:1;max-width:520px;width:100%;margin:0 auto;padding:16px;display:flex;flex-direction:column;gap:14px}
+.card{background:#111827;border:1px solid #1f2937;border-radius:14px;padding:16px}
+.card-title{font-size:11px;font-weight:600;color:#64748b;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:12px}
+.field{margin-bottom:12px;display:flex;flex-direction:column;gap:5px}
+label{font-size:11px;font-weight:600;color:#94a3b8;text-transform:uppercase}
+input,select,textarea{background:#0f172a;border:1px solid #1f2937;border-radius:10px;padding:11px 13px;font-size:14px;color:#e6e6e6;font-family:inherit;outline:none;width:100%}
+input:focus,select:focus,textarea:focus{border-color:#a855f7;box-shadow:0 0 0 3px rgba(168,85,247,0.15)}
+textarea{resize:vertical;min-height:90px;line-height:1.5}
+.hint{font-size:11px;color:#64748b;margin-top:3px}
+.btn-primary{width:100%;padding:12px;background:linear-gradient(135deg,#7c3aed,#a855f7);color:#fff;border:none;border-radius:10px;font-size:14px;font-weight:600;cursor:pointer}
+.btn-primary:disabled{opacity:0.5;cursor:not-allowed}
+.btn-ghost{padding:10px 16px;background:#1e293b;color:#cbd5e1;border:1px solid #334155;border-radius:10px;font-size:13px;font-weight:500;cursor:pointer}
+.row{display:flex;gap:10px;align-items:center;margin-top:8px}
+.st{border-radius:10px;padding:10px 13px;font-size:13px;display:none;margin-top:10px}
+.st.show{display:block}
+.st.success{background:#022c22;color:#4ade80;border:1px solid #166534}
+.st.error{background:#2c0000;color:#f87171;border:1px solid #7f1d1d}
+.st.loading{background:#1e1b4b;color:#a78bfa;border:1px solid #4338ca}
+.spinner{display:inline-block;width:12px;height:12px;border:2px solid rgba(167,139,250,0.3);border-top-color:#a78bfa;border-radius:50%;animation:spin 0.7s linear infinite;vertical-align:middle;margin-right:6px}
+@keyframes spin{to{transform:rotate(360deg)}}
+.tabs{display:flex;gap:4px;background:#111827;border:1px solid #1f2937;border-radius:12px;padding:4px;overflow-x:auto}
+.tab{flex:1;padding:9px 8px;border-radius:9px;border:none;background:transparent;font-size:12px;font-weight:500;color:#94a3b8;cursor:pointer;white-space:nowrap}
+.tab.active{background:linear-gradient(135deg,#7c3aed,#a855f7);color:#fff}
+.panel{display:none;flex-direction:column;gap:14px}
+.panel.active{display:flex}
+.stat-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:12px}
+.stat-card{background:#0f172a;border:1px solid #1f2937;border-radius:10px;padding:10px;text-align:center}
+.stat-value{font-size:20px;font-weight:700;color:#a78bfa}
+.stat-label{font-size:10px;color:#64748b;margin-top:4px}
+.list-item{background:#0f172a;border:1px solid #1f2937;border-radius:9px;padding:10px 13px;display:flex;justify-content:space-between;align-items:center;margin-bottom:6px}
+.item-name{font-weight:500;word-break:break-all}
+.item-meta{font-size:11px;color:#64748b;text-align:right}
+.tag{display:inline-block;padding:2px 8px;border-radius:20px;font-size:10px;font-weight:600;margin-left:6px}
+.tag-CRITICAL{background:#7f1d1d;color:#fca5a5}
+.tag-HIGH{background:#78350f;color:#fbbf24}
+.tag-MEDIUM{background:#1e3a5f;color:#93c5fd}
+.tag-LOW{background:#1e293b;color:#cbd5e1}
+.empty-state{text-align:center;padding:30px;color:#64748b;font-size:13px}
+</style>
+</head>
+<body>
+<header>
+  <div class="logo"><div class="logo-icon">🏃</div>Mission Runner</div>
+  <div class="badge" id="connBadge"><span class="dot" id="connDot"></span><span id="connLabel">Not connected</span></div>
+</header>
+<main>
+  <!-- setup card -->
+  <div class="card" id="setupCard">
+    <div class="card-title">Connect to GitHub Task Repo</div>
+    <div class="field"><label>GitHub Token</label><input type="password" id="ghToken" placeholder="ghp_..."></div>
+    <div class="field"><label>Repository</label><input type="text" id="ghRepo" placeholder="username/mishmish-runner"><div class="hint">The repo that stores /tasks/ folder</div></div>
+    <button class="btn-primary" onclick="connectRepo()">Connect</button>
+    <div class="st" id="setupSt"></div>
+  </div>
+  <!-- main UI after connected -->
+  <div id="mainUI" style="display:none;flex-direction:column;gap:14px">
+    <div class="tabs">
+      <button class="tab active" onclick="switchTab('create',this)">➕ Create</button>
+      <button class="tab" onclick="switchTab('dashboard',this)">📊 Dashboard</button>
+      <button class="tab" onclick="switchTab('tasks',this)">📋 Tasks</button>
+    </div>
+    <div class="panel active" id="panel-create">
+      <div class="card">
+        <div class="card-title">New Task</div>
+        <div class="field"><label>Title</label><input type="text" id="taskTitle" placeholder="e.g. Deploy landing page"></div>
+        <div class="field"><label>Department</label><select id="taskDept"><option value="general">General</option><option value="video">Video</option><option value="social">Social</option></select></div>
+        <div class="field"><label>Priority</label><select id="taskPriorityLabel"><option value="MEDIUM">Medium</option><option value="CRITICAL">Critical</option><option value="HIGH">High</option><option value="LOW">Low</option></select></div>
+        <div class="field"><label>Dependencies (task IDs, comma separated)</label><input type="text" id="taskDeps" placeholder="task-001, task-002"></div>
+        <div class="field"><label>Payload (JSON)</label><textarea id="taskPayload" placeholder='{"agent":"deploy","method":"deploy_files","files":[...]}'></textarea></div>
+        <button class="btn-primary" onclick="createTask()">Create Task</button>
+        <div class="st" id="createSt"></div>
+      </div>
+    </div>
+    <div class="panel" id="panel-dashboard">
+      <div class="stat-grid">
+        <div class="stat-card"><div class="stat-value" id="statQueued">0</div><div class="stat-label">Queued</div></div>
+        <div class="stat-card"><div class="stat-value" id="statRunning">0</div><div class="stat-label">Running</div></div>
+        <div class="stat-card"><div class="stat-value" id="statCompleted">0</div><div class="stat-label">Completed</div></div>
+        <div class="stat-card"><div class="stat-value" id="statFailed">0</div><div class="stat-label">Failed</div></div>
+        <div class="stat-card"><div class="stat-value" id="statWaiting">0</div><div class="stat-label">Waiting</div></div>
+        <div class="stat-card"><div class="stat-value" id="statBlocked">0</div><div class="stat-label">Blocked</div></div>
+      </div>
+      <button class="btn-ghost" style="width:100%" onclick="refreshAll()">Refresh Stats</button>
+    </div>
+    <div class="panel" id="panel-tasks">
+      <div id="taskList" class="empty-state">No tasks yet.</div>
+      <button class="btn-ghost" style="width:100%" onclick="loadTaskList()">Refresh Tasks</button>
+    </div>
+  </div>
+</main>
+<script>
+// ── Global state ──
+let GH_TOKEN = localStorage.getItem('mr_ghtoken') || '';
+let GH_REPO = localStorage.getItem('mr_ghrepo') || '';
+let tasks = {};
+let schedulerInterval = null;
+
+// ── Utilities ──
+function delay(ms){return new Promise(r=>setTimeout(r,ms));}
+function toBase64(str){try{return btoa(unescape(encodeURIComponent(str)));}catch(e){const bytes=new TextEncoder().encode(str);let bin='';bytes.forEach(b=>bin+=String.fromCharCode(b));return btoa(bin);}}
+function setSt(id,type,msg){const el=document.getElementById(id);el.className='st show '+type;el.innerHTML=type==='loading'?'<span class="spinner"></span>'+msg:msg;}
+function hideSt(id){document.getElementById(id).className='st';}
+
+async function ghFetch(path,opts={}){
+  const res=await fetch('https://api.github.com'+path,Object.assign({},opts,{
+    headers:Object.assign({Authorization:'Bearer '+GH_TOKEN,Accept:'application/vnd.github+json','X-GitHub-Api-Version':'2022-11-28'},opts.headers||{})
+  }));
+  const body=await res.json();
+  if(!res.ok) throw new Error('GitHub '+res.status+': '+(body.message||'Unknown'));
+  return body;
+}
+
+// ── Setup ──
+async function connectRepo(){
+  const t=document.getElementById('ghToken').value.trim();
+  const r=document.getElementById('ghRepo').value.trim();
+  if(!t||!r){setSt('setupSt','error','Fill both fields.');return;}
+  localStorage.setItem('mr_ghtoken',t); localStorage.setItem('mr_ghrepo',r);
+  GH_TOKEN=t; GH_REPO=r;
+  try{
+    await ghFetch('/repos/'+r);
+    document.getElementById('connDot').className='dot on';
+    document.getElementById('connLabel').textContent=r;
+    document.getElementById('setupCard').style.display='none';
+    document.getElementById('mainUI').style.display='flex';
+    await loadAllTasks();
+    startScheduler();
+  }catch(e){setSt('setupSt','error','Connection failed: '+e.message);}
+}
+
+window.onload=function(){
+  if(GH_TOKEN&&GH_REPO){
+    document.getElementById('ghToken').value=GH_TOKEN;
+    document.getElementById('ghRepo').value=GH_REPO;
+    connectRepo().catch(()=>{});
+  }
+};
+
+// ── Task storage via GitHub (folder /tasks/) ──
+async function saveTask(task){
+  const path = 'tasks/'+task.task_id+'.json';
+  const content = JSON.stringify(task,null,2);
+  let sha=null;
+  try{const existing=await ghFetch('/repos/'+GH_REPO+'/contents/'+path);sha=existing.sha;}catch(e){}
+  await ghFetch('/repos/'+GH_REPO+'/contents/'+path,{method:'PUT',headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({message:'update task '+task.task_id, content:toBase64(content), sha:sha||undefined})
+  });
+}
+
+async function loadAllTasks(){
+  tasks={};
+  try{
+    const items=await ghFetch('/repos/'+GH_REPO+'/contents/tasks?per_page=100');
+    if(!Array.isArray(items)) return;
+    for(const item of items){
+      if(item.name.endsWith('.json')){
+        try{
+          const file=await ghFetch('/repos/'+GH_REPO+'/contents/'+item.path);
+          const content=JSON.parse(decodeURIComponent(escape(atob(file.content))));
+          tasks[content.task_id]=content;
+        }catch(e){}
+      }
+    }
+  }catch(e){/* folder may not exist yet */}
+}
+
+// ── Create task ──
+function generateUUID(){return 'task-'+Date.now()+'-'+Math.random().toString(36).substr(2,6);}
+function computePriorityScore(label){
+  const map={CRITICAL:0.9, HIGH:0.7, MEDIUM:0.5, LOW:0.3};
+  return map[label]||0.5;
+}
+
+async function createTask(){
+  const title=document.getElementById('taskTitle').value.trim();
+  if(!title){setSt('createSt','error','Title required.');return;}
+  const task={
+    task_id: generateUUID(),
+    title: title,
+    department: document.getElementById('taskDept').value,
+    status: 'CREATED',
+    priority_score: computePriorityScore(document.getElementById('taskPriorityLabel').value),
+    priority_label: document.getElementById('taskPriorityLabel').value,
+    depends_on: document.getElementById('taskDeps').value.split(',').map(s=>s.trim()).filter(s=>s),
+    payload: {},
+    max_retries: 3,
+    retry_count: 0,
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString()
+  };
+  try{ task.payload=JSON.parse(document.getElementById('taskPayload').value||'{}'); }catch(e){}
+  // validation then transition to QUEUED
+  task.status='VALIDATED';
+  task.updated_at=new Date().toISOString();
+  task.status='QUEUED'; // immediate enqueue for simplicity
+  await saveTask(task);
+  tasks[task.task_id]=task;
+  setSt('createSt','success','Task '+task.task_id+' created.');
+  document.getElementById('taskTitle').value='';
+  document.getElementById('taskPayload').value='';
+  refreshStats();
+}
+
+// ── State machine transitions ──
+function canRun(task){
+  if(task.status!=='QUEUED') return false;
+  // check dependencies
+  for(const depId of task.depends_on){
+    const dep=tasks[depId];
+    if(!dep||dep.status!=='COMPLETED') return false;
+  }
+  return true;
+}
+
+async function dispatchTask(task){
+  // Simulate work: mark as RUNNING, then after a timeout complete it.
+  task.status='RUNNING';
+  task.updated_at=new Date().toISOString();
+  await saveTask(task);
+  // In a real version, here we would call an external worker.
+  // For now, we'll auto-complete after 3 seconds (simulated).
+  setTimeout(async ()=>{
+    task.status='COMPLETED';
+    task.completed_at=new Date().toISOString();
+    task.updated_at=new Date().toISOString();
+    await saveTask(task);
+    refreshStats();
+  }, 3000);
+}
+
+async function runSchedulerTick(){
+  const queued=Object.values(tasks).filter(t=>t.status==='QUEUED');
+  // sort by priority_score desc
+  queued.sort((a,b)=>b.priority_score-a.priority_score);
+  for(const task of queued){
+    if(canRun(task)){
+      await dispatchTask(task);
+      break; // one per tick for simplicity
+    }
+  }
+  // handle retries etc. (later)
+  refreshStats();
+}
+
+function startScheduler(){
+  if(schedulerInterval) clearInterval(schedulerInterval);
+  schedulerInterval=setInterval(runSchedulerTick,4000);
+}
+
+// ── UI updates ──
+function refreshStats(){
+  const all=Object.values(tasks);
+  document.getElementById('statQueued').textContent=all.filter(t=>t.status==='QUEUED').length;
+  document.getElementById('statRunning').textContent=all.filter(t=>t.status==='RUNNING').length;
+  document.getElementById('statCompleted').textContent=all.filter(t=>t.status==='COMPLETED').length;
+  document.getElementById('statFailed').textContent=all.filter(t=>t.status==='FAILED').length;
+  document.getElementById('statWaiting').textContent=all.filter(t=>t.status==='WAITING_DEPENDENCY').length;
+  document.getElementById('statBlocked').textContent=all.filter(t=>t.status==='BLOCKED').length;
+}
+
+function loadTaskList(){
+  const list=document.getElementById('taskList');
+  const all=Object.values(tasks).sort((a,b)=>new Date(b.created_at)-new Date(a.created_at));
+  if(!all.length){list.innerHTML='<div class="empty-state">No tasks yet.</div>';return;}
+  list.innerHTML=all.map(t=>`
+    <div class="list-item">
+      <div>
+        <span class="item-name">${t.title||t.task_id}</span>
+        <span class="tag tag-${t.priority_label}">${t.priority_label}</span>
+        <span class="tag">${t.status}</span>
+      </div>
+      <div class="item-meta">${t.department}<br>${new Date(t.created_at).toLocaleTimeString()}</div>
+    </div>
+  `).join('');
+}
+
+async function refreshAll(){
+  await loadAllTasks();
+  refreshStats();
+  loadTaskList();
+}
+
+// ── Tab switching ──
+function switchTab(name,btn){
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('panel-'+name).classList.add('active');
+  if(name==='dashboard') refreshStats();
+  if(name==='tasks') loadTaskList();
+}
+</script>
+</body>
+</html>
