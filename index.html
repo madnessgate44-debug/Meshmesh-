@@ -120,7 +120,7 @@ textarea{resize:vertical;min-height:80px;line-height:1.5}
         <div class="st" id="filesSt"></div>
       </div>
     </div>
-    <!-- SETTINGS with multiple keys + test -->
+    <!-- SETTINGS -->
     <div class="panel" id="panel-settings">
       <div class="card">
         <div class="card-title">⚙️ AI Keys & Providers</div>
@@ -169,15 +169,46 @@ let activeRole = 'hook';
 let showrunnerChat = [];
 let profile = { business:'', goal:'', strategy:'', constraints:'5h/week, phone-only' };
 
+// ======== SAFE STRING SANITIZER ========
+function sanitizeString(str) {
+  if (!str) return '';
+  // Encode to UTF-8 and back – kills lone surrogates
+  return new TextDecoder().decode(new TextEncoder().encode(String(str)));
+}
+
+// ======== BULLETPROOF BASE64 ========
+function toBase64(str) {
+  const clean = sanitizeString(str);
+  const bytes = new TextEncoder().encode(clean);
+  let binary = '';
+  bytes.forEach(b => binary += String.fromCharCode(b));
+  return btoa(binary);
+}
+
+// ======== SAFE JSON STRINGIFY ========
+function safeJsonStringify(obj) {
+  return JSON.stringify(obj, (key, value) => {
+    if (typeof value === 'string') return sanitizeString(value);
+    return value;
+  });
+}
+
 // UTILS
 function delay(ms){ return new Promise(r=>setTimeout(r,ms)); }
-function toBase64(str){ return btoa(unescape(encodeURIComponent(str))); }
 function setSt(id,type,msg){ const el=document.getElementById(id); if(el){ el.className='st show '+type; el.innerHTML=type==='loading'?'<span class="spinner"></span>'+msg:msg; } }
 function hideSt(id){ const el=document.getElementById(id); if(el) el.className='st'; }
-function esc(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+function esc(s){ return sanitizeString(String(s)).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
 
 async function ghFetch(path, opts={}){
-  const res = await fetch('https://api.github.com'+path,{...opts,headers:{...opts.headers,Authorization:'Bearer '+GH_TOKEN,Accept:'application/vnd.github+json','X-GitHub-Api-Version':'2022-11-28'}});
+  const res = await fetch('https://api.github.com'+path,{
+    ...opts,
+    headers:{
+      ...opts.headers,
+      Authorization:'Bearer '+GH_TOKEN,
+      Accept:'application/vnd.github+json',
+      'X-GitHub-Api-Version':'2022-11-28'
+    }
+  });
   const body = await res.json();
   if(!res.ok) throw new Error('GitHub '+res.status+': '+(body.message||''));
   return body;
@@ -204,7 +235,7 @@ function buildDiagnosticHTML(report){
 }
 
 async function callAI(messages, systemPrompt='', diagnosticTarget=''){
-  const keys = AI_PROVIDER==='gemini' ? GEMINI_KEYS.split(',').map(k=>k.trim()).filter(k=>k) : DEEPSEEK_KEYS.split(',').map(k=>k.trim()).filter(k=>k);
+  const keys = AI_PROVIDER==='gemini' ? GEMINI_KEYS.split(',').map(k=>sanitizeString(k).trim()).filter(k=>k) : DEEPSEEK_KEYS.split(',').map(k=>sanitizeString(k).trim()).filter(k=>k);
   if(!keys.length){
     const report = { provider:AI_PROVIDER, keysTried:0, activeKeyMasked:'none', httpStatus:'N/A', errorType:'No keys configured', rawError:'Add keys in Settings' };
     if(diagnosticTarget) document.getElementById(diagnosticTarget).innerHTML = buildDiagnosticHTML(report);
@@ -216,11 +247,11 @@ async function callAI(messages, systemPrompt='', diagnosticTarget=''){
     const masked = key.substring(0,6)+'...'+key.substring(key.length-4);
     try {
       if(AI_PROVIDER==='gemini'){
-        const contents = messages.map(m => ({ role:'user', parts:[{ text:m.content }] }));
+        const contents = messages.map(m => ({ role:'user', parts:[{ text:sanitizeString(m.content) }] }));
         const body = { contents, generationConfig:{temperature:0.7, maxOutputTokens:800} };
-        if(systemPrompt) body.systemInstruction = { parts:[{ text:systemPrompt }] };
+        if(systemPrompt) body.systemInstruction = { parts:[{ text:sanitizeString(systemPrompt) }] };
         const res = await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key='+key,{
-          method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(body)
+          method:'POST', headers:{'Content-Type':'application/json'}, body:safeJsonStringify(body)
         });
         const data = await res.json();
         if(!res.ok){
@@ -232,14 +263,14 @@ async function callAI(messages, systemPrompt='', diagnosticTarget=''){
           continue;
         }
         if(diagnosticTarget) document.getElementById(diagnosticTarget).innerHTML = '';
-        return data.candidates[0].content.parts[0].text.trim();
+        return sanitizeString(data.candidates[0].content.parts[0].text.trim());
       } else {
         const msgs = [];
-        if(systemPrompt) msgs.push({ role:'system', content:systemPrompt });
-        msgs.push(...messages);
+        if(systemPrompt) msgs.push({ role:'system', content:sanitizeString(systemPrompt) });
+        msgs.push(...messages.map(m => ({ role:'user', content:sanitizeString(m.content) })));
         const res = await fetch('https://api.deepseek.com/v1/chat/completions',{
           method:'POST', headers:{'Content-Type':'application/json', 'Authorization':'Bearer '+key},
-          body:JSON.stringify({ model:'deepseek-chat', messages:msgs, temperature:0.7, max_tokens:800 })
+          body:safeJsonStringify({ model:'deepseek-chat', messages:msgs, temperature:0.7, max_tokens:800 })
         });
         const data = await res.json();
         if(!res.ok){
@@ -251,10 +282,10 @@ async function callAI(messages, systemPrompt='', diagnosticTarget=''){
           continue;
         }
         if(diagnosticTarget) document.getElementById(diagnosticTarget).innerHTML = '';
-        return data.choices[0].message.content.trim();
+        return sanitizeString(data.choices[0].message.content.trim());
       }
     } catch(e){
-      lastReport = { provider:AI_PROVIDER, keysTried:i+1, activeKeyMasked:masked, httpStatus:'Fetch error', errorType:'Network/exception', rawError:e.message };
+      lastReport = { provider:AI_PROVIDER, keysTried:i+1, activeKeyMasked:masked, httpStatus:'Fetch error', errorType:'Network/exception', rawError:sanitizeString(e.message) };
     }
   }
   if(diagnosticTarget && lastReport) document.getElementById(diagnosticTarget).innerHTML = buildDiagnosticHTML(lastReport);
@@ -264,7 +295,7 @@ async function callAI(messages, systemPrompt='', diagnosticTarget=''){
 // TEST PROVIDER
 async function testProvider(provider){
   const keysField = provider==='gemini' ? document.getElementById('geminiKeys') : document.getElementById('deepseekKeys');
-  const keys = keysField.value.split(',').map(k=>k.trim()).filter(k=>k);
+  const keys = keysField.value.split(',').map(k=>sanitizeString(k).trim()).filter(k=>k);
   if(!keys.length){ setSt('settingsSt','error','No keys entered.'); return; }
   setSt('settingsSt','loading','Testing '+provider+'...');
   document.getElementById('settingsDiagnostic').innerHTML = '';
@@ -277,7 +308,7 @@ async function testProvider(provider){
       if(provider==='gemini'){
         const res = await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key='+key,{
           method:'POST', headers:{'Content-Type':'application/json'},
-          body:JSON.stringify({ contents:[{ role:'user', parts:[{ text:'Say ok' }] }], generationConfig:{maxOutputTokens:10} })
+          body:'{"contents":[{"role":"user","parts":[{"text":"Say ok"}]}],"generationConfig":{"maxOutputTokens":10}}'
         });
         const data = await res.json();
         if(res.ok && data.candidates) success = true;
@@ -285,14 +316,14 @@ async function testProvider(provider){
       } else {
         const res = await fetch('https://api.deepseek.com/v1/chat/completions',{
           method:'POST', headers:{'Content-Type':'application/json', 'Authorization':'Bearer '+key},
-          body:JSON.stringify({ model:'deepseek-chat', messages:[{role:'user',content:'Say ok'}], max_tokens:10 })
+          body:'{"model":"deepseek-chat","messages":[{"role":"user","content":"Say ok"}],"max_tokens":10}'
         });
         const data = await res.json();
         if(res.ok && data.choices) success = true;
         else lastReport = { provider:'deepseek', keysTried:i+1, activeKeyMasked:masked, httpStatus:res.status, errorType:data.error?.type||'unknown', rawError:JSON.stringify(data.error||data) };
       }
       if(success) break;
-    } catch(e){ lastReport = { provider, keysTried:i+1, activeKeyMasked:masked, httpStatus:'Fetch error', errorType:'Network', rawError:e.message }; }
+    } catch(e){ lastReport = { provider, keysTried:i+1, activeKeyMasked:masked, httpStatus:'Fetch error', errorType:'Network', rawError:sanitizeString(e.message) }; }
   }
   if(success){
     setSt('settingsSt','success','✅ '+provider+' key(s) work!');
@@ -303,21 +334,33 @@ async function testProvider(provider){
   }
 }
 
-// STORAGE
+// STORAGE (with safe strings)
 async function saveStateFile(filename, content){
   const path = 'mishstate/'+filename;
   let sha=null;
   try{ const ex = await ghFetch('/repos/'+GH_REPO+'/contents/'+path); sha=ex.sha; } catch(e){}
-  await ghFetch('/repos/'+GH_REPO+'/contents/'+path,{ method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify({ message:'update '+filename, content:toBase64(JSON.stringify(content)), sha:sha||undefined }) });
+  const body = {
+    message: sanitizeString('update '+filename),
+    content: toBase64(JSON.stringify(content)),  // content already sanitized via stringify
+    sha: sha||undefined
+  };
+  await ghFetch('/repos/'+GH_REPO+'/contents/'+path,{
+    method:'PUT',
+    headers:{'Content-Type':'application/json'},
+    body:safeJsonStringify(body)
+  });
 }
 async function loadStateFile(filename){
-  try{ const file = await ghFetch('/repos/'+GH_REPO+'/contents/mishstate/'+filename); return JSON.parse(decodeURIComponent(escape(atob(file.content)))); }catch(e){ return null; }
+  try{
+    const file = await ghFetch('/repos/'+GH_REPO+'/contents/mishstate/'+filename);
+    return JSON.parse(decodeURIComponent(escape(atob(file.content))));
+  }catch(e){ return null; }
 }
 
 // CONNECT
 async function connectRepo(){
-  const t = document.getElementById('ghToken').value.trim();
-  const r = document.getElementById('ghRepo').value.trim();
+  const t = sanitizeString(document.getElementById('ghToken').value.trim());
+  const r = sanitizeString(document.getElementById('ghRepo').value.trim());
   if(!t||!r){ setSt('setupSt','error','Fill both fields.'); return; }
   GH_TOKEN=t; GH_REPO=r;
   localStorage.setItem('mmos_ghtoken',t); localStorage.setItem('mmos_ghrepo',r);
@@ -329,7 +372,7 @@ async function connectRepo(){
     document.getElementById('mainUI').style.display='flex';
     loadCloudState(); loadFileList();
     addShowrunnerMessage('system','Mish Mish OS online. AI: '+AI_PROVIDER+'. Current goal?');
-  }catch(e){ setSt('setupSt','error','Connection failed: '+e.message); }
+  }catch(e){ setSt('setupSt','error','Connection failed: '+sanitizeString(e.message)); }
 }
 
 window.onload=function(){
@@ -348,10 +391,10 @@ window.onload=function(){
 
 function saveProvider(){ AI_PROVIDER = document.getElementById('aiProvider').value; localStorage.setItem('mmos_aiprovider', AI_PROVIDER); }
 function saveSettings(){
-  GEMINI_KEYS = document.getElementById('geminiKeys').value.trim();
-  DEEPSEEK_KEYS = document.getElementById('deepseekKeys').value.trim();
-  const ghToken = document.getElementById('settingsGhToken').value.trim();
-  const ghRepo = document.getElementById('settingsGhRepo').value.trim();
+  GEMINI_KEYS = sanitizeString(document.getElementById('geminiKeys').value.trim());
+  DEEPSEEK_KEYS = sanitizeString(document.getElementById('deepseekKeys').value.trim());
+  const ghToken = sanitizeString(document.getElementById('settingsGhToken').value.trim());
+  const ghRepo = sanitizeString(document.getElementById('settingsGhRepo').value.trim());
   if(GEMINI_KEYS) localStorage.setItem('mmos_geminiKeys', GEMINI_KEYS);
   if(DEEPSEEK_KEYS) localStorage.setItem('mmos_dsKeys', DEEPSEEK_KEYS);
   if(ghToken){ GH_TOKEN=ghToken; localStorage.setItem('mmos_ghtoken',ghToken); }
@@ -361,17 +404,17 @@ function saveSettings(){
 }
 
 // SHOWRUNNER
-function addShowrunnerMessage(role,text){ showrunnerChat.push({role,text,time:new Date().toISOString()}); renderShowrunnerChat(); saveStateFile('showrunner_chat.json',showrunnerChat); }
+function addShowrunnerMessage(role,text){ showrunnerChat.push({role:sanitizeString(role), text:sanitizeString(text), time:new Date().toISOString()}); renderShowrunnerChat(); saveStateFile('showrunner_chat.json',showrunnerChat); }
 function renderShowrunnerChat(){ const c=document.getElementById('srChat'); if(c){ c.innerHTML=showrunnerChat.map(m=>`<div class="chat-bubble ${m.role==='user'?'chat-user':'chat-system'}">${esc(m.text)}</div>`).join(''); c.scrollTop=c.scrollHeight; } }
 async function sendShowrunner(){
-  const input=document.getElementById('srInput').value.trim(); if(!input) return;
+  const input=sanitizeString(document.getElementById('srInput').value.trim()); if(!input) return;
   if(!(AI_PROVIDER==='gemini'?GEMINI_KEYS:DEEPSEEK_KEYS)){ addShowrunnerMessage('system','Missing API keys. Add them in Settings.'); return; }
   addShowrunnerMessage('user',input); document.getElementById('srInput').value='';
   document.getElementById('srDiagnostic').innerHTML = '';
   const thinking=document.createElement('div'); thinking.className='chat-bubble chat-thinking'; thinking.textContent='Analyzing...';
   document.getElementById('srChat').appendChild(thinking);
   try{
-    const reply = await callAI([{role:'user',content:input}], `You are the Showrunner. Business profile: ${JSON.stringify(profile)}. Use Modes 0-3. Ask one question per turn.`,'srDiagnostic');
+    const reply = await callAI([{role:'user',content:input}], `You are the Showrunner. Business profile: ${safeJsonStringify(profile)}. Use Modes 0-3. Ask one question per turn.`,'srDiagnostic');
     thinking.remove(); addShowrunnerMessage('system',reply);
   }catch(e){ thinking.remove(); addShowrunnerMessage('system','AI call failed. See diagnostic report below.'); }
 }
@@ -379,7 +422,7 @@ async function sendShowrunner(){
 // CONTENT FACTORY
 function setRole(role){ activeRole=role; const labels={hook:'Hook Architect',narrative:'Narrative Engineer',offer:'Offer Framer',visual:'Visual Brief Writer',script:'Video Script Director'}; document.getElementById('roleLabel').textContent=labels[role]; document.querySelectorAll('#panel-factory .btn-sm').forEach(b=>b.classList.remove('active-filter')); event.target.classList.add('active-filter'); }
 async function generateContent(){
-  const input=document.getElementById('cfInput').value.trim(); if(!input){ setSt('cfSt','error','Describe what you need.'); return; }
+  const input=sanitizeString(document.getElementById('cfInput').value.trim()); if(!input){ setSt('cfSt','error','Describe what you need.'); return; }
   if(!(AI_PROVIDER==='gemini'?GEMINI_KEYS:DEEPSEEK_KEYS)){ setSt('cfSt','error','Missing API keys.'); return; }
   setSt('cfSt','loading','Generating...'); document.getElementById('cfDiagnostic').innerHTML = '';
   const rolePrompts={hook:'Craft an open loop hook.',narrative:'Write StoryBrand narrative.',offer:'$100M Offers principles.',visual:'Cinematic prompt for AI.',script:'Video script: Hook, Story, CTA.'};
@@ -387,20 +430,20 @@ async function generateContent(){
     const res = await callAI([{role:'user',content:input}], `You are the ${document.getElementById('roleLabel').textContent}. ${rolePrompts[activeRole]}`,'cfDiagnostic');
     document.getElementById('cfOutput').innerHTML=`<div class="card"><div class="card-title">Output</div><p style="white-space:pre-wrap;font-size:13px">${esc(res)}</p></div>`;
     hideSt('cfSt'); saveStateFile('staging_'+activeRole+'.json',{role:activeRole,content:res,time:new Date().toISOString()});
-  }catch(e){ setSt('cfSt','error',e.message); }
+  }catch(e){ setSt('cfSt','error',sanitizeString(e.message)); }
 }
 
 // DESIGN & FILES
-async function loadDesignFiles(){ try{ const items=await ghFetch('/repos/'+GH_REPO+'/contents/mishstate?per_page=50'); const staging=items.filter(i=>i.name.startsWith('staging_')); document.getElementById('designFileList').innerHTML=staging.length?staging.map(i=>`<div class="file-item"><span>${i.name}</span><button class="btn-sm" onclick="commitDesignFile('${i.name}')">Commit</button></div>`).join(''):'<div class="empty-state">No staged components.</div>'; }catch(e){} }
-async function commitDesignFile(filename){ setSt('designSt','loading','Committing...'); try{ const data=await loadStateFile(filename); const targetPath='content/'+filename.replace('staging_',''); let sha=null; try{const ex=await ghFetch('/repos/'+GH_REPO+'/contents/'+targetPath);sha=ex.sha;}catch(e){} await ghFetch('/repos/'+GH_REPO+'/contents/'+targetPath,{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify({message:'Commit '+targetPath,content:toBase64(JSON.stringify(data)),sha:sha||undefined})}); setSt('designSt','success','Committed.'); }catch(e){setSt('designSt','error',e.message);} }
+async function loadDesignFiles(){ try{ const items=await ghFetch('/repos/'+GH_REPO+'/contents/mishstate?per_page=50'); const staging=items.filter(i=>i.name.startsWith('staging_')); document.getElementById('designFileList').innerHTML=staging.length?staging.map(i=>`<div class="file-item"><span>${esc(i.name)}</span><button class="btn-sm" onclick="commitDesignFile('${esc(i.name)}')">Commit</button></div>`).join(''):'<div class="empty-state">No staged components.</div>'; }catch(e){} }
+async function commitDesignFile(filename){ setSt('designSt','loading','Committing...'); try{ const data=await loadStateFile(filename); const targetPath='content/'+filename.replace('staging_',''); let sha=null; try{const ex=await ghFetch('/repos/'+GH_REPO+'/contents/'+targetPath);sha=ex.sha;}catch(e){} await ghFetch('/repos/'+GH_REPO+'/contents/'+targetPath,{method:'PUT',headers:{'Content-Type':'application/json'},body:safeJsonStringify({message:sanitizeString('Commit '+targetPath),content:toBase64(JSON.stringify(data)),sha:sha||undefined})}); setSt('designSt','success','Committed.'); }catch(e){setSt('designSt','error',sanitizeString(e.message));} }
 function commitDesign(){ loadDesignFiles(); }
-async function handleFileUpload(event){ const files=event.target.files; if(!files.length)return; setSt('filesSt','loading','Uploading...'); for(const file of files){ try{ const reader=new FileReader(); await new Promise((resolve,reject)=>{ reader.onload=async()=>{ const base64Content=reader.result.split(',')[1]; const path='uploads/'+file.name; let sha=null; try{const ex=await ghFetch('/repos/'+GH_REPO+'/contents/'+path);sha=ex.sha;}catch(e){} await ghFetch('/repos/'+GH_REPO+'/contents/'+path,{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify({message:'Upload '+file.name,content:base64Content,sha:sha||undefined})}); resolve(); }; reader.onerror=reject; reader.readAsDataURL(file); }); }catch(e){ setSt('filesSt','error','Upload failed: '+e.message); } } setSt('filesSt','success','Files uploaded.'); loadFileList(); }
-async function loadFileList(){ try{ const items=await ghFetch('/repos/'+GH_REPO+'/contents/uploads?per_page=50'); document.getElementById('fileList').innerHTML=items.map(i=>`<div class="file-item"><span>${i.name}</span></div>`).join(''); }catch(e){ document.getElementById('fileList').innerHTML='<div class="empty-state">No files uploaded yet.</div>'; } }
+async function handleFileUpload(event){ const files=event.target.files; if(!files.length)return; setSt('filesSt','loading','Uploading...'); for(const file of files){ try{ const reader=new FileReader(); await new Promise((resolve,reject)=>{ reader.onload=async()=>{ const base64Content=reader.result.split(',')[1]; const path='uploads/'+sanitizeString(file.name); let sha=null; try{const ex=await ghFetch('/repos/'+GH_REPO+'/contents/'+path);sha=ex.sha;}catch(e){} await ghFetch('/repos/'+GH_REPO+'/contents/'+path,{method:'PUT',headers:{'Content-Type':'application/json'},body:safeJsonStringify({message:sanitizeString('Upload '+file.name),content:base64Content,sha:sha||undefined})}); resolve(); }; reader.onerror=reject; reader.readAsDataURL(file); }); }catch(e){ setSt('filesSt','error','Upload failed: '+sanitizeString(e.message)); } } setSt('filesSt','success','Files uploaded.'); loadFileList(); }
+async function loadFileList(){ try{ const items=await ghFetch('/repos/'+GH_REPO+'/contents/uploads?per_page=50'); document.getElementById('fileList').innerHTML=items.map(i=>`<div class="file-item"><span>${esc(i.name)}</span></div>`).join(''); }catch(e){ document.getElementById('fileList').innerHTML='<div class="empty-state">No files uploaded yet.</div>'; } }
 
 // FLYING BUTTON
 function toggleRadial(){ document.getElementById('radialMenu').classList.toggle('show'); }
 async function captureClipboard(){ try{ const text=await navigator.clipboard.readText(); addShowrunnerMessage('system','📋 Clipboard: '+text.substring(0,200)); document.getElementById('radialMenu').classList.remove('show'); }catch(e){ addShowrunnerMessage('system','Clipboard access denied. Paste manually.'); } }
-function quickGoal(){ const goal=prompt('Set CURRENT_GOAL:'); if(goal){ profile.goal=goal; saveStateFile('business_profile.json',profile); addShowrunnerMessage('system','🎯 Goal: '+goal); } }
+function quickGoal(){ const goal=prompt('Set CURRENT_GOAL:'); if(goal){ profile.goal=sanitizeString(goal); saveStateFile('business_profile.json',profile); addShowrunnerMessage('system','🎯 Goal: '+goal); } }
 
 function switchTab(name,btn){
   document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
