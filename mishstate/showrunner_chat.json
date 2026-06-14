@@ -3,5 +3,10 @@
     "role": "system",
     "text": "Mish Mish OS online. Mode 0 active — I’m listening. What’s our current goal?",
     "time": "2026-06-14T08:15:07.623Z"
+  },
+  {
+    "role": "system",
+    "text": "🎤 Voice note: Please use your phone’s recorder, then paste the transcript here. I’ll process it immediately.",
+    "time": "2026-06-14T08:15:24.027Z"
   }
 ]
