@@ -1,0 +1,1345 @@
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>Mish Mish OS</title>
+<!-- Tailwind CSS for utility styling -->
+<script src="https://cdn.tailwindcss.com"></script>
+<!-- Lucide Icons -->
+<script src="https://unpkg.com/lucide@latest"></script>
+<!-- Google Fonts: Inter & JetBrains Mono -->
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+
+<style>
+  * {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    -webkit-tap-highlight-color: transparent;
+  }
+  body {
+    font-family: 'Inter', sans-serif;
+    background-color: #131314; /* Gemini exact base dark background */
+    color: #e3e3e3;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    overflow-x: hidden;
+  }
+  .mono {
+    font-family: 'JetBrains Mono', monospace;
+  }
+  /* Custom scrollbar matching Google Gemini layout */
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: #3c4043;
+    border-radius: 10px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: #4f5357;
+  }
+  /* Sidebar transition curves */
+  .sidebar-transition {
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  /* Simulated voice pulse anim */
+  @keyframes voicePulse {
+    0%, 100% { transform: scaleY(0.3); }
+    50% { transform: scaleY(1); }
+  }
+  .pulse-bar {
+    animation: voicePulse 1s ease-in-out infinite;
+  }
+  /* Glassmorphism for prompt pill */
+  .prompt-wrapper {
+    background: #1e1f20;
+    border: 1px solid #3c4043;
+    border-radius: 32px;
+  }
+  .prompt-wrapper:focus-within {
+    background: #282a2c;
+    border-color: #7c3aed;
+    box-shadow: 0 0 0 1px #7c3aed;
+  }
+</style>
+</head>
+<body class="flex flex-col h-screen text-sm select-none">
+
+  <!-- TOP HEADER SYSTEM BAR -->
+  <header class="bg-[#1e1f20] px-4 py-3 flex items-center justify-between border-b border-[#3c4043] sticky top-0 z-40">
+    <div class="flex items-center gap-3">
+      <button onclick="toggleSidebar()" class="p-2 hover:bg-[#2f3032] rounded-full transition text-gray-300 active:scale-95" title="Toggle System Menu">
+        <i data-lucide="menu" class="w-5 h-5"></i>
+      </button>
+      <div class="flex items-center gap-2">
+        <div class="w-7 h-7 bg-gradient-to-tr from-violet-600 via-purple-500 to-indigo-500 rounded-lg flex items-center justify-center shadow-lg font-bold text-white text-sm">M</div>
+        <span class="font-semibold tracking-tight text-white text-md">Mish Mish OS</span>
+      </div>
+    </div>
+    
+    <div class="flex items-center gap-2">
+      <!-- Sync Icon Indicators -->
+      <button onclick="syncStateWithCloud()" class="p-2 hover:bg-[#2f3032] rounded-full transition text-gray-400 hover:text-white relative" title="Sync Cloud Brain">
+        <i data-lucide="refresh-cw" id="syncSpinner" class="w-4 h-4"></i>
+        <span id="syncIndicatorDot" class="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-emerald-500 animate-pulse hidden"></span>
+      </button>
+      <div class="flex items-center gap-1.5 bg-[#2f3032] px-3 py-1 rounded-full border border-[#3c4043]">
+        <span id="connDot" class="w-1.5 h-1.5 rounded-full bg-slate-500"></span>
+        <span id="connLabel" class="text-xs text-gray-300 font-medium">Offline</span>
+      </div>
+    </div>
+  </header>
+
+  <!-- COLLAPSIBLE GEMINI-STYLE SIDEBAR DRAWER -->
+  <div id="sidebarDrawer" class="fixed inset-y-0 left-0 w-80 bg-[#1e1f20] border-r border-[#3c4043] z-50 transform -translate-x-full sidebar-transition shadow-2xl flex flex-col">
+    <!-- Drawer Title and Controls -->
+    <div class="p-4 border-b border-[#3c4043] flex items-center justify-between">
+      <div class="flex items-center gap-2">
+        <i data-lucide="cpu" class="w-4 h-4 text-purple-400"></i>
+        <span class="mono font-bold tracking-wider text-xs text-purple-400 uppercase">System Hub</span>
+      </div>
+      <button onclick="toggleSidebar()" class="p-1.5 hover:bg-[#2f3032] rounded-full text-gray-400 hover:text-white transition">
+        <i data-lucide="x" class="w-4 h-4"></i>
+      </button>
+    </div>
+
+    <!-- Scrollable Drawer Settings Container -->
+    <div class="flex-1 overflow-y-auto p-4 space-y-6">
+      
+      <!-- Hisham's Active Core Profile -->
+      <div>
+        <label class="text-[10px] text-gray-500 font-bold uppercase tracking-widest block mb-2">Operator Identity</label>
+        <div class="p-3.5 bg-[#131314] rounded-2xl border border-[#3c4043] space-y-2">
+          <div class="flex items-center gap-3">
+            <div class="w-9 h-9 rounded-full bg-purple-900/40 border border-purple-500/20 flex items-center justify-center font-bold text-purple-300">HA</div>
+            <div>
+              <h4 class="text-xs font-semibold text-white">Hisham Al Ansari</h4>
+              <p class="text-[10px] text-purple-400 font-medium mono">ADHD Executive Director</p>
+            </div>
+          </div>
+          <div class="pt-1.5 border-t border-[#3c4043]/50 flex justify-between items-center">
+            <span class="text-[10px] text-gray-500">Methodology</span>
+            <span class="text-[10px] bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 px-2 py-0.5 rounded font-bold uppercase tracking-wider scale-90">StoryBrand + 100M</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Live Pipeline Analytics Indicators -->
+      <div>
+        <label class="text-[10px] text-gray-500 font-bold uppercase tracking-widest block mb-2">Goal Tracking</label>
+        <div class="p-3.5 bg-[#131314] rounded-2xl border border-[#3c4043] space-y-2.5">
+          <div>
+            <div class="flex justify-between text-xs text-gray-400 mb-1">
+              <span>Sprint Campaign Goal</span>
+              <span id="sidebarGoalStatus" class="mono text-white font-medium">No active target</span>
+            </div>
+            <div class="w-full bg-[#2f3032] h-1.5 rounded-full overflow-hidden">
+              <div id="goalProgressBar" class="bg-gradient-to-r from-purple-500 to-indigo-500 h-full w-0 transition-all duration-500"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Quick Default Preset Configurations -->
+      <div>
+        <label class="text-[10px] text-gray-500 font-bold uppercase tracking-widest block mb-2">Preset Standards</label>
+        <div class="space-y-2">
+          <div class="flex items-center justify-between text-xs p-2.5 bg-[#131314] rounded-xl border border-[#3c4043]">
+            <span class="text-gray-400">Weekly Quota</span>
+            <span class="mono text-gray-200 font-medium">3 Cinematic Posts</span>
+          </div>
+          <div class="flex items-center justify-between text-xs p-2.5 bg-[#131314] rounded-xl border border-[#3c4043]">
+            <span class="text-gray-400">Direct CTA Target</span>
+            <span class="mono text-purple-400 font-medium">"DM me FOCUS"</span>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Drawer Footer -->
+    <div class="p-4 border-t border-[#3c4043] bg-[#131314] flex items-center justify-between">
+      <span class="text-[10px] text-gray-500 mono tracking-wider">v1.1.0-GEMINI</span>
+      <div class="flex items-center gap-1">
+        <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
+        <span class="text-[10px] text-gray-400 mono">Cloud Sync OK</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- SETUP GITHUB CONNECT CARD -->
+  <main id="setupContainer" class="flex-1 max-w-lg mx-auto w-full p-4 flex flex-col justify-center gap-4">
+    <div class="bg-[#1e1f20] border border-[#3c4043] rounded-3xl p-6 space-y-5 shadow-2xl">
+      <div class="text-center space-y-1">
+        <div class="w-12 h-12 bg-purple-600/10 border border-purple-500/20 text-purple-400 rounded-2xl mx-auto flex items-center justify-center mb-2">
+          <i data-lucide="cloud" class="w-6 h-6"></i>
+        </div>
+        <h2 class="text-md font-bold text-white tracking-tight">Connect Mish Mish Cloud Brain</h2>
+        <p class="text-xs text-gray-400">Synchronize state parameters directly with your secure Git repository.</p>
+      </div>
+
+      <div class="space-y-3.5">
+        <div class="space-y-1.5">
+          <label class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">GitHub Secret Token</label>
+          <input type="password" id="ghToken" class="bg-[#131314] border border-[#3c4043] focus:border-purple-500 focus:ring-1 focus:ring-purple-500 rounded-xl px-4 py-3 text-sm text-white placeholder-gray-600 outline-none w-full transition" placeholder="ghp_...">
+        </div>
+        <div class="space-y-1.5">
+          <label class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Repository Location Path</label>
+          <input type="text" id="ghRepo" class="bg-[#131314] border border-[#3c4043] focus:border-purple-500 focus:ring-1 focus:ring-purple-500 rounded-xl px-4 py-3 text-sm text-white placeholder-gray-600 outline-none w-full transition" placeholder="username/repository-name">
+        </div>
+      </div>
+
+      <button onclick="connectRepo()" class="w-full py-3 bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-500 hover:to-indigo-500 text-white font-semibold rounded-xl text-sm transition shadow-lg shadow-purple-600/10 active:scale-[0.98]">
+        Establish Connection
+      </button>
+
+      <div id="setupSt" class="hidden text-xs rounded-xl p-3"></div>
+    </div>
+  </main>
+
+  <!-- MAIN OPERATOR WORKSPACE (Initially Hidden) -->
+  <main id="mainContainer" class="flex-1 max-w-2xl mx-auto w-full p-4 flex flex-col gap-4 overflow-hidden hidden">
+    
+    <!-- SUBHEADER / STATUS PROGRESS TRACKER -->
+    <div id="systemStateTracker" class="bg-[#1e1f20] border border-[#3c4043] rounded-2xl p-3 flex items-center justify-between shadow-lg">
+      <div class="flex items-center gap-2 overflow-hidden">
+        <span id="headerModeTag" class="text-[10px] font-bold uppercase mono px-2 py-0.5 rounded bg-purple-500/10 text-purple-400 border border-purple-500/20 whitespace-nowrap">
+          Mode: 1
+        </span>
+        <span id="headerStepTag" class="text-[10px] text-gray-400 mono truncate font-medium">
+          Step: Setup Q1 of 4
+        </span>
+      </div>
+      <div class="flex items-center gap-1.5 text-[10px] text-emerald-400 mono font-semibold truncate ml-4">
+        <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping"></span>
+        <span id="headerNextTag">Next: Core Audience</span>
+      </div>
+    </div>
+
+    <!-- CAPSULE TAB CONTROL SYSTEM -->
+    <div class="bg-[#1e1f20] border border-[#3c4043] p-1 rounded-2xl flex gap-1 shadow-lg">
+      <button onclick="switchTab('showrunner', this)" class="tab flex-1 py-2.5 rounded-xl text-xs font-semibold text-gray-400 transition hover:text-white flex items-center justify-center gap-1.5 active" id="tab-showrunner">
+        <i data-lucide="terminal" class="w-3.5 h-3.5"></i> Showrunner
+      </button>
+      <button onclick="switchTab('factory', this)" class="tab flex-1 py-2.5 rounded-xl text-xs font-semibold text-gray-400 transition hover:text-white flex items-center justify-center gap-1.5" id="tab-factory">
+        <i data-lucide="palette" class="w-3.5 h-3.5"></i> Content
+      </button>
+      <button onclick="switchTab('design', this)" class="tab flex-1 py-2.5 rounded-xl text-xs font-semibold text-gray-400 transition hover:text-white flex items-center justify-center gap-1.5 relative" id="tab-design">
+        <i data-lucide="paintbrush" class="w-3.5 h-3.5"></i> Design
+        <span id="designBadge" class="absolute top-2 right-2 w-2 h-2 rounded-full bg-rose-500 hidden"></span>
+      </button>
+      <button onclick="switchTab('files', this)" class="tab flex-1 py-2.5 rounded-xl text-xs font-semibold text-gray-400 transition hover:text-white flex items-center justify-center gap-1.5" id="tab-files">
+        <i data-lucide="folder-open" class="w-3.5 h-3.5"></i> Files
+      </button>
+      <button onclick="switchTab('settings', this)" class="tab flex-1 py-2.5 rounded-xl text-xs font-semibold text-gray-400 transition hover:text-white flex items-center justify-center gap-1.5" id="tab-settings">
+        <i data-lucide="sliders" class="w-3.5 h-3.5"></i> Settings
+      </button>
+    </div>
+
+    <!-- WORKSPACE VIEWPORT STREAMS -->
+    <div class="flex-1 min-h-0 flex flex-col relative">
+      
+      <!-- VIEWPORT 1: SHOWRUNNER (CHAT STREAM) -->
+      <div id="panel-showrunner" class="panel flex-1 flex flex-col min-h-0 active">
+        <div class="flex-1 overflow-y-auto pr-1 space-y-4 mb-4 no-scrollbar" id="srChat">
+          <!-- Chat bubbles are generated dynamically here -->
+        </div>
+      </div>
+
+      <!-- VIEWPORT 2: CONTENT FACTORY (CREATIVE DASHBOARD) -->
+      <div id="panel-factory" class="panel flex-1 flex flex-col min-h-0 hidden">
+        <div class="bg-[#1e1f20] border border-[#3c4043] rounded-3xl p-5 space-y-4 shadow-xl overflow-y-auto no-scrollbar max-h-full">
+          <div class="flex items-center justify-between border-b border-[#3c4043] pb-3">
+            <h3 class="text-xs font-bold text-gray-400 uppercase tracking-widest flex items-center gap-1.5">
+              <i data-lucide="pen-tool" class="w-4 h-4 text-purple-400"></i> Generation Engine
+            </h3>
+            <span id="activeWorkspaceRoleBadge" class="text-[10px] mono font-bold bg-purple-500/10 text-purple-300 border border-purple-500/20 px-2.5 py-0.5 rounded-full uppercase">
+              Hook Architect
+            </span>
+          </div>
+
+          <!-- Creative Department Selectors -->
+          <div class="flex gap-1 overflow-x-auto pb-2 no-scrollbar">
+            <button onclick="setCreativeRole('hook', this)" class="role-filter flex-shrink-0 text-[10px] font-bold tracking-wider px-3.5 py-2 rounded-xl border border-purple-500/30 bg-purple-500/10 text-purple-300 transition active:scale-95">
+              🪝 HOOK ARCHITECT
+            </button>
+            <button onclick="setCreativeRole('narrative', this)" class="role-filter flex-shrink-0 text-[10px] font-bold tracking-wider px-3.5 py-2 rounded-xl border border-[#3c4043] text-gray-400 hover:text-white hover:border-[#4f5357] transition active:scale-95">
+              📖 NARRATIVE
+            </button>
+            <button onclick="setCreativeRole('offer', this)" class="role-filter flex-shrink-0 text-[10px] font-bold tracking-wider px-3.5 py-2 rounded-xl border border-[#3c4043] text-gray-400 hover:text-white hover:border-[#4f5357] transition active:scale-95">
+              💸 OFFER FRAMER
+            </button>
+            <button onclick="setCreativeRole('visual', this)" class="role-filter flex-shrink-0 text-[10px] font-bold tracking-wider px-3.5 py-2 rounded-xl border border-[#3c4043] text-gray-400 hover:text-white hover:border-[#4f5357] transition active:scale-95">
+              🖼 VISUAL BRIEF
+            </button>
+            <button onclick="setCreativeRole('script', this)" class="role-filter flex-shrink-0 text-[10px] font-bold tracking-wider px-3.5 py-2 rounded-xl border border-[#3c4043] text-gray-400 hover:text-white hover:border-[#4f5357] transition active:scale-95">
+              🎬 SCRIPT DIRECTOR
+            </button>
+          </div>
+
+          <!-- Active Prompt Ingestion Workspace -->
+          <div class="space-y-1.5">
+            <label class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Inbound Content Blueprint</label>
+            <textarea id="cfInput" class="bg-[#131314] border border-[#3c4043] focus:border-purple-500 focus:ring-1 focus:ring-purple-500 rounded-2xl p-4 text-sm text-white placeholder-gray-600 outline-none w-full transition" placeholder="Specify details, client triggers, or copy directions..." rows="4"></textarea>
+          </div>
+
+          <button onclick="generateCreativeContent()" class="w-full py-3 bg-gradient-to-r from-purple-600 to-violet-600 hover:from-purple-500 hover:to-violet-500 text-white font-semibold rounded-xl text-sm transition shadow-lg active:scale-[0.98]">
+            Initiate Synthesis
+          </button>
+
+          <div id="cfSt" class="hidden text-xs rounded-xl p-3"></div>
+
+          <!-- Dynamic Output Terminal Pane -->
+          <div id="cfOutput" class="space-y-2 pt-2 hidden">
+            <!-- Rendered outputs dynamically inject here -->
+          </div>
+          <div id="cfDiagnostic"></div>
+        </div>
+      </div>
+
+      <!-- VIEWPORT 3: DESIGN CANVAS PREVIEW & DIRECTORY -->
+      <div id="panel-design" class="panel flex-1 flex flex-col min-h-0 hidden">
+        <div class="bg-[#1e1f20] border border-[#3c4043] rounded-3xl p-5 space-y-4 shadow-xl overflow-y-auto no-scrollbar max-h-full">
+          <div class="flex items-center justify-between border-b border-[#3c4043] pb-3">
+            <h3 class="text-xs font-bold text-gray-400 uppercase tracking-widest flex items-center gap-1.5">
+              <i data-lucide="paintbrush" class="w-4 h-4 text-purple-400"></i> Staging Canvas
+            </h3>
+            <span class="text-[10px] text-emerald-400 font-semibold mono">Auto-Layout Engine</span>
+          </div>
+
+          <!-- Dynamic Live SVG Rendering Matrix Box -->
+          <div class="relative bg-[#131314] border border-[#3c4043] rounded-2xl p-4 flex flex-col items-center justify-center min-h-[220px]">
+            <div class="absolute top-2 right-2 text-[9px] bg-purple-500/10 text-purple-300 border border-purple-500/20 px-2 py-0.5 rounded-full uppercase mono tracking-widest">
+              Live Mock Frame
+            </div>
+            
+            <svg id="liveSvgCanvas" width="100%" height="200" viewBox="0 0 400 200" style="background: linear-gradient(135deg, #18142c, #0d0a18); border-radius: 12px; border: 1px solid #3c4043;">
+              <defs>
+                <linearGradient id="glowGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                  <stop offset="0%" stop-color="#8b5cf6" />
+                  <stop offset="100%" stop-color="#3b82f6" />
+                </linearGradient>
+              </defs>
+              <rect width="100%" height="100%" fill="none" />
+              <circle cx="360" cy="40" r="100" fill="url(#glowGrad)" opacity="0.12" />
+              <text x="24" y="38" fill="#a78bfa" font-size="10" font-weight="bold" font-family="sans-serif" letter-spacing="1">MISH MISH SYSTEM DIRECTIVE</text>
+              <text id="svgCanvasTitle" x="24" y="85" fill="#f3f4f6" font-size="15" font-weight="bold" font-family="sans-serif">Select a staged file below to map content</text>
+              <text id="svgCanvasDescription" x="24" y="125" fill="#9ca3af" font-size="11" font-family="sans-serif">Ready to deploy assets to cloud staging directory.</text>
+              <rect x="24" y="155" width="90" height="22" rx="4" fill="#a78bfa" opacity="0.2" />
+              <text x="36" y="169" fill="#a78bfa" font-size="9" font-weight="bold" font-family="sans-serif">Direct Action</text>
+            </svg>
+          </div>
+
+          <!-- Staged Assets File Checker Grid -->
+          <div class="space-y-2">
+            <label class="text-[10px] font-bold text-gray-400 uppercase tracking-widest block">Staged Directory Components</label>
+            <div id="designFileList" class="space-y-1.5 max-h-[160px] overflow-y-auto no-scrollbar">
+              <!-- Files injected here -->
+            </div>
+          </div>
+
+          <div class="pt-3 border-t border-[#3c4043] flex gap-2">
+            <button onclick="commitDesign()" class="flex-1 py-3 bg-[#131314] hover:bg-[#2f3032] border border-[#3c4043] rounded-xl text-xs font-semibold text-white transition active:scale-[0.98]">
+              Refresh File Map
+            </button>
+          </div>
+          <div id="designSt" class="hidden text-xs rounded-xl p-3"></div>
+        </div>
+      </div>
+
+      <!-- VIEWPORT 4: FILE DIRECTORIES & NATIVE CAPTURES -->
+      <div id="panel-files" class="panel flex-1 flex flex-col min-h-0 hidden">
+        <div class="bg-[#1e1f20] border border-[#3c4043] rounded-3xl p-5 space-y-4 shadow-xl overflow-y-auto no-scrollbar max-h-full">
+          <div class="flex items-center justify-between border-b border-[#3c4043] pb-3">
+            <h3 class="text-xs font-bold text-gray-400 uppercase tracking-widest flex items-center gap-1.5">
+              <i data-lucide="folder" class="w-4 h-4 text-purple-400"></i> Local Storage Repository
+            </h3>
+            <span class="text-[10px] text-purple-400 mono font-semibold">Upload Hub</span>
+          </div>
+
+          <!-- File Upload Panel -->
+          <div class="border-2 border-dashed border-[#3c4043] hover:border-purple-500/50 rounded-2xl p-6 text-center transition cursor-pointer relative" onclick="document.getElementById('fileInput').click()">
+            <input type="file" id="fileInput" multiple class="hidden" onchange="handleFileUpload(event)">
+            <i data-lucide="upload-cloud" class="w-8 h-8 text-gray-500 mx-auto mb-2"></i>
+            <span class="text-xs font-medium text-white block">Upload screenshots or brand files</span>
+            <span class="text-[10px] text-gray-500 mt-1 block">Supported layouts: PNG, JPG, MD, PDF, TXT</span>
+          </div>
+
+          <!-- File Inbound Directory List -->
+          <div class="space-y-2">
+            <label class="text-[10px] font-bold text-gray-400 uppercase tracking-widest block">System Workspace Uploads</label>
+            <div id="fileList" class="space-y-1.5 max-h-[160px] overflow-y-auto no-scrollbar">
+              <!-- Uploaded files list injects dynamically here -->
+            </div>
+          </div>
+
+          <div id="filesSt" class="hidden text-xs rounded-xl p-3"></div>
+        </div>
+      </div>
+
+      <!-- VIEWPORT 5: COMPREHENSIVE SETTINGS DRAWER PANEL -->
+      <div id="panel-settings" class="panel flex-1 flex flex-col min-h-0 hidden">
+        <div class="bg-[#1e1f20] border border-[#3c4043] rounded-3xl p-5 space-y-4 shadow-xl overflow-y-auto no-scrollbar max-h-full">
+          <div class="flex items-center justify-between border-b border-[#3c4043] pb-3">
+            <h3 class="text-xs font-bold text-gray-400 uppercase tracking-widest flex items-center gap-1.5">
+              <i data-lucide="sliders" class="w-4 h-4 text-purple-400"></i> Settings Panel
+            </h3>
+            <span class="text-[10px] text-purple-400 font-semibold mono">Engine Config</span>
+          </div>
+
+          <!-- AI Model Targeting Preferences -->
+          <div class="space-y-1.5">
+            <label class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Active Model Provider</label>
+            <select id="aiProvider" onchange="saveProvider()" class="bg-[#131314] border border-[#3c4043] focus:border-purple-500 rounded-xl px-4 py-3 text-sm text-white outline-none w-full transition">
+              <option value="gemini">Google Gemini AI</option>
+              <option value="deepseek">DeepSeek API</option>
+            </select>
+          </div>
+
+          <div class="space-y-1.5">
+            <label class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Target Gemini Model Variant</label>
+            <select id="geminiModelTarget" class="bg-[#131314] border border-[#3c4043] focus:border-purple-500 rounded-xl px-4 py-3 text-sm text-white outline-none w-full transition">
+              <option value="gemini-1.5-flash">Gemini 1.5 Flash (Generous Free Tier)</option>
+              <option value="gemini-2.0-flash">Gemini 2.0 Flash (Premium Latency)</option>
+            </select>
+            <span class="text-[10px] text-gray-500 leading-relaxed block mt-1">If your account is brand-new, fall back to **1.5 Flash** to prevent regional Resource Exhausted blocks.</span>
+          </div>
+
+          <!-- Key Inputs configuration -->
+          <div class="space-y-3 pt-2">
+            <div class="space-y-1.5">
+              <label class="text-[10px] font-bold text-gray-400 uppercase tracking-widest block">Gemini API Key</label>
+              <input type="password" id="geminiKeys" class="bg-[#131314] border border-[#3c4043] focus:border-purple-500 rounded-xl px-4 py-3 text-sm text-white outline-none w-full transition" placeholder="Paste Gemini API key...">
+              <button onclick="testProvider('gemini')" class="w-full py-2 bg-[#131314] hover:bg-[#2f3032] border border-[#3c4043] rounded-lg text-xs text-purple-400 hover:text-purple-300 font-semibold transition active:scale-95">
+                Validate API Key
+              </button>
+            </div>
+
+            <div class="space-y-1.5">
+              <label class="text-[10px] font-bold text-gray-400 uppercase tracking-widest block">DeepSeek API Key</label>
+              <input type="password" id="deepseekKeys" class="bg-[#131314] border border-[#3c4043] focus:border-purple-500 rounded-xl px-4 py-3 text-sm text-white outline-none w-full transition" placeholder="Paste DeepSeek API key...">
+              <button onclick="testProvider('deepseek')" class="w-full py-2 bg-[#131314] hover:bg-[#2f3032] border border-[#3c4043] rounded-lg text-xs text-purple-400 hover:text-purple-300 font-semibold transition active:scale-95">
+                Validate DeepSeek Keys
+              </button>
+            </div>
+          </div>
+
+          <!-- Setup Variables Sync Controls -->
+          <div class="space-y-3 pt-3 border-t border-[#3c4043]">
+            <div class="flex justify-between items-center">
+              <div>
+                <h4 class="text-xs font-semibold text-white">Manual Config Sync</h4>
+                <p class="text-[10px] text-gray-500">Apply modified tokens, paths and connections.</p>
+              </div>
+              <button onclick="saveAllSettings()" class="py-2 px-4 bg-purple-600 hover:bg-purple-500 text-white rounded-lg text-xs font-bold transition active:scale-95">
+                Save Settings
+              </button>
+            </div>
+          </div>
+
+          <div id="settingsSt" class="hidden text-xs rounded-xl p-3"></div>
+          <div id="settingsDiagnostic" class="pt-2"></div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- MAIN CHAT & COMMAND PANEL DOCKED DYNAMICALLY AT BOTTOM -->
+    <div id="chatControlsWrapper" class="space-y-3">
+      
+      <!-- Interactive Input Prompt Pill Container -->
+      <div class="prompt-wrapper flex items-center px-4 py-3 relative">
+        <button id="voiceRecorderTrigger" onclick="triggerVoiceNote()" class="p-2 hover:bg-[#2f3032] rounded-full text-gray-400 hover:text-purple-400 transition active:scale-95" title="Simulate Ambient Voice Ingestion">
+          <i data-lucide="mic" id="micIcon" class="w-5 h-5"></i>
+        </button>
+        
+        <input type="text" id="srInput" onkeydown="handleInputEnter(event)" placeholder="Ask Mish Mish or send strategic update..." class="flex-1 bg-transparent border-none text-sm text-white placeholder-gray-500 focus:outline-none px-3 py-1">
+
+        <button onclick="sendShowrunner()" class="p-2.5 bg-gradient-to-tr from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white rounded-full transition active:scale-95" title="Dispatch Command">
+          <i data-lucide="arrow-up" class="w-4 h-4"></i>
+        </button>
+      </div>
+
+    </div>
+
+  </main>
+
+  <!-- RADIAL EXPANSION MENU TRIGGER OVERLAY -->
+  <button class="flying-btn" id="flyingBtn" onclick="toggleRadialMenu()" title="Quick Actions">
+    <i data-lucide="zap" id="flyingBtnIcon" class="w-5 h-5 text-yellow-300"></i>
+  </button>
+  <div class="radial-menu" id="radialMenu">
+    <button class="radial-item bg-[#1e1f20] text-gray-300 border border-[#3c4043] flex items-center justify-center p-3 rounded-full hover:bg-[#2f3032] transition hover:text-white" onclick="captureClipboard()" title="Monitor Mobile Clipboard">
+      <i data-lucide="clipboard" class="w-4 h-4"></i>
+    </button>
+    <button class="radial-item bg-[#1e1f20] text-gray-300 border border-[#3c4043] flex items-center justify-center p-3 rounded-full hover:bg-[#2f3032] transition hover:text-white" onclick="triggerVoiceNote()" title="Voice Record Ingest">
+      <i data-lucide="mic" class="w-4 h-4"></i>
+    </button>
+    <button class="radial-item bg-[#1e1f20] text-gray-300 border border-[#3c4043] flex items-center justify-center p-3 rounded-full hover:bg-[#2f3032] transition hover:text-white" onclick="quickGoalTrigger()" title="Update Campaign Target">
+      <i data-lucide="target" class="w-4 h-4"></i>
+    </button>
+  </div>
+
+  <!-- VOICE INGESTION MODAL OVERLAY -->
+  <div id="voiceOverlay" class="fixed inset-0 bg-black/90 backdrop-blur-md z-50 flex flex-col items-center justify-center p-6 hidden">
+    <div class="text-center max-w-sm space-y-6">
+      <div class="w-14 h-14 bg-purple-600/10 border border-purple-500/20 text-purple-400 rounded-full flex items-center justify-center mx-auto shadow-lg animate-pulse">
+        <i data-lucide="mic" class="w-6 h-6"></i>
+      </div>
+      <div class="space-y-1">
+        <span class="mono text-[10px] text-gray-500 tracking-widest uppercase block">Live Recording Simulation</span>
+        <h3 class="text-md font-bold text-white leading-tight">Mish Mish is capturing background audio</h3>
+        <p class="text-xs text-gray-400">Describe the strategy, client feeling, or landing draft in your natural speaking voice.</p>
+      </div>
+
+      <!-- Animated Waves -->
+      <div class="flex items-center justify-center gap-1.5 h-10 py-1">
+        <span class="w-1 h-3 bg-purple-500 rounded-full pulse-bar"></span>
+        <span class="w-1 h-6 bg-purple-500 rounded-full pulse-bar" style="animation-delay: 0.15s"></span>
+        <span class="w-1 h-8 bg-purple-500 rounded-full pulse-bar" style="animation-delay: 0.3s"></span>
+        <span class="w-1 h-5 bg-purple-500 rounded-full pulse-bar" style="animation-delay: 0.45s"></span>
+        <span class="w-1 h-7 bg-purple-500 rounded-full pulse-bar" style="animation-delay: 0.6s"></span>
+        <span class="w-1 h-4 bg-purple-500 rounded-full pulse-bar" style="animation-delay: 0.2s"></span>
+      </div>
+
+      <div class="space-y-2.5">
+        <button onclick="stopVoiceSimulation(true)" class="w-full py-3 bg-purple-600 hover:bg-purple-500 text-white font-semibold rounded-xl text-sm transition shadow-lg active:scale-95">
+          Process Voice Transcription
+        </button>
+        <button onclick="stopVoiceSimulation(false)" class="w-full py-2 bg-[#1e1f20] hover:bg-[#2f3032] border border-[#3c4043] text-gray-400 text-xs font-semibold rounded-xl transition">
+          Cancel & Exit
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- CLIPBOARD CAPTURING SCREEN OVERLAY (Mode 0) -->
+  <div id="captureOverlay" class="fixed inset-0 bg-black/95 backdrop-blur-md z-50 flex flex-col items-center justify-center p-6 hidden">
+    <div class="text-center max-w-sm space-y-4">
+      <div class="w-12 h-12 bg-yellow-500/10 border border-yellow-500/20 text-yellow-400 rounded-2xl mx-auto flex items-center justify-center shadow-lg animate-bounce">
+        <i data-lucide="scan" class="w-5 h-5"></i>
+      </div>
+      <div class="space-y-1">
+        <span class="mono text-[10px] text-yellow-400 tracking-wider uppercase block font-semibold">Mode 0 Ingestion Engine</span>
+        <h3 class="text-md font-bold text-white">Monitoring mobile viewport state</h3>
+        <p class="text-xs text-gray-400">Extracting raw text vectors, files, and browser clipboard variables...</p>
+      </div>
+      <div class="w-32 h-1 bg-[#2f3032] rounded-full mx-auto overflow-hidden relative">
+        <div class="absolute inset-y-0 left-0 bg-yellow-400 w-1/3 animate-[pulse_1s_infinite]"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TOAST ALERTS SYSTEM WRAPPER -->
+  <div id="toastContainer" class="fixed top-20 left-1/2 -translate-x-1/2 z-50 pointer-events-none transition-all duration-300 transform -translate-y-4 opacity-0">
+    <div class="bg-[#1e1f20] border border-[#3c4043] px-4 py-2.5 rounded-full flex items-center gap-2.5 shadow-2xl">
+      <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+      <span id="toastMessage" class="text-xs text-gray-200 font-medium">Operation executed successfully</span>
+    </div>
+  </div>
+
+  <!-- SYSTEM JAVASCRIPT LOGIC BLOCK -->
+  <script>
+    // System Variables Provided at Runtime
+    const apiKey = ""; // Set dynamically by execution shell if available
+
+    // Local state managers
+    let GH_TOKEN = localStorage.getItem('mmos_ghtoken') || '';
+    let GH_REPO = localStorage.getItem('mmos_ghrepo') || '';
+    let AI_PROVIDER = localStorage.getItem('mmos_aiprovider') || 'gemini';
+    let GEMINI_MODEL_TARGET = localStorage.getItem('mmos_geminiModel') || 'gemini-1.5-flash';
+    let GEMINI_KEYS = localStorage.getItem('mmos_geminiKeys') || '';
+    let DEEPSEEK_KEYS = localStorage.getItem('mmos_dsKeys') || '';
+    
+    let activeTab = 'showrunner';
+    let activeCreativeRole = 'hook';
+    let activeStagedContent = '';
+    
+    let showrunnerChat = [];
+    let profile = { 
+      business: 'ADHD Executive Coaching', 
+      goal: '3 client bookings in 3 weeks', 
+      strategy: 'LinkedIn Organic Authority Bridge', 
+      constraints: '5h/week, phone-only' 
+    };
+
+    // Safe sanitizer to process strings safely
+    function sanitizeString(str) {
+      if (!str) return '';
+      return new TextDecoder().decode(new TextEncoder().encode(String(str)));
+    }
+
+    // Direct UTF-8 base64 converter
+    function toBase64(str) {
+      const clean = sanitizeString(str);
+      const bytes = new TextEncoder().encode(clean);
+      let binary = '';
+      bytes.forEach(b => binary += String.fromCharCode(b));
+      return btoa(binary);
+    }
+
+    // Safe stringifier
+    function safeJsonStringify(obj) {
+      return JSON.stringify(obj, (key, value) => {
+        if (typeof value === 'string') return sanitizeString(value);
+        return value;
+      });
+    }
+
+    // Delay helper
+    function delay(ms) { return new Promise(resolve => setTimeout(resolve, ms)); }
+
+    // Toggle active sidebar panels
+    function toggleSidebar() {
+      const drawer = document.getElementById('sidebarDrawer');
+      if (drawer.classList.contains('-translate-x-full')) {
+        drawer.classList.remove('-translate-x-full');
+      } else {
+        drawer.classList.add('-translate-x-full');
+      }
+    }
+
+    // Custom non-blocking visual Toast Alerts
+    function displayToast(message) {
+      const container = document.getElementById('toastContainer');
+      const text = document.getElementById('toastMessage');
+
+      text.innerText = message;
+      container.classList.remove('opacity-0', '-translate-y-4');
+      container.classList.add('opacity-100', 'translate-y-0');
+
+      setTimeout(() => {
+        container.classList.remove('opacity-100', 'translate-y-0');
+        container.classList.add('opacity-0', '-translate-y-4');
+      }, 2000);
+    }
+
+    // Connection validation layer
+    async function ghFetch(path, opts={}) {
+      const res = await fetch('https://api.github.com' + path, {
+        ...opts,
+        headers: {
+          ...opts.headers,
+          Authorization: 'Bearer ' + GH_TOKEN,
+          Accept: 'application/vnd.github+json',
+          'X-GitHub-Api-Version': '2022-11-28'
+        }
+      });
+      const body = await res.json();
+      if (!res.ok) throw new Error('GitHub API Fail: ' + (body.message || res.status));
+      return body;
+    }
+
+    // Save and retrieve file structures to GitHub Cloud Brain
+    async function saveStateFile(filename, content) {
+      const path = 'mishstate/' + filename;
+      let sha = null;
+      try {
+        const ex = await ghFetch('/repos/' + GH_REPO + '/contents/' + path);
+        sha = ex.sha;
+      } catch(e) {}
+      
+      const body = {
+        message: sanitizeString('Mish Mish OS backup: ' + filename),
+        content: toBase64(JSON.stringify(content)),
+        sha: sha || undefined
+      };
+
+      await ghFetch('/repos/' + GH_REPO + '/contents/' + path, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: safeJsonStringify(body)
+      });
+    }
+
+    async function loadStateFile(filename) {
+      try {
+        const file = await ghFetch('/repos/' + GH_REPO + '/contents/mishstate/' + filename);
+        return JSON.parse(decodeURIComponent(escape(atob(file.content))));
+      } catch(e) {
+        return null;
+      }
+    }
+
+    // Connecting inputs trigger
+    async function connectRepo() {
+      const t = sanitizeString(document.getElementById('ghToken').value.trim());
+      const r = sanitizeString(document.getElementById('ghRepo').value.trim());
+      
+      if (!t || !r) {
+        setSt('setupSt', 'error', 'Both connection parameters must be specified.');
+        return;
+      }
+
+      GH_TOKEN = t;
+      GH_REPO = r;
+      localStorage.setItem('mmos_ghtoken', t);
+      localStorage.setItem('mmos_ghrepo', r);
+
+      setSt('setupSt', 'loading', 'Establishing API connections...');
+
+      try {
+        await ghFetch('/repos/' + r);
+        document.getElementById('connDot').className = 'w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse';
+        document.getElementById('connLabel').textContent = r;
+        document.getElementById('setupContainer').classList.add('hidden');
+        document.getElementById('mainContainer').classList.remove('hidden');
+        
+        displayToast("Cloud Brain Handshake OK.");
+        await initializeWorkspace();
+      } catch(e) {
+        setSt('setupSt', 'error', 'Connection failed: ' + sanitizeString(e.message));
+      }
+    }
+
+    // Establish elements on mount
+    async function initializeWorkspace() {
+      // Sync local profile updates
+      const bp = await loadStateFile('business_profile.json');
+      if (bp) {
+        profile = bp;
+        document.getElementById('sidebarGoalStatus').textContent = profile.goal || 'No goal';
+        document.getElementById('goalProgressBar').style.width = profile.goal ? '65%' : '0%';
+      }
+
+      const chats = await loadStateFile('showrunner_chat.json');
+      if (chats) {
+        showrunnerChat = chats;
+      } else {
+        // Initial setup prompt inside stream mapping
+        showrunnerChat.push({
+          role: 'assistant',
+          text: 'Mish Mish OS operational. Ingestion Listener online (Mode 0).\n\nShowrunner active. Let\'s establish our core campaign parameters. What is your immediate goal?',
+          time: new Date().toISOString()
+        });
+      }
+
+      renderShowrunnerChat();
+      loadFileList();
+    }
+
+    // Diagnostic visual logs builder
+    function buildDiagnosticHTML(report) {
+      let html = '<div class="bg-[#131314] border border-[#3c4043] rounded-2xl p-4 font-mono text-[11px] leading-relaxed text-gray-400 space-y-1 max-h-[250px] overflow-y-auto mt-3">';
+      html += '<strong class="text-rose-400 block mb-1">🔬 API DIAGNOSTIC FAILURE MATRIX</strong>';
+      html += 'Active Provider : ' + report.provider + '<br>';
+      html += 'Keys evaluated  : ' + report.keysTried + '<br>';
+      html += 'Key Signature  : ' + report.activeKeyMasked + '<br>';
+      html += 'HTTP Status    : ' + report.httpStatus + '<br>';
+      html += 'System Error   : ' + report.errorType + '<br>';
+      html += '<div class="text-[10px] text-gray-500 whitespace-pre-wrap mt-2 pt-2 border-t border-[#3c4043]">Raw Payload Details: ' + esc(report.rawError) + '</div>';
+      html += '</div>';
+      return html;
+    }
+
+    // Unified AI Gateway API
+    async function callAI(messages, systemPrompt='', diagnosticTarget='') {
+      // Prioritize environment key if available, otherwise check configured values
+      const baseKeys = AI_PROVIDER === 'gemini' ? GEMINI_KEYS : DEEPSEEK_KEYS;
+      const keys = baseKeys.split(',').map(k => sanitizeString(k).trim()).filter(k => k);
+      
+      // If we are evaluating Gemini and runtime key exists, prepend it as high priority
+      if (AI_PROVIDER === 'gemini' && typeof apiKey !== 'undefined' && apiKey) {
+        keys.unshift(apiKey);
+      }
+
+      if (!keys.length) {
+        const report = { provider: AI_PROVIDER, keysTried: 0, activeKeyMasked: 'none', httpStatus: 'N/A', errorType: 'Keys undefined', rawError: 'Set API credentials in settings drawer.' };
+        if (diagnosticTarget) document.getElementById(diagnosticTarget).innerHTML = buildDiagnosticHTML(report);
+        throw new Error('API Key configuration error.');
+      }
+
+      let lastReport = null;
+
+      for (let i = 0; i < keys.length; i++) {
+        const key = keys[i];
+        const masked = key.substring(0, 6) + '...' + key.substring(key.length - 4);
+        
+        try {
+          if (AI_PROVIDER === 'gemini') {
+            // Map messages for Gemini's structure: must alternate user <-> model
+            const contents = messages.map(m => {
+              const apiRole = (m.role === 'assistant' || m.role === 'system') ? 'model' : 'user';
+              return {
+                role: apiRole,
+                parts: [{ text: sanitizeString(m.content || m.text) }]
+              };
+            });
+
+            const body = {
+              contents: contents,
+              generationConfig: { temperature: 0.7, maxOutputTokens: 800 }
+            };
+
+            if (systemPrompt) {
+              body.systemInstruction = { parts: [{ text: sanitizeString(systemPrompt) }] };
+            }
+
+            const modelName = GEMINI_MODEL_TARGET;
+            const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${key}`, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify(body)
+            });
+
+            const data = await res.json();
+            if (!res.ok) {
+              lastReport = { provider: 'gemini', keysTried: i + 1, activeKeyMasked: masked, httpStatus: res.status, errorType: data.error?.status || 'unknown', rawError: JSON.stringify(data.error || data) };
+              continue;
+            }
+
+            if (!data.candidates || !data.candidates[0]?.content?.parts?.[0]?.text) {
+              lastReport = { provider: 'gemini', keysTried: i + 1, activeKeyMasked: masked, httpStatus: res.status, errorType: 'No message returned', rawError: JSON.stringify(data) };
+              continue;
+            }
+
+            if (diagnosticTarget) document.getElementById(diagnosticTarget).innerHTML = '';
+            return sanitizeString(data.candidates[0].content.parts[0].text.trim());
+          } else {
+            // DeepSeek API pipeline
+            const msgs = [];
+            if (systemPrompt) msgs.push({ role: 'system', content: sanitizeString(systemPrompt) });
+            msgs.push(...messages.map(m => ({ role: 'user', content: sanitizeString(m.content || m.text) })));
+            
+            const res = await fetch('https://api.deepseek.com/v1/chat/completions', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + key },
+              body: JSON.stringify({ model: 'deepseek-chat', messages: msgs, temperature: 0.7, max_tokens: 800 })
+            });
+
+            const data = await res.json();
+            if (!res.ok) {
+              lastReport = { provider: 'deepseek', keysTried: i + 1, activeKeyMasked: masked, httpStatus: res.status, errorType: data.error?.type || 'unknown', rawError: JSON.stringify(data.error || data) };
+              continue;
+            }
+
+            if (!data.choices || !data.choices[0]?.message?.content) {
+              lastReport = { provider: 'deepseek', keysTried: i + 1, activeKeyMasked: masked, httpStatus: res.status, errorType: 'Empty response object', rawError: JSON.stringify(data) };
+              continue;
+            }
+
+            if (diagnosticTarget) document.getElementById(diagnosticTarget).innerHTML = '';
+            return sanitizeString(data.choices[0].message.content.trim());
+          }
+        } catch(e) {
+          lastReport = { provider: AI_PROVIDER, keysTried: i + 1, activeKeyMasked: masked, httpStatus: 'Network error', errorType: 'Exception', rawError: sanitizeString(e.message) };
+        }
+      }
+
+      if (diagnosticTarget && lastReport) {
+        document.getElementById(diagnosticTarget).innerHTML = buildDiagnosticHTML(lastReport);
+      }
+      throw new Error(lastReport?.rawError || 'All configured API credentials failed.');
+    }
+
+    // Validation testing interface
+    async function testProvider(provider) {
+      const keysField = provider === 'gemini' ? document.getElementById('geminiKeys') : document.getElementById('deepseekKeys');
+      const keys = keysField.value.split(',').map(k => sanitizeString(k).trim()).filter(k => k);
+      
+      if (!keys.length) {
+        setSt('settingsSt', 'error', 'Provide at least one credential before validation testing.');
+        return;
+      }
+
+      setSt('settingsSt', 'loading', 'Pinging ' + provider + ' platform...');
+      document.getElementById('settingsDiagnostic').innerHTML = '';
+      
+      let lastReport = null;
+      let success = false;
+
+      for (let i = 0; i < keys.length; i++) {
+        const key = keys[i];
+        const masked = key.substring(0, 6) + '...' + key.substring(key.length - 4);
+        
+        try {
+          if (provider === 'gemini') {
+            const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL_TARGET}:generateContent?key=${key}`, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: '{"contents":[{"role":"user","parts":[{"text":"ping"}]}]}'
+            });
+            const data = await res.json();
+            if (res.ok && data.candidates) success = true;
+            else lastReport = { provider: 'gemini', keysTried: i + 1, activeKeyMasked: masked, httpStatus: res.status, errorType: data.error?.status || 'unknown', rawError: JSON.stringify(data.error || data) };
+          } else {
+            const res = await fetch('https://api.deepseek.com/v1/chat/completions', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + key },
+              body: '{"model":"deepseek-chat","messages":[{"role":"user","content":"ping"}],"max_tokens":10}'
+            });
+            const data = await res.json();
+            if (res.ok && data.choices) success = true;
+            else lastReport = { provider: 'deepseek', keysTried: i + 1, activeKeyMasked: masked, httpStatus: res.status, errorType: data.error?.type || 'unknown', rawError: JSON.stringify(data.error || data) };
+          }
+          if (success) break;
+        } catch(e) {
+          lastReport = { provider, keysTried: i + 1, activeKeyMasked: masked, httpStatus: 'Network exception', errorType: 'Exception', rawError: sanitizeString(e.message) };
+        }
+      }
+
+      if (success) {
+        setSt('settingsSt', 'success', 'Connection Established. ' + provider + ' validation successful.');
+        document.getElementById('settingsDiagnostic').innerHTML = '';
+      } else {
+        setSt('settingsSt', 'error', 'API test failed.');
+        if (lastReport) {
+          document.getElementById('settingsDiagnostic').innerHTML = buildDiagnosticHTML(lastReport);
+        }
+      }
+    }
+
+    // Toggle radial expanding floating buttons
+    function toggleRadialMenu() {
+      document.getElementById('radialMenu').classList.toggle('show');
+      const icon = document.getElementById('flyingBtnIcon');
+      if (document.getElementById('radialMenu').classList.contains('show')) {
+        icon.setAttribute('data-lucide', 'x');
+      } else {
+        icon.setAttribute('data-lucide', 'zap');
+      }
+      lucide.createIcons();
+    }
+
+    // Clipboard monitoring simulation
+    async function captureClipboard() {
+      const overlay = document.getElementById('captureOverlay');
+      overlay.classList.remove('hidden');
+
+      await delay(1200);
+      overlay.classList.add('hidden');
+      document.getElementById('radialMenu').classList.remove('show');
+
+      try {
+        const text = await navigator.clipboard.readText();
+        addShowrunnerMessage('system', '📋 Captured clipboard: ' + text.substring(0, 180) + (text.length > 180 ? '...' : ''));
+        displayToast('Clipboard data ingested successfully.');
+      } catch(e) {
+        addShowrunnerMessage('system', 'Clipboard access permissions restricted by browser client. Input text parameters manually.');
+        displayToast('Access denied.');
+      }
+    }
+
+    // Voice capturing triggers
+    function triggerVoiceNote() {
+      document.getElementById('voiceOverlay').classList.remove('hidden');
+      document.getElementById('radialMenu').classList.remove('show');
+    }
+
+    function stopVoiceSimulation(process) {
+      document.getElementById('voiceOverlay').classList.add('hidden');
+      if (process) {
+        addShowrunnerMessage('system', '🎤 Voice note processed: "Focus is not our structural blocker. Setup execution pathways sequentially to reduce cognitive drag."');
+        displayToast('Ambient voice parsed.');
+      }
+    }
+
+    // Direct configuration settings
+    function quickGoalTrigger() {
+      const goal = prompt('Define campaign CURRENT_GOAL target metrics:');
+      if (goal) {
+        profile.goal = sanitizeString(goal);
+        document.getElementById('sidebarGoalStatus').textContent = goal;
+        document.getElementById('goalProgressBar').style.width = '65%';
+        saveStateFile('business_profile.json', profile);
+        addShowrunnerMessage('system', '🎯 Campaign Target Goal successfully modified: ' + goal);
+        displayToast('Goal updated.');
+      }
+    }
+
+    // Save modifications to parameters
+    function saveProvider() {
+      AI_PROVIDER = document.getElementById('aiProvider').value;
+      localStorage.setItem('mmos_aiprovider', AI_PROVIDER);
+    }
+
+    function saveAllSettings() {
+      GEMINI_KEYS = sanitizeString(document.getElementById('geminiKeys').value.trim());
+      DEEPSEEK_KEYS = sanitizeString(document.getElementById('deepseekKeys').value.trim());
+      GEMINI_MODEL_TARGET = document.getElementById('geminiModelTarget').value;
+      
+      localStorage.setItem('mmos_geminiKeys', GEMINI_KEYS);
+      localStorage.setItem('mmos_dsKeys', DEEPSEEK_KEYS);
+      localStorage.setItem('mmos_geminiModel', GEMINI_MODEL_TARGET);
+
+      setSt('settingsSt', 'success', 'System variables successfully locked to local browser state.');
+    }
+
+    // Showrunner strategic stream renderer
+    function addShowrunnerMessage(role, text) {
+      showrunnerChat.push({ role: sanitizeString(role), text: sanitizeString(text), time: new Date().toISOString() });
+      renderShowrunnerChat();
+      saveStateFile('showrunner_chat.json', showrunnerChat);
+    }
+
+    function renderShowrunnerChat() {
+      const c = document.getElementById('srChat');
+      if (!c) return;
+
+      c.innerHTML = showrunnerChat.map(m => {
+        const isUser = m.role === 'user';
+        return `
+          <div class="flex flex-col space-y-1 ${isUser ? 'items-end' : 'items-start'} max-w-full">
+            <span class="text-[9px] text-gray-500 font-bold tracking-tight uppercase px-1">
+              ${isUser ? 'Operator (Hisham)' : 'Showrunner System'}
+            </span>
+            <div class="p-4 rounded-3xl leading-relaxed whitespace-pre-wrap max-w-[85%] text-sm ${isUser ? 'bg-gradient-to-tr from-purple-700 to-indigo-700 text-white rounded-tr-none' : 'bg-[#1e1f20] border border-[#3c4043] text-[#e3e3e3] rounded-tl-none'}">
+              ${esc(m.text)}
+            </div>
+          </div>
+        `;
+      }).join('');
+      c.scrollTop = c.scrollHeight;
+    }
+
+    async function sendShowrunner() {
+      const input = sanitizeString(document.getElementById('srInput').value.trim());
+      if (!input) return;
+
+      addShowrunnerMessage('user', input);
+      document.getElementById('srInput').value = '';
+
+      const stream = document.getElementById('srChat');
+      const thinking = document.createElement('div');
+      thinking.className = 'flex flex-col items-start space-y-1 max-w-full';
+      thinking.innerHTML = `
+        <span class="text-[9px] text-gray-500 font-bold uppercase tracking-tight px-1">Showrunner System</span>
+        <div class="p-4 rounded-3xl bg-[#1e1f20] border border-[#3c4043] rounded-tl-none text-purple-400 font-medium italic flex items-center gap-2">
+          <span class="w-1.5 h-1.5 rounded-full bg-purple-400 animate-ping"></span> Thinking...
+        </div>
+      `;
+      stream.appendChild(thinking);
+      stream.scrollTop = stream.scrollHeight;
+
+      try {
+        const prompt = `You are the Showrunner of Mish Mish OS. Business settings: ${safeJsonStringify(profile)}. Only ask one highly targeted question per turn. Direct style, conversational. Response:`;
+        const reply = await callAI(showrunnerChat, prompt, '');
+        thinking.remove();
+        addShowrunnerMessage('assistant', reply);
+
+        // Notify content factory tab of background action triggers
+        if (reply.toLowerCase().includes('generate') || reply.toLowerCase().includes('script') || reply.toLowerCase().includes('draft')) {
+          document.getElementById('designBadge').classList.remove('hidden');
+        }
+      } catch(e) {
+        thinking.remove();
+        addShowrunnerMessage('assistant', 'System communication blocked. Ensure keys and models are configured in settings.');
+      }
+    }
+
+    function handleInputEnter(e) {
+      if (e.key === 'Enter') {
+        sendShowrunner();
+      }
+    }
+
+    // Content Factory Actions Layer
+    function setCreativeRole(role, btn) {
+      activeCreativeRole = role;
+      const labels = {
+        hook: 'Hook Architect',
+        narrative: 'Narrative Engineer',
+        offer: 'Offer Framer',
+        visual: 'Visual Brief Writer',
+        script: 'Video Script Director'
+      };
+      
+      document.getElementById('activeWorkspaceRoleBadge').textContent = labels[role];
+      document.querySelectorAll('.role-filter').forEach(b => {
+        b.className = "role-filter flex-shrink-0 text-[10px] font-bold tracking-wider px-3.5 py-2 rounded-xl border border-[#3c4043] text-gray-400 hover:text-white hover:border-[#4f5357] transition active:scale-95";
+      });
+      btn.className = "role-filter flex-shrink-0 text-[10px] font-bold tracking-wider px-3.5 py-2 rounded-xl border border-purple-500/30 bg-purple-500/10 text-purple-300 transition active:scale-95";
+    }
+
+    async function generateCreativeContent() {
+      const input = sanitizeString(document.getElementById('cfInput').value.trim());
+      if (!input) {
+        setSt('cfSt', 'error', 'Input structural directives first.');
+        return;
+      }
+
+      setSt('cfSt', 'loading', 'Synthesizing visual content data...');
+      document.getElementById('cfDiagnostic').innerHTML = '';
+
+      const instructions = {
+        hook: 'Output ONLY one scroll-stopping Hook Option. Start directly with the text.',
+        narrative: 'Construct a structured StoryBrand breakdown: Character, Core Problem, and Call-to-action.',
+        offer: 'Write a high-ticket conversion stack: Value stacking, Guarantee, and clear CTA.',
+        visual: 'Provide details for a cinematic scene mockup prompt: mood, framing and specific lighting details.',
+        script: 'Build a short video storyboard structure: Hook (0-3s), Core Content (4-45s), CTA (46-60s).'
+      };
+
+      try {
+        const responseText = await callAI([{role: 'user', content: input}], `You are the Content Factory specializing in short-form text outputs. Mode instruction: ${instructions[activeCreativeRole]}`, 'cfDiagnostic');
+        
+        document.getElementById('cfOutput').className = "space-y-2 pt-2 block";
+        document.getElementById('cfOutput').innerHTML = `
+          <div class="bg-[#131314] border border-[#3c4043] rounded-2xl p-4 space-y-3">
+            <span class="mono text-[9px] text-gray-500 tracking-wider uppercase font-semibold">Active Synthesis Output</span>
+            <p id="stagedTextContainer" class="text-xs text-gray-200 leading-relaxed whitespace-pre-wrap font-medium">${esc(responseText)}</p>
+            <div class="flex gap-2 pt-1">
+              <button onclick="copyGeneratedText()" class="flex-1 py-2 bg-[#2f3032] border border-[#3c4043] rounded-lg text-[10px] text-gray-300 hover:text-white transition font-medium">Copy Text</button>
+              <button onclick="pushOutputToStaging()" class="flex-1 py-2 bg-purple-600 hover:bg-purple-500 rounded-lg text-[10px] text-white transition font-bold">Push to Design Staging</button>
+            </div>
+          </div>
+        `;
+        hideSt('cfSt');
+      } catch(e) {
+        setSt('cfSt', 'error', 'Creative synthesis halted: ' + sanitizeString(e.message));
+      }
+    }
+
+    // Sync design layouts inside staging panel
+    async function pushOutputToStaging() {
+      const outputText = document.getElementById('stagedTextContainer').textContent;
+      if (!outputText) return;
+
+      displayToast('Pushing asset payload to cloud...');
+      try {
+        await saveStateFile('staging_' + activeCreativeRole + '.json', {
+          role: activeCreativeRole,
+          content: outputText,
+          time: new Date().toISOString()
+        });
+        document.getElementById('designBadge').classList.remove('hidden');
+        displayToast('Staged file committed.');
+      } catch(e) {
+        displayToast('Commit blocked: ' + e.message);
+      }
+    }
+
+    // Direct local asset directory checking
+    async function loadDesignStagedDirectory() {
+      const list = document.getElementById('designFileList');
+      list.innerHTML = '<span class="text-xs text-gray-500 block py-2">Syncing staging directories...</span>';
+
+      try {
+        const items = await ghFetch('/repos/' + GH_REPO + '/contents/mishstate?per_page=50');
+        const stagingFiles = items.filter(i => i.name.startsWith('staging_'));
+        
+        if (!stagingFiles.length) {
+          list.innerHTML = '<span class="text-xs text-gray-500 block py-2">Staged directory empty. Commit from Creative tab first.</span>';
+          return;
+        }
+
+        list.innerHTML = stagingFiles.map(i => `
+          <div class="flex items-center justify-between p-2 bg-[#131314] rounded-xl border border-[#3c4043] text-xs">
+            <span class="text-gray-300 truncate font-medium max-w-[140px]">${esc(i.name)}</span>
+            <div class="flex gap-1.5">
+              <button onclick="previewFileOnCanvas('${esc(i.name)}')" class="py-1 px-2.5 bg-purple-500/10 text-purple-400 border border-purple-500/20 hover:bg-purple-500/20 rounded-md font-semibold text-[10px] transition">Map Layer</button>
+              <button onclick="publishStagedToProduction('${esc(i.name)}')" class="py-1 px-2 bg-[#2f3032] text-gray-300 hover:text-white rounded-md text-[10px] transition">Deploy</button>
+            </div>
+          </div>
+        `).join('');
+      } catch(e) {
+        list.innerHTML = '<span class="text-xs text-rose-500 block py-2">Cloud file connection error. Check GitHub parameters.</span>';
+      }
+    }
+
+    // Inject staged context directly into visual components
+    async function previewFileOnCanvas(filename) {
+      setSt('designSt', 'loading', 'Injecting model values into SVG...');
+      try {
+        const data = await loadStateFile(filename);
+        if (!data || !data.content) throw new Error("Could not parse file structure.");
+        
+        activeStagedContent = data.content;
+        
+        // Dynamically map values into visual SVG preview areas
+        const previewExcerpt = sanitizeString(data.content).substring(0, 50) + (data.content.length > 50 ? '...' : '');
+        document.getElementById('svgCanvasTitle').textContent = previewExcerpt;
+        document.getElementById('svgCanvasDescription').textContent = 'Source Asset: ' + filename.replace('staging_', '');
+        
+        setSt('designSt', 'success', 'SVG visual layout updated successfully.');
+      } catch(e) {
+        setSt('designSt', 'error', 'Pre-flight parsing failure: ' + e.message);
+      }
+    }
+
+    async function publishStagedToProduction(filename) {
+      setSt('designSt', 'loading', 'Deploying branch builds...');
+      try {
+        const data = await loadStateFile(filename);
+        const targetPath = 'content/' + filename.replace('staging_', '');
+        
+        let sha = null;
+        try {
+          const ex = await ghFetch('/repos/' + GH_REPO + '/contents/' + targetPath);
+          sha = ex.sha;
+        } catch(e) {}
+
+        await ghFetch('/repos/' + GH_REPO + '/contents/' + targetPath, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: safeJsonStringify({
+            message: sanitizeString('Mish Mish OS Live Release: ' + targetPath),
+            content: toBase64(JSON.stringify(data)),
+            sha: sha || undefined
+          })
+        });
+
+        setSt('designSt', 'success', 'Published live layout components to Cloud Brain.');
+        loadDesignStagedDirectory();
+      } catch(e) {
+        setSt('designSt', 'error', 'Publish failed: ' + e.message);
+      }
+    }
+
+    function commitDesign() {
+      loadDesignStagedDirectory();
+    }
+
+    // Local file directories uploads
+    async function handleFileUpload(event) {
+      const files = event.target.files;
+      if (!files.length) return;
+
+      setSt('filesSt', 'loading', 'Uploading asset payload...');
+      
+      for (const file of files) {
+        try {
+          const reader = new FileReader();
+          await new Promise((resolve, reject) => {
+            reader.onload = async () => {
+              const base64 = reader.result.split(',')[1];
+              const path = 'uploads/' + sanitizeString(file.name);
+              let sha = null;
+              
+              try {
+                const ex = await ghFetch('/repos/' + GH_REPO + '/contents/' + path);
+                sha = ex.sha;
+              } catch(e) {}
+
+              await ghFetch('/repos/' + GH_REPO + '/contents/' + path, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: safeJsonStringify({
+                  message: sanitizeString('User raw upload: ' + file.name),
+                  content: base64,
+                  sha: sha || undefined
+                })
+              });
+              resolve();
+            };
+            reader.onerror = reject;
+            reader.readAsDataURL(file);
+          });
+        } catch(e) {
+          setSt('filesSt', 'error', 'Upload failed: ' + sanitizeString(e.message));
+          return;
+        }
+      }
+
+      setSt('filesSt', 'success', 'Uploaded assets added to cloud.');
+      loadFileList();
+    }
+
+    async function loadFileList() {
+      try {
+        const items = await ghFetch('/repos/' + GH_REPO + '/contents/uploads?per_page=50');
+        document.getElementById('fileList').innerHTML = items.map(i => `
+          <div class="flex items-center justify-between p-2 bg-[#131314] rounded-xl border border-[#3c4043] text-xs">
+            <span class="text-gray-300 truncate font-medium max-w-[180px]">${esc(i.name)}</span>
+            <span class="text-[9px] mono text-purple-400">RAW FILE</span>
+          </div>
+        `).join('');
+      } catch(e) {
+        document.getElementById('fileList').innerHTML = '<span class="text-xs text-gray-500 block py-2">No custom uploads directory initialized.</span>';
+      }
+    }
+
+    // Unified Manual Cloud Sync Button
+    async function syncStateWithCloud() {
+      const spinner = document.getElementById('syncSpinner');
+      spinner.classList.add('animate-spin');
+      
+      try {
+        await saveStateFile('business_profile.json', profile);
+        await saveStateFile('showrunner_chat.json', showrunnerChat);
+        displayToast('Synchronization validated.');
+      } catch(e) {
+        displayToast('Local sync failed: ' + e.message);
+      } finally {
+        spinner.classList.remove('animate-spin');
+      }
+    }
+
+    // Local layout navigation control panel
+    function switchTab(name, btn) {
+      document.querySelectorAll('.tab').forEach(t => t.classList.remove('active', 'bg-[#2f3032]', 'text-white'));
+      document.querySelectorAll('.tab').forEach(t => t.classList.add('text-gray-400'));
+      document.querySelectorAll('.panel').forEach(p => p.classList.add('hidden'));
+
+      btn.classList.add('active', 'bg-[#2f3032]', 'text-white');
+      document.getElementById('panel-' + name).classList.remove('hidden');
+
+      activeTab = name;
+
+      if (name === 'design') {
+        document.getElementById('designBadge').classList.add('hidden');
+        loadDesignStagedDirectory();
+      }
+      if (name === 'files') {
+        loadFileList();
+      }
+    }
+
+    // In-app layout feedback element state updater
+    function setSt(id, type, msg) {
+      const el = document.getElementById(id);
+      if (!el) return;
+      el.className = 'text-xs rounded-xl p-3 block ' + (
+        type === 'error' ? 'bg-red-500/10 text-red-400 border border-red-500/20' :
+        type === 'success' ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' :
+        'bg-purple-500/10 text-purple-400 border border-purple-500/20'
+      );
+      el.innerHTML = type === 'loading' ? '<span class="inline-block w-3 h-3 border-2 border-purple-400/20 border-t-purple-400 rounded-full animate-spin mr-2 align-middle"></span>' + msg : msg;
+    }
+
+    function hideSt(id) {
+      const el = document.getElementById(id);
+      if (el) el.className = 'hidden';
+    }
+
+    function esc(s) {
+      return sanitizeString(String(s)).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    }
+
+    function copyGeneratedText() {
+      const text = document.getElementById('stagedTextContainer').textContent;
+      const dummy = document.createElement("textarea");
+      document.body.appendChild(dummy);
+      dummy.value = text;
+      dummy.select();
+      document.execCommand("copy");
+      document.body.removeChild(dummy);
+      displayToast('Text copied to clipboard.');
+    }
+
+    // Run direct initial setups
+    window.onload = function() {
+      lucide.createIcons();
+      document.getElementById('aiProvider').value = AI_PROVIDER;
+      document.getElementById('geminiModelTarget').value = GEMINI_MODEL_TARGET;
+      document.getElementById('geminiKeys').value = GEMINI_KEYS;
+      document.getElementById('deepseekKeys').value = DEEPSEEK_KEYS;
+      
+      if (GH_TOKEN && GH_REPO) {
+        document.getElementById('ghToken').value = GH_TOKEN;
+        document.getElementById('ghRepo').value = GH_REPO;
+        connectRepo().catch(() => {});
+      }
+    }
+  </script>
+</body>
+</html>
+
+```
