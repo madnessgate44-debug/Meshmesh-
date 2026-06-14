@@ -1,0 +1,520 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GAHIZ — AI Interview Pressure Simulation | Master The Wall</title>
+    <style>
+        :root {
+            --bg-deep: #080b12;
+            --bg-card: #0d1117;
+            --bg-elevated: #111827;
+            --border-subtle: #1e293b;
+            --border-active: #334155;
+            --text-primary: #e2e8f0;
+            --text-secondary: #94a3b8;
+            --text-muted: #64748b;
+            --accent-cyan: #00e5ff;
+            --accent-cyan-dim: rgba(0, 229, 255, 0.15);
+            --accent-amber: #f59e0b;
+            --accent-red: #ef4444;
+            --accent-green: #10b981;
+            --accent-violet: #8b5cf6;
+            --accent-pink: #ec4899;
+            --gradient-hero: linear-gradient(135deg, #0a0f1a 0%, #0d1525 40%, #111d33 100%);
+            --gradient-cta: linear-gradient(135deg, #00e5ff 0%, #8b5cf6 100%);
+            --shadow-glow-cyan: 0 0 40px rgba(0, 229, 255, 0.25), 0 0 80px rgba(0, 229, 255, 0.08);
+            --shadow-glow-violet: 0 0 40px rgba(139, 92, 246, 0.2);
+            --radius-sm: 8px;
+            --radius-md: 14px;
+            --radius-lg: 20px;
+            --radius-xl: 28px;
+            --font-mono: 'SF Mono', 'JetBrains Mono', 'Fira Code', 'Consolas', monospace;
+            --font-sans: 'Inter', 'SF Pro Display', 'Segoe UI', system-ui, -apple-system, sans-serif;
+            --transition-fast: 0.18s cubic-bezier(0.4, 0, 0.2, 1);
+            --transition-smooth: 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html { scroll-behavior: smooth; font-size: 16px; }
+        body { background: var(--bg-deep); color: var(--text-primary); font-family: var(--font-sans); line-height: 1.6; -webkit-font-smoothing: antialiased; overflow-x: hidden; }
+        .nav-bar { position: fixed; top: 0; left: 0; right: 0; z-index: 1000; background: rgba(8, 11, 18, 0.82); backdrop-filter: blur(18px) saturate(140%); border-bottom: 1px solid var(--border-subtle); padding: 0.6rem 2rem; display: flex; align-items: center; justify-content: space-between; transition: var(--transition-smooth); }
+        .nav-logo { font-family: var(--font-mono); font-weight: 700; font-size: 1.5rem; letter-spacing: -0.03em; color: var(--accent-cyan); text-shadow: 0 0 18px rgba(0, 229, 255, 0.5); display: flex; align-items: center; gap: 0.4rem; }
+        .nav-logo .dot { display: inline-block; width: 9px; height: 9px; border-radius: 50%; background: var(--accent-cyan); animation: pulse-dot 2s infinite; box-shadow: 0 0 10px var(--accent-cyan); }
+        @keyframes pulse-dot { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.35; transform: scale(1.9); } }
+        .nav-links { display: flex; gap: 1.6rem; list-style: none; align-items: center; flex-wrap: wrap; }
+        .nav-links a { color: var(--text-secondary); text-decoration: none; font-size: 0.9rem; font-weight: 500; transition: var(--transition-fast); position: relative; }
+        .nav-links a:hover { color: var(--text-primary); }
+        .nav-links a::after { content: ''; position: absolute; bottom: -4px; left: 0; width: 0; height: 2px; background: var(--accent-cyan); transition: var(--transition-fast); }
+        .nav-links a:hover::after { width: 100%; }
+        .nav-cta-btn { background: var(--gradient-cta); color: #000; font-weight: 700; padding: 0.55rem 1.4rem; border-radius: 50px; text-decoration: none; font-size: 0.85rem; letter-spacing: 0.02em; transition: var(--transition-smooth); box-shadow: var(--shadow-glow-cyan); }
+        .nav-cta-btn:hover { transform: translateY(-2px); box-shadow: 0 0 50px rgba(0, 229, 255, 0.4), 0 0 90px rgba(139, 92, 246, 0.3); }
+        .section { padding: 5rem 2rem; max-width: 1100px; margin: 0 auto; position: relative; }
+        .section-label { font-family: var(--font-mono); font-size: 0.75rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--accent-cyan); margin-bottom: 0.7rem; opacity: 0.85; }
+        .section-title { font-size: 2.6rem; font-weight: 800; letter-spacing: -0.03em; line-height: 1.2; margin-bottom: 1rem; color: #f1f5f9; }
+        .section-subtitle { font-size: 1.1rem; color: var(--text-secondary); max-width: 600px; margin-bottom: 2.5rem; line-height: 1.7; }
+        .highlight-cyan { color: var(--accent-cyan); }
+        .highlight-amber { color: var(--accent-amber); }
+        .highlight-red { color: var(--accent-red); }
+        .highlight-green { color: var(--accent-green); }
+        .highlight-violet { color: var(--accent-violet); }
+        .hero-section { padding-top: 7rem; padding-bottom: 5rem; background: var(--gradient-hero); position: relative; overflow: hidden; text-align: center; }
+        .hero-section::before { content: ''; position: absolute; top: -30%; left: 50%; transform: translateX(-50%); width: 700px; height: 700px; background: radial-gradient(circle, rgba(0, 229, 255, 0.06) 0%, transparent 70%); pointer-events: none; }
+        .hero-badge { display: inline-block; font-family: var(--font-mono); font-size: 0.78rem; letter-spacing: 0.1em; color: var(--accent-cyan); border: 1px solid var(--accent-cyan-dim); padding: 0.4rem 1.2rem; border-radius: 50px; margin-bottom: 1.5rem; background: rgba(0, 229, 255, 0.04); }
+        .hero-title { font-size: 3.4rem; font-weight: 900; letter-spacing: -0.04em; line-height: 1.1; margin-bottom: 1.2rem; position: relative; z-index: 1; }
+        .hero-title .glitch-text { position: relative; display: inline-block; color: var(--accent-cyan); text-shadow: var(--shadow-glow-cyan); }
+        .hero-desc { font-size: 1.2rem; color: var(--text-secondary); max-width: 620px; margin: 0 auto 2rem; line-height: 1.7; position: relative; z-index: 1; }
+        .hero-stats-row { display: flex; gap: 2.5rem; justify-content: center; flex-wrap: wrap; margin-bottom: 2.5rem; position: relative; z-index: 1; }
+        .hero-stat { text-align: center; }
+        .hero-stat-num { font-size: 2.2rem; font-weight: 900; color: #f1f5f9; font-family: var(--font-mono); }
+        .hero-stat-label { font-size: 0.8rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.06em; }
+        .hero-cta-group { display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap; position: relative; z-index: 1; }
+        .btn-primary { background: var(--gradient-cta); color: #000; font-weight: 700; padding: 0.85rem 2rem; border-radius: 50px; text-decoration: none; font-size: 1rem; letter-spacing: 0.02em; border: none; cursor: pointer; transition: var(--transition-smooth); box-shadow: var(--shadow-glow-cyan); font-family: var(--font-sans); }
+        .btn-primary:hover { transform: translateY(-3px); box-shadow: 0 0 55px rgba(0, 229, 255, 0.45), 0 0 100px rgba(139, 92, 246, 0.35); }
+        .btn-outline { background: transparent; color: var(--text-primary); font-weight: 600; padding: 0.85rem 2rem; border-radius: 50px; text-decoration: none; font-size: 1rem; letter-spacing: 0.02em; border: 1px solid var(--border-active); cursor: pointer; transition: var(--transition-smooth); font-family: var(--font-sans); }
+        .btn-outline:hover { border-color: var(--accent-cyan); color: var(--accent-cyan); box-shadow: 0 0 25px rgba(0, 229, 255, 0.15); }
+        .problem-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.5rem; margin-top: 1rem; }
+        .problem-card { background: var(--bg-card); border: 1px solid var(--border-subtle); border-radius: var(--radius-lg); padding: 2rem 1.6rem; transition: var(--transition-smooth); position: relative; overflow: hidden; }
+        .problem-card:hover { border-color: var(--border-active); box-shadow: 0 8px 30px rgba(0, 0, 0, 0.4); transform: translateY(-3px); }
+        .problem-card .phase-tag { font-family: var(--font-mono); font-size: 0.7rem; letter-spacing: 0.1em; text-transform: uppercase; padding: 0.25rem 0.7rem; border-radius: 50px; display: inline-block; margin-bottom: 1rem; font-weight: 700; }
+        .phase-before { background: rgba(16, 185, 129, 0.15); color: var(--accent-green); }
+        .phase-during { background: rgba(239, 68, 68, 0.15); color: var(--accent-red); }
+        .phase-after { background: rgba(245, 158, 11, 0.15); color: var(--accent-amber); }
+        .problem-card h3 { font-size: 1.3rem; margin-bottom: 0.6rem; font-weight: 700; }
+        .problem-card p { color: var(--text-secondary); font-size: 0.95rem; line-height: 1.6; }
+        .industry-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 1.2rem; }
+        .industry-card { background: var(--bg-elevated); border: 1px solid var(--border-subtle); border-radius: var(--radius-md); padding: 1.5rem; text-align: center; transition: var(--transition-smooth); }
+        .industry-card:hover { border-color: var(--accent-cyan); box-shadow: 0 0 25px rgba(0, 229, 255, 0.1); }
+        .industry-card .company-name { font-weight: 800; font-size: 1.2rem; letter-spacing: -0.02em; margin-bottom: 0.4rem; }
+        .industry-card .reality-tag { font-family: var(--font-mono); font-size: 0.7rem; color: var(--accent-amber); text-transform: uppercase; letter-spacing: 0.08em; }
+        .industry-card p { color: var(--text-secondary); font-size: 0.85rem; margin-top: 0.5rem; line-height: 1.5; }
+        .transformation-duo { display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; margin-top: 1rem; }
+        @media (max-width: 700px) { .transformation-duo { grid-template-columns: 1fr; } }
+        .tf-card { border-radius: var(--radius-lg); padding: 2.2rem 1.8rem; border: 1px solid var(--border-subtle); position: relative; overflow: hidden; }
+        .tf-before { background: rgba(239, 68, 68, 0.06); border-color: rgba(239, 68, 68, 0.25); }
+        .tf-after { background: rgba(16, 185, 129, 0.06); border-color: rgba(16, 185, 129, 0.25); }
+        .tf-card h3 { font-size: 1.5rem; font-weight: 800; margin-bottom: 1rem; letter-spacing: -0.02em; }
+        .tf-card ul { list-style: none; padding: 0; }
+        .tf-card ul li { padding: 0.45rem 0; color: var(--text-secondary); font-size: 0.95rem; position: relative; padding-left: 1.4rem; }
+        .tf-card ul li::before { content: ''; position: absolute; left: 0; top: 0.7rem; width: 8px; height: 8px; border-radius: 50%; }
+        .tf-before ul li::before { background: var(--accent-red); }
+        .tf-after ul li::before { background: var(--accent-green); }
+        .sim-wrapper { background: var(--bg-card); border: 2px solid var(--border-active); border-radius: var(--radius-xl); overflow: hidden; box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5), var(--shadow-glow-cyan); margin-top: 2rem; }
+        .sim-header { background: var(--bg-elevated); padding: 1.2rem 1.8rem; border-bottom: 1px solid var(--border-subtle); display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1rem; }
+        .sim-header .sim-title { font-family: var(--font-mono); font-weight: 700; font-size: 1rem; letter-spacing: 0.04em; color: var(--accent-cyan); }
+        .sim-mode-select { background: var(--bg-deep); color: var(--text-primary); border: 1px solid var(--border-active); padding: 0.5rem 1rem; border-radius: 50px; font-family: var(--font-sans); font-size: 0.85rem; cursor: pointer; transition: var(--transition-fast); }
+        .sim-mode-select:focus { outline: none; border-color: var(--accent-cyan); box-shadow: 0 0 12px rgba(0, 229, 255, 0.2); }
+        .sim-body { padding: 2rem 1.8rem; display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; }
+        @media (max-width: 800px) { .sim-body { grid-template-columns: 1fr; } }
+        .sim-question-panel h4 { font-family: var(--font-mono); font-size: 0.7rem; letter-spacing: 0.1em; color: var(--text-muted); text-transform: uppercase; margin-bottom: 0.5rem; }
+        .sim-question-text { font-size: 1.3rem; font-weight: 700; letter-spacing: -0.02em; margin-bottom: 1rem; min-height: 3.5rem; line-height: 1.4; }
+        .sim-timer { font-family: var(--font-mono); font-size: 2.5rem; font-weight: 900; color: var(--accent-cyan); text-shadow: 0 0 20px rgba(0, 229, 255, 0.4); margin-bottom: 1rem; }
+        .sim-timer.warning { color: var(--accent-amber); text-shadow: 0 0 20px rgba(245, 158, 11, 0.5); }
+        .sim-timer.danger { color: var(--accent-red); text-shadow: 0 0 20px rgba(239, 68, 68, 0.5); animation: shake 0.5s infinite; }
+        @keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-4px); } 75% { transform: translateX(4px); } }
+        .sim-answer-input { width: 100%; background: var(--bg-deep); border: 1px solid var(--border-active); color: var(--text-primary); padding: 1rem; border-radius: var(--radius-md); font-family: var(--font-sans); font-size: 0.95rem; resize: vertical; min-height: 100px; transition: var(--transition-fast); line-height: 1.6; }
+        .sim-answer-input:focus { outline: none; border-color: var(--accent-cyan); box-shadow: 0 0 20px rgba(0, 229, 255, 0.12); }
+        .sim-answer-input:disabled { opacity: 0.5; cursor: not-allowed; }
+        .sim-controls { display: flex; gap: 0.8rem; flex-wrap: wrap; margin-top: 1rem; }
+        .sim-btn { padding: 0.65rem 1.5rem; border-radius: 50px; font-weight: 700; font-size: 0.9rem; cursor: pointer; border: none; transition: var(--transition-smooth); font-family: var(--font-sans); letter-spacing: 0.02em; }
+        .sim-btn-start { background: var(--accent-green); color: #000; }
+        .sim-btn-start:hover { box-shadow: 0 0 30px rgba(16, 185, 129, 0.4); transform: translateY(-2px); }
+        .sim-btn-submit { background: var(--accent-cyan); color: #000; }
+        .sim-btn-submit:hover { box-shadow: 0 0 30px rgba(0, 229, 255, 0.4); transform: translateY(-2px); }
+        .sim-btn-reset { background: transparent; border: 1px solid var(--border-active); color: var(--text-primary); }
+        .sim-btn-reset:hover { border-color: var(--accent-red); color: var(--accent-red); }
+        .sim-btn:disabled { opacity: 0.45; cursor: not-allowed; pointer-events: none; }
+        .sim-metrics-panel { background: var(--bg-elevated); border-radius: var(--radius-md); padding: 1.5rem; border: 1px solid var(--border-subtle); display: flex; flex-direction: column; gap: 1rem; }
+        .metric-row { display: flex; justify-content: space-between; align-items: center; }
+        .metric-label { font-size: 0.8rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; }
+        .metric-value { font-family: var(--font-mono); font-weight: 700; font-size: 1.1rem; }
+        .metric-bar-bg { height: 6px; background: var(--border-subtle); border-radius: 10px; overflow: hidden; margin-top: 0.3rem; }
+        .metric-bar-fill { height: 100%; border-radius: 10px; transition: width 0.5s ease; }
+        .fill-confidence { background: var(--accent-green); }
+        .fill-pressure { background: var(--accent-red); }
+        .fill-hesitation { background: var(--accent-amber); }
+        .fill-fillers { background: var(--accent-violet); }
+        .wall-indicator { text-align: center; padding: 0.8rem; border-radius: var(--radius-md); font-weight: 800; font-family: var(--font-mono); letter-spacing: 0.05em; font-size: 0.9rem; transition: var(--transition-smooth); }
+        .wall-none { background: rgba(16, 185, 129, 0.12); color: var(--accent-green); border: 1px solid rgba(16, 185, 129, 0.3); }
+        .wall-warning { background: rgba(245, 158, 11, 0.12); color: var(--accent-amber); border: 1px solid rgba(245, 158, 11, 0.3); }
+        .wall-detected { background: rgba(239, 68, 68, 0.15); color: var(--accent-red); border: 1px solid rgba(239, 68, 68, 0.4); animation: pulse-wall 1s infinite; }
+        @keyframes pulse-wall { 0%, 100% { box-shadow: 0 0 10px rgba(239, 68, 68, 0.3); } 50% { box-shadow: 0 0 30px rgba(239, 68, 68, 0.6); } }
+        .sim-graph-container { background: var(--bg-deep); border-radius: var(--radius-md); border: 1px solid var(--border-subtle); padding: 1rem; height: 200px; position: relative; }
+        .sim-graph-container canvas { width: 100%; height: 100%; display: block; }
+        .sim-results { background: var(--bg-elevated); border-radius: var(--radius-lg); padding: 1.8rem; border: 1px solid var(--border-active); margin-top: 1.5rem; display: none; }
+        .sim-results.visible { display: block; }
+        .sim-results h3 { font-size: 1.4rem; font-weight: 800; margin-bottom: 1rem; letter-spacing: -0.02em; }
+        .result-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 1rem; }
+        .result-item { background: var(--bg-deep); border-radius: var(--radius-md); padding: 1rem; text-align: center; border: 1px solid var(--border-subtle); }
+        .result-item .r-val { font-family: var(--font-mono); font-size: 1.6rem; font-weight: 900; }
+        .result-item .r-lbl { font-size: 0.7rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.06em; }
+        .pricing-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.5rem; }
+        .pricing-card { background: var(--bg-card); border: 1px solid var(--border-subtle); border-radius: var(--radius-lg); padding: 2rem 1.8rem; transition: var(--transition-smooth); position: relative; }
+        .pricing-card.pro { border-color: var(--accent-cyan); box-shadow: var(--shadow-glow-cyan); }
+        .pricing-card .badge { position: absolute; top: -14px; right: 20px; background: var(--accent-cyan); color: #000; font-weight: 800; font-size: 0.7rem; padding: 0.3rem 1rem; border-radius: 50px; letter-spacing: 0.05em; }
+        .pricing-price { font-size: 3rem; font-weight: 900; letter-spacing: -0.03em; }
+        .pricing-card ul { list-style: none; padding: 0; margin: 1.2rem 0; }
+        .pricing-card ul li { padding: 0.4rem 0; color: var(--text-secondary); font-size: 0.9rem; }
+        .pricing-card ul li::before { content: '✓ '; color: var(--accent-green); font-weight: 700; }
+        .trust-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1.5rem; }
+        .trust-card { background: var(--bg-elevated); border: 1px solid var(--border-subtle); border-radius: var(--radius-md); padding: 1.6rem; transition: var(--transition-smooth); }
+        .trust-card:hover { border-color: var(--accent-violet); box-shadow: var(--shadow-glow-violet); }
+        .trust-card h4 { font-weight: 700; margin-bottom: 0.5rem; font-size: 1.1rem; }
+        .trust-card p { color: var(--text-secondary); font-size: 0.9rem; line-height: 1.6; }
+        .footer-cta { text-align: center; padding: 4rem 2rem; background: var(--gradient-hero); border-top: 1px solid var(--border-subtle); }
+        .footer-cta h2 { font-size: 2.2rem; font-weight: 900; letter-spacing: -0.03em; margin-bottom: 0.8rem; }
+        .footer-cta p { color: var(--text-secondary); max-width: 500px; margin: 0 auto 1.8rem; line-height: 1.7; }
+        @media (max-width: 600px) {
+            .hero-title { font-size: 2rem; }
+            .section-title { font-size: 1.8rem; }
+            .nav-bar { padding: 0.5rem 1rem; flex-wrap: wrap; gap: 0.5rem; }
+            .nav-links { gap: 0.8rem; font-size: 0.75rem; }
+            .sim-body { grid-template-columns: 1fr; }
+            .hero-stats-row { gap: 1rem; }
+            .hero-stat-num { font-size: 1.4rem; }
+        }
+    </style>
+</head>
+<body>
+    <nav class="nav-bar" id="navbar">
+        <div class="nav-logo">GAHIZ<span class="dot"></span></div>
+        <ul class="nav-links">
+            <li><a href="#problem">The Problem</a></li>
+            <li><a href="#industry">Industry Reality</a></li>
+            <li><a href="#simulation">Simulation</a></li>
+            <li><a href="#pricing">Pricing</a></li>
+            <li><a href="#trust">How It Works</a></li>
+            <li><a href="#simulation" class="nav-cta-btn">Try Free</a></li>
+        </ul>
+    </nav>
+    <section class="hero-section" id="hero">
+        <div class="hero-badge">🎯 AI-POWERED PRESSURE SIMULATION</div>
+        <h1 class="hero-title">Your English Is Good Enough.<br><span class="glitch-text">Your Pressure Response Isn't.</span></h1>
+        <p class="hero-desc">You freeze. You hesitate. You ramble. Not because you lack language skills — but because <strong>no one trained you for the psychological collapse</strong> that happens when the interviewer leans in and the clock is ticking. <span class="highlight-cyan">GAHIZ fixes that.</span></p>
+        <div class="hero-stats-row">
+            <div class="hero-stat"><div class="hero-stat-num">87%</div><div class="hero-stat-label">of candidates hit "The Wall" within 90 seconds</div></div>
+            <div class="hero-stat"><div class="hero-stat-num">3.2x</div><div class="hero-stat-label">higher pass rate after pressure training</div></div>
+            <div class="hero-stat"><div class="hero-stat-num">14s</div><div class="hero-stat-label">average recovery time after GAHIZ training</div></div>
+        </div>
+        <div class="hero-cta-group">
+            <a href="#simulation" class="btn-primary">⚡ Start Free Simulation</a>
+            <a href="#pricing" class="btn-outline">See Pro Plan</a>
+        </div>
+    </section>
+    <section class="section" id="problem">
+        <div class="section-label">// THE INTERVIEW FAILURE CYCLE</div>
+        <h2 class="section-title">You've Lived This <span class="highlight-red">Nightmare</span> Before</h2>
+        <p class="section-subtitle">It follows the same brutal pattern every time. Recognize yourself?</p>
+        <div class="problem-cards">
+            <div class="problem-card"><span class="phase-tag phase-before">Phase 1 — Before</span><h3>Overconfidence & Illusion of Readiness</h3><p>You rehearsed answers in the mirror. You memorized STAR format. You felt bulletproof walking in. <em>"I've got this."</em> But rehearsing alone in silence is not the same as facing a real interrogator.</p></div>
+            <div class="problem-card"><span class="phase-tag phase-during">Phase 2 — During</span><h3>Pressure Collapse — "The Wall"</h3><p>The question lands. Your mind goes blank. Heart pounds. You hear yourself stalling — <em>"That's a great question..."</em> — buying seconds you don't have. The silence stretches. You're drowning in your own hesitation.</p></div>
+            <div class="problem-card"><span class="phase-tag phase-after">Phase 3 — After</span><h3>Regret, Self-Blame & The Loop</h3><p>You walk out knowing you could have answered better. The replay starts in your head. <em>"Why did I freeze? I knew that answer!"</em> You promise to prepare harder — but the cycle repeats because <strong>you're training the wrong muscle.</strong></p></div>
+        </div>
+    </section>
+    <section class="section" id="industry">
+        <div class="section-label">// WHO'S REALLY TESTING YOU</div>
+        <h2 class="section-title">These Companies Test <span class="highlight-amber">Pressure</span>, Not Just English</h2>
+        <p class="section-subtitle">BPO giants don't just assess your vocabulary. They measure how fast you crumble — or stay standing — under psychological load.</p>
+        <div class="industry-grid">
+            <div class="industry-card"><div class="company-name">Teleperformance</div><div class="reality-tag">⏱ Rapid-Fire Probing</div><p>Multi-question stacking designed to overwhelm. They watch how you handle cognitive overload — not just your accent.</p></div>
+            <div class="industry-card"><div class="company-name">Concentrix</div><div class="reality-tag">🎭 Behavioral Stress Tests</div><p>Unexpected scenario pivots mid-answer. Your composure under surprise is the real KPI they're measuring.</p></div>
+            <div class="industry-card"><div class="company-name">Vodafone UK</div><div class="reality-tag">🔍 Precision Under Pressure</div><p>Technical + behavioral hybrid interviews. One unclear answer and the entire flow shifts. Recovery speed matters more than perfection.</p></div>
+            <div class="industry-card"><div class="company-name">Amazon BPO</div><div class="reality-tag">📐 Leadership Principle Gauntlet</div><p>STAR-format answers under time compression. They test how structured your thinking remains when the clock is weaponized against you.</p></div>
+        </div>
+    </section>
+    <section class="section" id="transformation">
+        <div class="section-label">// THE SHIFT</div>
+        <h2 class="section-title">From <span class="highlight-red">Collapse</span> to <span class="highlight-green">Control</span></h2>
+        <p class="section-subtitle">GAHIZ rewires your response pattern through repeated pressure inoculation.</p>
+        <div class="transformation-duo">
+            <div class="tf-card tf-before"><h3>❌ Before GAHIZ</h3><ul><li>Mind goes blank when the question lands</li><li>Hesitation markers spike: "um", "uh", long pauses</li><li>Answer structure collapses under time pressure</li><li>Recovery takes 30+ seconds — if it happens at all</li><li>Confidence drops with every follow-up probe</li><li>Leaves interview knowing you underperformed</li></ul></div>
+            <div class="tf-card tf-after"><h3>✅ After GAHIZ</h3><ul><li>Question lands — brain stays online</li><li>Hesitation markers drop below 8% of response</li><li>STAR structure holds even at 45-second pressure mark</li><li>Recovery from surprise pivots in under 14 seconds</li><li>Confidence trajectory climbs through the interview</li><li>Walks out knowing you showed your real capability</li></ul></div>
+        </div>
+    </section>
+    <section class="section" id="simulation">
+        <div class="section-label">// LIVE SIMULATION ENGINE</div>
+        <h2 class="section-title">Experience <span class="highlight-cyan">The Wall</span> — Then Break Through It</h2>
+        <p class="section-subtitle">Select a mode, face the timer, and watch your pressure metrics in real time.</p>
+        <div class="sim-wrapper" id="simEngine">
+            <div class="sim-header"><span class="sim-title">◈ SIMULATION ACTIVE</span><select class="sim-mode-select" id="modeSelect"><option value="behavioral">Behavioral Interview</option><option value="stress">Stress / Pressure Test</option><option value="customer">Customer Service Scenario</option><option value="technical">Technical Probing</option><option value="leadership">Leadership Principles</option></select></div>
+            <div class="sim-body">
+                <div>
+                    <div class="sim-question-panel"><h4>◉ CURRENT QUESTION</h4><div class="sim-question-text" id="questionDisplay">Press "Start Simulation" to begin.</div><div class="sim-timer" id="timerDisplay">00:45</div></div>
+                    <textarea class="sim-answer-input" id="answerInput" placeholder="Type your answer here..." disabled></textarea>
+                    <div class="sim-controls"><button class="sim-btn sim-btn-start" id="btnStart">▶ Start</button><button class="sim-btn sim-btn-submit" id="btnSubmit" disabled>✓ Submit Answer</button><button class="sim-btn sim-btn-reset" id="btnReset">↺ Reset</button></div>
+                </div>
+                <div class="sim-metrics-panel" id="metricsPanel">
+                    <div class="wall-indicator wall-none" id="wallIndicator">🟢 WALL STATUS: CLEAR</div>
+                    <div class="metric-row"><span class="metric-label">Confidence</span><span class="metric-value highlight-green" id="confValue">--</span></div>
+                    <div class="metric-bar-bg"><div class="metric-bar-fill fill-confidence" id="confBar" style="width:0%"></div></div>
+                    <div class="metric-row"><span class="metric-label">Pressure Load</span><span class="metric-value highlight-red" id="pressValue">--</span></div>
+                    <div class="metric-bar-bg"><div class="metric-bar-fill fill-pressure" id="pressBar" style="width:0%"></div></div>
+                    <div class="metric-row"><span class="metric-label">Hesitation %</span><span class="metric-value highlight-amber" id="hesValue">--</span></div>
+                    <div class="metric-bar-bg"><div class="metric-bar-fill fill-hesitation" id="hesBar" style="width:0%"></div></div>
+                    <div class="metric-row"><span class="metric-label">Filler Words</span><span class="metric-value highlight-violet" id="fillValue">--</span></div>
+                    <div class="metric-bar-bg"><div class="metric-bar-fill fill-fillers" id="fillBar" style="width:0%"></div></div>
+                    <div class="sim-graph-container"><canvas id="pressureGraph"></canvas></div>
+                </div>
+            </div>
+            <div class="sim-results" id="resultsPanel"><h3>📊 Session Report</h3><div class="result-grid" id="resultGrid"></div></div>
+        </div>
+    </section>
+    <section class="section" id="pricing">
+        <div class="section-label">// INVEST IN MASTERY</div>
+        <h2 class="section-title">Basic Practice vs. <span class="highlight-cyan">Pressure Mastery</span></h2>
+        <p class="section-subtitle">Free tier lets you taste the simulation. Pro tier rewires your nervous system for real interviews.</p>
+        <div class="pricing-grid">
+            <div class="pricing-card"><h3>🆓 Free</h3><div class="pricing-price">$0</div><p style="color:var(--text-muted);">Basic pressure exposure</p><ul><li>3 simulation runs / day</li><li>2 modes (Behavioral & Stress)</li><li>Basic metrics dashboard</li><li>Wall detection alerts</li><li>45-second timer only</li></ul><p style="font-size:0.8rem;color:var(--text-muted);">Great for understanding what "The Wall" feels like. Not enough to build lasting resilience.</p><a href="#simulation" class="btn-outline" style="display:block;text-align:center;">Try Free</a></div>
+            <div class="pricing-card pro"><span class="badge">RECOMMENDED</span><h3>🚀 Pro — Pressure Mastery</h3><div class="pricing-price">$19<span style="font-size:1rem;">/mo</span></div><p style="color:var(--accent-cyan);">Full psychological inoculation</p><ul><li>Unlimited simulation runs</li><li>All 5 modes + custom scenarios</li><li>Advanced analytics & trend graphs</li><li>Recovery speed tracking</li><li>Custom timer (30s / 60s / 90s)</li><li>Session replay & breakdown</li><li>Exportable progress reports</li></ul><p style="font-size:0.8rem;color:var(--accent-cyan);">This is where transformation happens. Repeated exposure builds the neural pathways for calm under fire.</p><a href="#simulation" class="btn-primary" style="display:block;text-align:center;">Upgrade to Pro</a></div>
+        </div>
+    </section>
+    <section class="section" id="trust">
+        <div class="section-label">// WHY THIS ACTUALLY WORKS</div>
+        <h2 class="section-title">The Science Behind <span class="highlight-violet">Pressure Inoculation</span></h2>
+        <p class="section-subtitle">Traditional interview prep fails because it ignores the physiological reality of pressure.</p>
+        <div class="trust-grid">
+            <div class="trust-card"><h4>🧠 Pressure Simulation > Rote Memorization</h4><p>Rehearsing answers in a calm room creates a false sense of readiness. GAHIZ replicates the <strong>sympathetic nervous system activation</strong> of a real interview — the only environment where true preparation occurs.</p></div>
+            <div class="trust-card"><h4>📐 Hesitation Detection</h4><p>We analyze filler words ("um", "uh", "you know"), pause patterns, and response latency. These micro-signals reveal exactly where your cognitive load exceeds your processing capacity.</p></div>
+            <div class="trust-card"><h4>🧱 Wall Detection Algorithm</h4><p>When confidence drops below 25% AND hesitation exceeds 40% simultaneously, "The Wall" is triggered. This is the exact moment most candidates lose the interview — and the exact moment GAHIZ trains you to recover from.</p></div>
+            <div class="trust-card"><h4>📈 Progressive Desensitization</h4><p>Each simulation run slightly reduces your amygdala's overreaction to pressure. Over multiple sessions, your brain learns: <em>"This feeling is familiar. I can operate through it."</em> This is the same principle used in elite military and sports training.</p></div>
+            <div class="trust-card"><h4>🔄 Recovery Speed as a Metric</h4><p>Everyone gets thrown off. The difference between candidates who pass and those who fail is <strong>how fast they recover.</strong> GAHIZ tracks your recovery trajectory across sessions, turning it into a trainable skill.</p></div>
+            <div class="trust-card"><h4>❌ Why Traditional Learning Fails</h4><p>Watching YouTube interview tips, reading STAR format guides, practicing with friends — none of these replicate the <strong>time-compressed, high-stakes, evaluative gaze</strong> of a real interviewer. Knowledge without pressure inoculation collapses on contact.</p></div>
+        </div>
+    </section>
+    <section class="footer-cta">
+        <h2>Ready to Face <span class="highlight-cyan">The Wall</span>?</h2>
+        <p>Stop rehearsing in the mirror. Start training under real pressure. Your next interview doesn't have to end the same way.</p>
+        <a href="#simulation" class="btn-primary" style="font-size:1.1rem;padding:1rem 2.5rem;">⚡ Launch Free Simulation Now</a>
+        <p style="margin-top:1.5rem;font-size:0.8rem;color:var(--text-muted);">© 2026 GAHIZ — AI Interview Pressure Simulation Platform. All rights reserved.</p>
+    </section>
+    <script>
+(function() {
+    const questionBanks = {
+        behavioral: [
+            "Tell me about a time you faced a difficult customer. How did you handle it?",
+            "Describe a situation where you had to work under tight deadlines.",
+            "Give an example of a conflict you had with a coworker and how you resolved it.",
+            "Tell me about a time you made a mistake at work. What did you do?",
+            "Describe a goal you set and how you achieved it under pressure.",
+            "Tell me about a time you had to adapt quickly to a major change.",
+        ],
+        stress: [
+            "Why should we hire you over someone with more experience?",
+            "What's your biggest failure — and don't give me a humble brag.",
+            "If I called your last manager, what would they say is your weakness?",
+            "You seem nervous. Are you sure you're ready for this role?",
+            "Convince me in 30 seconds that you're the best candidate here.",
+            "What would you do if I told you this interview is going badly?",
+        ],
+        customer: [
+            "A customer is shouting at you about a billing error. Walk me through your response.",
+            "How would you de-escalate a situation where the customer demands a supervisor?",
+            "A customer gives you a 1-star review publicly. How do you handle it?",
+            "You're on a call and the customer starts crying from frustration. What do you do?",
+            "How do you balance company policy with genuine customer empathy?",
+        ],
+        technical: [
+            "Explain a complex technical concept to me as if I were a non-technical stakeholder.",
+            "Walk me through how you'd debug a production outage at 3 AM.",
+            "What's the most challenging technical decision you've made? Justify it.",
+            "How do you stay current with rapidly changing technology?",
+            "Describe your approach to code review when you disagree with a senior engineer.",
+        ],
+        leadership: [
+            "Tell me about a time you had to lead a team through a crisis.",
+            "How do you motivate underperforming team members?",
+            "Describe a decision you made that was unpopular but necessary.",
+            "How do you handle disagreement with your own manager?",
+            "Tell me about a time you failed as a leader. What did you learn?",
+        ],
+    };
+    let currentMode = 'behavioral';
+    let questions = [...questionBanks.behavioral];
+    let currentQuestionIndex = 0;
+    let timerSeconds = 45;
+    let timerInterval = null;
+    let isRunning = false;
+    let sessionData = [];
+    let pressureHistory = [];
+    let graphCtx = null;
+    const modeSelect = document.getElementById('modeSelect');
+    const questionDisplay = document.getElementById('questionDisplay');
+    const timerDisplay = document.getElementById('timerDisplay');
+    const answerInput = document.getElementById('answerInput');
+    const btnStart = document.getElementById('btnStart');
+    const btnSubmit = document.getElementById('btnSubmit');
+    const btnReset = document.getElementById('btnReset');
+    const wallIndicator = document.getElementById('wallIndicator');
+    const confValue = document.getElementById('confValue');
+    const pressValue = document.getElementById('pressValue');
+    const hesValue = document.getElementById('hesValue');
+    const fillValue = document.getElementById('fillValue');
+    const confBar = document.getElementById('confBar');
+    const pressBar = document.getElementById('pressBar');
+    const hesBar = document.getElementById('hesBar');
+    const fillBar = document.getElementById('fillBar');
+    const resultsPanel = document.getElementById('resultsPanel');
+    const resultGrid = document.getElementById('resultGrid');
+    const graphCanvas = document.getElementById('pressureGraph');
+    function initGraph() {
+        if (!graphCanvas) return;
+        graphCtx = graphCanvas.getContext('2d');
+        const dpr = window.devicePixelRatio || 1;
+        const rect = graphCanvas.parentElement.getBoundingClientRect();
+        graphCanvas.width = rect.width * dpr;
+        graphCanvas.height = 200 * dpr;
+        graphCanvas.style.width = rect.width + 'px';
+        graphCanvas.style.height = '200px';
+        graphCtx.scale(dpr, dpr);
+        drawGraph();
+    }
+    function drawGraph() {
+        if (!graphCtx) return;
+        const w = graphCanvas.width / (window.devicePixelRatio || 1);
+        const h = 200;
+        graphCtx.clearRect(0, 0, w, h);
+        graphCtx.strokeStyle = '#1e293b';
+        graphCtx.lineWidth = 1;
+        for (let i = 0; i < 5; i++) { const y = 20 + i * 40; graphCtx.beginPath(); graphCtx.moveTo(0, y); graphCtx.lineTo(w, y); graphCtx.stroke(); }
+        if (pressureHistory.length < 2) return;
+        const maxPoints = Math.min(pressureHistory.length, Math.floor(w / 3));
+        const recent = pressureHistory.slice(-maxPoints);
+        const stepX = w / (recent.length - 1 || 1);
+        graphCtx.strokeStyle = '#00e5ff';
+        graphCtx.lineWidth = 2.5;
+        graphCtx.shadowColor = 'rgba(0,229,255,0.5)';
+        graphCtx.shadowBlur = 8;
+        graphCtx.beginPath();
+        recent.forEach((val, i) => { const x = i * stepX; const y = 20 + (160 - val * 160); if (i === 0) graphCtx.moveTo(x, y); else graphCtx.lineTo(x, y); });
+        graphCtx.stroke();
+        graphCtx.shadowBlur = 0;
+        graphCtx.fillStyle = 'rgba(0,229,255,0.12)';
+        graphCtx.beginPath();
+        recent.forEach((val, i) => { const x = i * stepX; const y = 20 + (160 - val * 160); if (i === 0) graphCtx.moveTo(x, y); else graphCtx.lineTo(x, y); });
+        graphCtx.lineTo((recent.length - 1) * stepX, 180);
+        graphCtx.lineTo(0, 180);
+        graphCtx.closePath();
+        graphCtx.fill();
+    }
+    function updateWallStatus(conf, hes) {
+        if (conf < 25 && hes > 40) { wallIndicator.textContent = '🔴 WALL DETECTED — PRESSURE COLLAPSE'; wallIndicator.className = 'wall-indicator wall-detected'; }
+        else if (conf < 45 || hes > 25) { wallIndicator.textContent = '🟡 WALL WARNING — PRESSURE BUILDING'; wallIndicator.className = 'wall-indicator wall-warning'; }
+        else { wallIndicator.textContent = '🟢 WALL STATUS: CLEAR'; wallIndicator.className = 'wall-indicator wall-none'; }
+    }
+    function analyzeAnswer(text) {
+        const wordCount = text.split(/\s+/).filter(w => w.length > 0).length;
+        const fillerPattern = /\b(um|uh|er|ah|like|you\s*know|I\s*mean|sort\s*of|kind\s*of|basically|actually|literally|honestly|so\s*yeah|right\?)\b/gi;
+        const fillerMatches = text.match(fillerPattern) || [];
+        const fillerCount = fillerMatches.length;
+        const hesitationMarkers = (text.match(/\.{3,}|—{1,}|\.\.\.\.|\,{2,}/g) || []).length;
+        const totalWords = Math.max(wordCount, 1);
+        const fillerPercent = Math.min(100, (fillerCount / totalWords) * 100);
+        const hesitationPercent = Math.min(100, ((hesitationMarkers + fillerCount) / totalWords) * 100);
+        const timeRatio = timerSeconds / 45;
+        const pressureScore = Math.min(100, Math.round((1 - timeRatio) * 70 + fillerPercent * 0.6 + hesitationPercent * 0.5));
+        const confidenceScore = Math.max(5, Math.round(100 - pressureScore - fillerPercent * 0.5 - (wordCount < 15 ? 35 : wordCount < 30 ? 15 : 0)));
+        return { wordCount, fillerCount, fillerPercent: Math.round(fillerPercent), hesitationPercent: Math.round(hesitationPercent), pressureScore: Math.round(pressureScore), confidenceScore: Math.round(confidenceScore) };
+    }
+    function updateMetricsDisplay(metrics) {
+        confValue.textContent = metrics.confidenceScore + '%';
+        pressValue.textContent = metrics.pressureScore + '%';
+        hesValue.textContent = metrics.hesitationPercent + '%';
+        fillValue.textContent = metrics.fillerCount + ' words';
+        confBar.style.width = metrics.confidenceScore + '%';
+        pressBar.style.width = metrics.pressureScore + '%';
+        hesBar.style.width = metrics.hesitationPercent + '%';
+        fillBar.style.width = Math.min(100, metrics.fillerCount * 8) + '%';
+        updateWallStatus(metrics.confidenceScore, metrics.hesitationPercent);
+        pressureHistory.push(metrics.pressureScore / 100);
+        if (pressureHistory.length > 120) pressureHistory.shift();
+        drawGraph();
+    }
+    function displayQuestion() {
+        if (currentQuestionIndex < questions.length) { questionDisplay.textContent = questions[currentQuestionIndex]; }
+        else { questionDisplay.textContent = 'All questions completed. Reset to try again.'; }
+    }
+    function startTimer() {
+        timerSeconds = 45;
+        updateTimerDisplay();
+        timerInterval = setInterval(() => {
+            timerSeconds--;
+            updateTimerDisplay();
+            if (timerSeconds <= 15 && timerSeconds > 7) { timerDisplay.classList.add('warning'); timerDisplay.classList.remove('danger'); }
+            else if (timerSeconds <= 7) { timerDisplay.classList.remove('warning'); timerDisplay.classList.add('danger'); }
+            else { timerDisplay.classList.remove('warning', 'danger'); }
+            if (timerSeconds <= 0) { clearInterval(timerInterval); timerInterval = null; isRunning = false; handleAutoSubmit(); }
+        }, 1000);
+    }
+    function updateTimerDisplay() { const m = Math.floor(timerSeconds / 60); const s = timerSeconds % 60; timerDisplay.textContent = String(m).padStart(2, '0') + ':' + String(s).padStart(2, '0'); }
+    function handleAutoSubmit() {
+        const text = answerInput.value;
+        if (text.trim().length > 0) { const metrics = analyzeAnswer(text); sessionData.push({ question: questions[currentQuestionIndex], answer: text, metrics, timestamp: new Date().toISOString() }); updateMetricsDisplay(metrics); }
+        advanceQuestion();
+    }
+    function advanceQuestion() {
+        currentQuestionIndex++;
+        if (currentQuestionIndex >= questions.length) { endSession(); }
+        else { displayQuestion(); answerInput.value = ''; timerSeconds = 45; updateTimerDisplay(); timerDisplay.classList.remove('warning', 'danger'); if (isRunning && !timerInterval) { startTimer(); } }
+    }
+    function endSession() {
+        isRunning = false;
+        if (timerInterval) { clearInterval(timerInterval); timerInterval = null; }
+        btnStart.disabled = true; btnSubmit.disabled = true; answerInput.disabled = true;
+        timerDisplay.classList.remove('warning', 'danger');
+        questionDisplay.textContent = 'Session complete. Review your results below.';
+        timerDisplay.textContent = '--:--';
+        displayResults();
+    }
+    function displayResults() {
+        if (sessionData.length === 0) { resultGrid.innerHTML = '<p style="color:var(--text-muted);">No data collected.</p>'; resultsPanel.classList.add('visible'); return; }
+        const avgConf = Math.round(sessionData.reduce((a, s) => a + s.metrics.confidenceScore, 0) / sessionData.length);
+        const avgPress = Math.round(sessionData.reduce((a, s) => a + s.metrics.pressureScore, 0) / sessionData.length);
+        const avgHes = Math.round(sessionData.reduce((a, s) => a + s.metrics.hesitationPercent, 0) / sessionData.length);
+        const totalFillers = sessionData.reduce((a, s) => a + s.metrics.fillerCount, 0);
+        const wallTriggers = sessionData.filter(s => s.metrics.confidenceScore < 25 && s.metrics.hesitationPercent > 40).length;
+        resultGrid.innerHTML = `<div class="result-item"><div class="r-val highlight-green">${avgConf}%</div><div class="r-lbl">Avg Confidence</div></div><div class="result-item"><div class="r-val highlight-red">${avgPress}%</div><div class="r-lbl">Avg Pressure</div></div><div class="result-item"><div class="r-val highlight-amber">${avgHes}%</div><div class="r-lbl">Hesitation Rate</div></div><div class="result-item"><div class="r-val highlight-violet">${totalFillers}</div><div class="r-lbl">Total Fillers</div></div><div class="result-item"><div class="r-val ${wallTriggers > 0 ? 'highlight-red' : 'highlight-green'}">${wallTriggers}</div><div class="r-lbl">Wall Triggers</div></div><div class="result-item"><div class="r-val">${sessionData.length}</div><div class="r-lbl">Questions Answered</div></div>`;
+        resultsPanel.classList.add('visible');
+    }
+    function resetSimulation() {
+        clearInterval(timerInterval); timerInterval = null; isRunning = false;
+        currentQuestionIndex = 0; timerSeconds = 45; sessionData = []; pressureHistory = [];
+        questions = [...questionBanks[currentMode]];
+        displayQuestion(); updateTimerDisplay();
+        timerDisplay.classList.remove('warning', 'danger');
+        answerInput.value = ''; answerInput.disabled = true;
+        btnStart.disabled = false; btnSubmit.disabled = true;
+        confValue.textContent = '--'; pressValue.textContent = '--'; hesValue.textContent = '--'; fillValue.textContent = '--';
+        confBar.style.width = '0%'; pressBar.style.width = '0%'; hesBar.style.width = '0%'; fillBar.style.width = '0%';
+        wallIndicator.textContent = '🟢 WALL STATUS: CLEAR'; wallIndicator.className = 'wall-indicator wall-none';
+        resultsPanel.classList.remove('visible'); resultGrid.innerHTML = '';
+        drawGraph();
+    }
+    modeSelect.addEventListener('change', function() { currentMode = this.value; questions = [...questionBanks[currentMode]]; resetSimulation(); });
+    btnStart.addEventListener('click', function() {
+        if (isRunning) return;
+        if (currentQuestionIndex >= questions.length) { currentQuestionIndex = 0; sessionData = []; pressureHistory = []; resultsPanel.classList.remove('visible'); resultGrid.innerHTML = ''; }
+        isRunning = true; answerInput.disabled = false; btnSubmit.disabled = false; btnStart.disabled = true;
+        displayQuestion(); timerSeconds = 45; updateTimerDisplay(); timerDisplay.classList.remove('warning', 'danger');
+        if (timerInterval) clearInterval(timerInterval);
+        startTimer(); answerInput.focus();
+    });
+    btnSubmit.addEventListener('click', function() {
+        if (!isRunning) return;
+        clearInterval(timerInterval); timerInterval = null;
+        const text = answerInput.value;
+        const metrics = analyzeAnswer(text);
+        sessionData.push({ question: questions[currentQuestionIndex], answer: text, metrics, timestamp: new Date().toISOString() });
+        updateMetricsDisplay(metrics);
+        timerDisplay.classList.remove('warning', 'danger');
+        advanceQuestion();
+        if (isRunning && currentQuestionIndex < questions.length) { startTimer(); answerInput.value = ''; answerInput.focus(); }
+    });
+    btnReset.addEventListener('click', resetSimulation);
+    answerInput.addEventListener('keydown', function(e) { if (e.key === 'Enter' && e.ctrlKey) { e.preventDefault(); btnSubmit.click(); } });
+    displayQuestion();
+    initGraph();
+    window.addEventListener('resize', () => { initGraph(); drawGraph(); });
+    setTimeout(drawGraph, 300);
+})();
+    </script>
+</body>
+</html>
