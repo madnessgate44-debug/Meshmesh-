@@ -16,8 +16,8 @@ header{background:#111827;padding:12px 16px;display:flex;align-items:center;just
 main{flex:1;max-width:560px;width:100%;margin:0 auto;padding:16px;display:flex;flex-direction:column;gap:14px;padding-bottom:80px}
 .card{background:#111827;border:1px solid #1f2937;border-radius:14px;padding:16px}
 .card-title{font-size:11px;font-weight:600;color:#64748b;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:12px}
-.tabs{display:flex;gap:4px;background:#111827;border:1px solid #1f2937;border-radius:12px;padding:4px}
-.tab{flex:1;padding:10px 6px;border-radius:9px;border:none;background:transparent;font-size:11px;font-weight:500;color:#94a3b8;cursor:pointer;text-align:center;position:relative}
+.tabs{display:flex;gap:4px;background:#111827;border:1px solid #1f2937;border-radius:12px;padding:4px;overflow-x:auto}
+.tab{flex:1;padding:10px 6px;border-radius:9px;border:none;background:transparent;font-size:11px;font-weight:500;color:#94a3b8;cursor:pointer;text-align:center;position:relative;white-space:nowrap}
 .tab.active{background:linear-gradient(135deg,#7c3aed,#a855f7);color:#fff}
 .tab-badge{position:absolute;top:-4px;right:2px;background:#ef4444;color:#fff;border-radius:10px;font-size:9px;padding:1px 5px;display:none}
 .tab-badge.show{display:block}
@@ -42,14 +42,12 @@ textarea{resize:vertical;min-height:80px;line-height:1.5}
 .st.loading{background:#1e1b4b;color:#a78bfa;border:1px solid #4338ca}
 .spinner{display:inline-block;width:12px;height:12px;border:2px solid rgba(167,139,250,0.3);border-top-color:#a78bfa;border-radius:50%;animation:spin 0.7s linear infinite;vertical-align:middle;margin-right:6px}
 @keyframes spin{to{transform:rotate(360deg)}}
-/* Chat stream */
 .chat-stream{max-height:400px;overflow-y:auto;display:flex;flex-direction:column;gap:10px;margin-bottom:12px}
 .chat-bubble{padding:10px 14px;border-radius:12px;font-size:13px;line-height:1.6;max-width:92%;word-break:break-word}
 .chat-user{background:linear-gradient(135deg,#7c3aed,#a855f7);color:#fff;align-self:flex-end;border-bottom-right-radius:4px}
 .chat-system{background:#1e293b;border:1px solid #334155;align-self:flex-start;border-bottom-left-radius:4px}
 .chat-thinking{background:#1e1b4b;border:1px solid #4338ca;color:#a78bfa;align-self:flex-start;font-style:italic}
 .voice-trigger{font-size:12px;color:#a78bfa;cursor:pointer;text-decoration:underline;margin-top:6px;display:inline-block}
-/* Flying button */
 .flying-btn{position:fixed;bottom:24px;right:24px;width:56px;height:56px;border-radius:50%;background:linear-gradient(135deg,#7c3aed,#a855f7);color:#fff;border:none;font-size:24px;box-shadow:0 4px 15px rgba(124,58,237,0.4);z-index:200;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:transform 0.1s}
 .flying-btn:active{transform:scale(0.9)}
 .radial-menu{position:fixed;bottom:90px;right:24px;display:none;flex-direction:column;gap:8px;z-index:199}
@@ -57,6 +55,8 @@ textarea{resize:vertical;min-height:80px;line-height:1.5}
 .radial-item{width:48px;height:48px;border-radius:50%;background:#1e293b;border:1px solid #334155;color:#e6e6e6;font-size:18px;display:flex;align-items:center;justify-content:center;cursor:pointer}
 .guardrail-msg{background:#7f1d1d;color:#fca5a5;padding:8px 12px;border-radius:8px;font-size:12px;margin-top:8px;display:none}
 .guardrail-msg.show{display:block}
+.file-item{display:flex;align-items:center;justify-content:space-between;padding:8px;background:#0f172a;border-radius:8px;margin-bottom:6px}
+.file-item span{word-break:break-all;flex:1}
 </style>
 </head>
 <body>
@@ -65,7 +65,7 @@ textarea{resize:vertical;min-height:80px;line-height:1.5}
   <div class="badge"><span class="dot" id="connDot"></span><span id="connLabel">Offline</span></div>
 </header>
 <main>
-  <!-- Setup card -->
+  <!-- Setup (shown only if not connected) -->
   <div class="card" id="setupCard">
     <div class="card-title">Connect Cloud Brain</div>
     <div class="field"><label>GitHub Token</label><input type="password" id="ghToken" placeholder="ghp_..."></div>
@@ -73,27 +73,26 @@ textarea{resize:vertical;min-height:80px;line-height:1.5}
     <button class="btn-primary" onclick="connectRepo()">Connect</button>
     <div class="st" id="setupSt"></div>
   </div>
-  <!-- Main UI after connected -->
+  <!-- Main UI -->
   <div id="mainUI" style="display:none;flex-direction:column;gap:14px">
-    <div class="tabs">
-      <button class="tab active" onclick="switchTab('showrunner',this)" id="tab-showrunner">🎬 Showrunner<span class="tab-badge" id="badge-showrunner">●</span></button>
-      <button class="tab" onclick="switchTab('factory',this)" id="tab-factory">🎨 Content<span class="tab-badge" id="badge-factory">●</span></button>
-      <button class="tab" onclick="switchTab('design',this)" id="tab-design">🖌 Design<span class="tab-badge" id="badge-design">●</span></button>
+    <div class="tabs" id="mainTabs">
+      <button class="tab active" onclick="switchTab('showrunner',this)">🎬 Showrunner<span class="tab-badge" id="badge-showrunner">●</span></button>
+      <button class="tab" onclick="switchTab('factory',this)">🎨 Content<span class="tab-badge" id="badge-factory">●</span></button>
+      <button class="tab" onclick="switchTab('design',this)">🖌 Design<span class="tab-badge" id="badge-design">●</span></button>
+      <button class="tab" onclick="switchTab('files',this)">📁 Files<span class="tab-badge" id="badge-files">●</span></button>
+      <button class="tab" onclick="switchTab('settings',this)">⚙️ Settings</button>
     </div>
-    <!-- SHOWRUNNER PANEL -->
+    <!-- SHOWRUNNER -->
     <div class="panel active" id="panel-showrunner">
       <div class="card" style="flex:1;display:flex;flex-direction:column">
         <div class="card-title">Showrunner · Business Director</div>
         <div class="chat-stream" id="srChat"></div>
-        <div class="field">
-          <textarea id="srInput" placeholder="What's the next move?" rows="2"></textarea>
-          <span class="voice-trigger" onclick="triggerVoiceNote()">🎤 Or drop a voice note...</span>
-        </div>
+        <div class="field"><textarea id="srInput" placeholder="What's the next move?" rows="2"></textarea></div>
         <button class="btn-primary" onclick="sendShowrunner()">Send</button>
         <div class="guardrail-msg" id="guardrailMsg"></div>
       </div>
     </div>
-    <!-- CONTENT FACTORY PANEL -->
+    <!-- CONTENT FACTORY -->
     <div class="panel" id="panel-factory">
       <div class="card">
         <div class="card-title">Content Factory · Creative Director</div>
@@ -110,13 +109,35 @@ textarea{resize:vertical;min-height:80px;line-height:1.5}
         <div id="cfOutput" style="margin-top:12px"></div>
       </div>
     </div>
-    <!-- DESIGN PANEL -->
+    <!-- DESIGN -->
     <div class="panel" id="panel-design">
       <div class="card">
         <div class="card-title">Design · Component Staging</div>
         <div id="designFileList">Loading...</div>
         <button class="btn-ghost" style="width:100%;margin-top:8px" onclick="commitDesign()">Commit to Cloud Brain</button>
         <div class="st" id="designSt"></div>
+      </div>
+    </div>
+    <!-- FILES -->
+    <div class="panel" id="panel-files">
+      <div class="card">
+        <div class="card-title">Files · Upload & Scan</div>
+        <input type="file" id="fileInput" multiple style="display:none" onchange="handleFileUpload(event)">
+        <button class="btn-primary" onclick="document.getElementById('fileInput').click()">📤 Upload Files</button>
+        <div class="hint">Select images, docs, or any file from your phone</div>
+        <div id="fileList" style="margin-top:12px"></div>
+        <div class="st" id="filesSt"></div>
+      </div>
+    </div>
+    <!-- SETTINGS -->
+    <div class="panel" id="panel-settings">
+      <div class="card">
+        <div class="card-title">Settings</div>
+        <div class="field"><label>DeepSeek API Key</label><input type="password" id="deepseekKey" placeholder="sk-..."></div>
+        <div class="field"><label>GitHub Token</label><input type="password" id="settingsGhToken" placeholder="ghp_..."></div>
+        <div class="field"><label>Repository</label><input type="text" id="settingsGhRepo" placeholder="username/repo"></div>
+        <button class="btn-primary" onclick="saveSettings()">Save Settings</button>
+        <div class="st" id="settingsSt"></div>
       </div>
     </div>
   </div>
@@ -126,253 +147,273 @@ textarea{resize:vertical;min-height:80px;line-height:1.5}
 <button class="flying-btn" id="flyingBtn" onclick="toggleRadial()" oncontextmenu="event.preventDefault()">⚡</button>
 <div class="radial-menu" id="radialMenu">
   <button class="radial-item" onclick="captureClipboard()" title="Capture Clipboard">📋</button>
-  <button class="radial-item" onclick="triggerVoiceNote()" title="Voice Note">🎤</button>
+  <button class="radial-item" onclick="document.getElementById('fileInput').click()" title="Upload File">📤</button>
   <button class="radial-item" onclick="quickGoal()" title="Set Goal">🎯</button>
 </div>
 
 <script>
-// ── STATE ──
-let GH_TOKEN=localStorage.getItem('mmos_ghtoken')||'';
-let GH_REPO=localStorage.getItem('mmos_ghrepo')||'madnessgate44-debug/Meshmesh-';
-let geminiKey=localStorage.getItem('meshmesh_gemini_direct')||'';
-let activeRole='hook';
-let showrunnerChat=[];
-let profile={business:'', goal:'', strategy:'', constraints:'5h/week, phone-only'};
-let notificationBadges={showrunner:false, factory:false, design:false};
+// ── GLOBAL STATE ──
+let GH_TOKEN = localStorage.getItem('mmos_ghtoken') || '';
+let GH_REPO = localStorage.getItem('mmos_ghrepo') || 'madnessgate44-debug/Meshmesh-';
+let DS_KEY = localStorage.getItem('mmos_dsKey') || '';
+let activeRole = 'hook';
+let showrunnerChat = [];
+let profile = { business: '', goal: '', strategy: '', constraints: '5h/week, phone-only' };
 
 // ── UTILS ──
-function delay(ms){return new Promise(r=>setTimeout(r,ms));}
-function toBase64(str){try{return btoa(unescape(encodeURIComponent(str)));}catch(e){return btoa(String.fromCharCode(...new TextEncoder().encode(str)));}}
-function setSt(id,type,msg){const el=document.getElementById(id);if(!el)return;el.className='st show '+type;el.innerHTML=type==='loading'?'<span class="spinner"></span>'+msg:msg;}
-function hideSt(id){const el=document.getElementById(id);if(el)el.className='st';}
-async function ghFetch(path,opts={}){
-  const res=await fetch('https://api.github.com'+path,{...opts,headers:{...opts.headers,Authorization:'Bearer '+GH_TOKEN,Accept:'application/vnd.github+json','X-GitHub-Api-Version':'2022-11-28'}});
-  const body=await res.json();
-  if(!res.ok) throw new Error('GitHub '+res.status+': '+(body.message||''));
+function delay(ms) { return new Promise(r => setTimeout(r, ms)); }
+function toBase64(str) { return btoa(unescape(encodeURIComponent(str))); }
+function setSt(id, type, msg) { const el = document.getElementById(id); if (!el) return; el.className = 'st show ' + type; el.innerHTML = type === 'loading' ? '<span class="spinner"></span>' + msg : msg; }
+function hideSt(id) { const el = document.getElementById(id); if (el) el.className = 'st'; }
+function esc(s) { return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
+
+async function ghFetch(path, opts = {}) {
+  const res = await fetch('https://api.github.com' + path, {
+    ...opts,
+    headers: {
+      ...opts.headers,
+      Authorization: 'Bearer ' + GH_TOKEN,
+      Accept: 'application/vnd.github+json',
+      'X-GitHub-Api-Version': '2022-11-28'
+    }
+  });
+  const body = await res.json();
+  if (!res.ok) throw new Error('GitHub ' + res.status + ': ' + (body.message || ''));
   return body;
 }
-async function saveStateFile(filename, content){
-  const path='mishstate/'+filename;
-  let sha=null;
-  try{const ex=await ghFetch('/repos/'+GH_REPO+'/contents/'+path);sha=ex.sha;}catch(e){}
-  await ghFetch('/repos/'+GH_REPO+'/contents/'+path,{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify({message:'update '+filename,content:toBase64(JSON.stringify(content,null,2)),sha:sha||undefined})});
+
+// ── DEEPSEEK API ──
+async function callDeepSeek(messages, systemPrompt = '') {
+  if (!DS_KEY) throw new Error('No DeepSeek API key. Set it in Settings.');
+  const msgs = [];
+  if (systemPrompt) msgs.push({ role: 'system', content: systemPrompt });
+  msgs.push(...messages);
+  const res = await fetch('https://api.deepseek.com/v1/chat/completions', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + DS_KEY },
+    body: JSON.stringify({ model: 'deepseek-chat', messages: msgs, temperature: 0.7, max_tokens: 800 })
+  });
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.error?.message || 'DeepSeek error');
+  return data.choices[0].message.content.trim();
 }
-async function loadStateFile(filename){
-  try{
-    const file=await ghFetch('/repos/'+GH_REPO+'/contents/mishstate/'+filename);
+
+// ── CLOUD STATE ──
+async function saveStateFile(filename, content) {
+  const path = 'mishstate/' + filename;
+  let sha = null;
+  try { const ex = await ghFetch('/repos/' + GH_REPO + '/contents/' + path); sha = ex.sha; } catch (e) { }
+  await ghFetch('/repos/' + GH_REPO + '/contents/' + path, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ message: 'update ' + filename, content: toBase64(JSON.stringify(content)), sha: sha || undefined })
+  });
+}
+async function loadStateFile(filename) {
+  try {
+    const file = await ghFetch('/repos/' + GH_REPO + '/contents/mishstate/' + filename);
     return JSON.parse(decodeURIComponent(escape(atob(file.content))));
-  }catch(e){return null;}
+  } catch (e) { return null; }
 }
 
 // ── CONNECT ──
-async function connectRepo(){
-  const t=document.getElementById('ghToken').value.trim();
-  const r=document.getElementById('ghRepo').value.trim();
-  if(!t||!r){setSt('setupSt','error','Fill both fields.');return;}
-  localStorage.setItem('mmos_ghtoken',t); localStorage.setItem('mmos_ghrepo',r);
-  GH_TOKEN=t; GH_REPO=r;
-  try{
-    await ghFetch('/repos/'+r);
-    document.getElementById('connDot').className='dot on';
-    document.getElementById('connLabel').textContent=r;
-    document.getElementById('setupCard').style.display='none';
-    document.getElementById('mainUI').style.display='flex';
-    await loadCloudState();
-    addShowrunnerMessage('system','Mish Mish OS online. Mode 0 active — I’m listening. What’s our current goal?');
-  }catch(e){setSt('setupSt','error','Connection failed: '+e.message);}
+async function connectRepo() {
+  const t = document.getElementById('ghToken').value.trim();
+  const r = document.getElementById('ghRepo').value.trim();
+  if (!t || !r) { setSt('setupSt', 'error', 'Fill both fields.'); return; }
+  GH_TOKEN = t; GH_REPO = r;
+  localStorage.setItem('mmos_ghtoken', t);
+  localStorage.setItem('mmos_ghrepo', r);
+  try {
+    await ghFetch('/repos/' + r);
+    document.getElementById('connDot').className = 'dot on';
+    document.getElementById('connLabel').textContent = r;
+    document.getElementById('setupCard').style.display = 'none';
+    document.getElementById('mainUI').style.display = 'flex';
+    loadCloudState();
+    loadFileList();
+    addShowrunnerMessage('system', 'Mish Mish OS online. DeepSeek AI connected. What’s our current goal?');
+  } catch (e) { setSt('setupSt', 'error', 'Connection failed: ' + e.message); }
 }
-window.onload=function(){
-  if(GH_TOKEN) connectRepo().catch(()=>{});
-  // long-press on flying button
-  const btn=document.getElementById('flyingBtn');
+window.onload = function () {
+  // pre-fill settings fields
+  if (DS_KEY) document.getElementById('deepseekKey').value = DS_KEY;
+  if (GH_TOKEN) document.getElementById('settingsGhToken').value = GH_TOKEN;
+  if (GH_REPO) document.getElementById('settingsGhRepo').value = GH_REPO;
+  if (GH_TOKEN && GH_REPO) connectRepo().catch(() => {});
+  // flying button long-press
+  const btn = document.getElementById('flyingBtn');
   let pressTimer;
-  btn.addEventListener('touchstart',(e)=>{pressTimer=setTimeout(()=>{captureClipboard();},800);});
-  btn.addEventListener('touchend',()=>clearTimeout(pressTimer));
-  btn.addEventListener('touchmove',()=>clearTimeout(pressTimer));
-  btn.addEventListener('mousedown',(e)=>{pressTimer=setTimeout(()=>{captureClipboard();},800);});
-  btn.addEventListener('mouseup',()=>clearTimeout(pressTimer));
-  btn.addEventListener('mouseleave',()=>clearTimeout(pressTimer));
+  btn.addEventListener('touchstart', () => { pressTimer = setTimeout(() => { captureClipboard(); }, 800); });
+  btn.addEventListener('touchend', () => clearTimeout(pressTimer));
+  btn.addEventListener('touchmove', () => clearTimeout(pressTimer));
 };
 
-// ── CLOUD STATE ──
-async function loadCloudState(){
-  const bp=await loadStateFile('business_profile.json');
-  if(bp) profile=bp;
-  const chat=await loadStateFile('showrunner_chat.json');
-  if(chat) showrunnerChat=chat;
-  renderShowrunnerChat();
+// ── SETTINGS ──
+function saveSettings() {
+  const dsKey = document.getElementById('deepseekKey').value.trim();
+  const ghToken = document.getElementById('settingsGhToken').value.trim();
+  const ghRepo = document.getElementById('settingsGhRepo').value.trim();
+  if (dsKey) { DS_KEY = dsKey; localStorage.setItem('mmos_dsKey', dsKey); }
+  if (ghToken) { GH_TOKEN = ghToken; localStorage.setItem('mmos_ghtoken', ghToken); }
+  if (ghRepo) { GH_REPO = ghRepo; localStorage.setItem('mmos_ghrepo', ghRepo); }
+  setSt('settingsSt', 'success', 'Settings saved. AI and Cloud Brain connected.');
+  if (!document.getElementById('connDot').classList.contains('on') && GH_TOKEN && GH_REPO) {
+    connectRepo();
+  }
 }
 
 // ── SHOWRUNNER ──
-function addShowrunnerMessage(role, text){
-  showrunnerChat.push({role, text, time:new Date().toISOString()});
+function addShowrunnerMessage(role, text) {
+  showrunnerChat.push({ role, text, time: new Date().toISOString() });
   renderShowrunnerChat();
   saveStateFile('showrunner_chat.json', showrunnerChat);
 }
-function renderShowrunnerChat(){
-  const container=document.getElementById('srChat');
-  container.innerHTML=showrunnerChat.map(m=>{
-    const cls=m.role==='user'?'chat-user':'chat-system';
+function renderShowrunnerChat() {
+  const container = document.getElementById('srChat');
+  if (!container) return;
+  container.innerHTML = showrunnerChat.map(m => {
+    const cls = m.role === 'user' ? 'chat-user' : 'chat-system';
     return `<div class="chat-bubble ${cls}">${esc(m.text)}</div>`;
   }).join('');
-  container.scrollTop=container.scrollHeight;
+  container.scrollTop = container.scrollHeight;
 }
-async function sendShowrunner(){
-  const input=document.getElementById('srInput').value.trim();
-  if(!input) return;
-  if(!geminiKey){addShowrunnerMessage('system','Missing Gemini key. Go to AI Builder in Meshmesh and save it.');return;}
-  // Single-question guard: if last system message was a question, only allow answer
-  const lastMsg=showrunnerChat[showrunnerChat.length-1];
-  if(lastMsg&&lastMsg.role==='system'&&lastMsg.text.includes('?')){
-    // That's fine, answer allowed
-  }
-  addShowrunnerMessage('user',input);
-  document.getElementById('srInput').value='';
-  // Call Gemini as Showrunner
-  const thinking=document.createElement('div');
-  thinking.className='chat-bubble chat-thinking'; thinking.textContent='Analyzing...';
+async function sendShowrunner() {
+  const input = document.getElementById('srInput').value.trim();
+  if (!input) return;
+  if (!DS_KEY) { addShowrunnerMessage('system', 'Missing DeepSeek API key. Set it in Settings.'); return; }
+  addShowrunnerMessage('user', input);
+  document.getElementById('srInput').value = '';
+  const thinking = document.createElement('div');
+  thinking.className = 'chat-bubble chat-thinking'; thinking.textContent = 'Analyzing...';
   document.getElementById('srChat').appendChild(thinking);
-  try{
-    const prompt=buildShowrunnerPrompt(input);
-    const reply=await callGemini(prompt);
+  try {
+    const reply = await callDeepSeek([{ role: 'user', content: input }], buildShowrunnerSystem());
     thinking.remove();
-    addShowrunnerMessage('system',reply);
-    // Set notification badge on Content Factory if task dispatched
-    if(reply.includes('Content Factory')||reply.includes('dispatch')){
-      setBadge('factory',true);
-    }
-  }catch(e){
+    addShowrunnerMessage('system', reply);
+  } catch (e) {
     thinking.remove();
-    addShowrunnerMessage('system','Error: '+e.message);
+    addShowrunnerMessage('system', 'Error: ' + e.message);
   }
 }
-function buildShowrunnerPrompt(userInput){
-  return `You are the Showrunner of Mish Mish OS, an autonomous business engine.
-Current profile: ${JSON.stringify(profile)}.
-Your job: Guide the user through Modes 0-3.
-- Mode 0 (ingest): You are continuously receiving context.
-- Mode 1 (validate): If critical variables missing, ask max 2 target questions.
-- Mode 2 (optimize): Offer strategic paths with trade-offs.
-- Mode 3 (execute): Dispatch a single task to Content Factory.
-
-Rules:
-- Only ONE question per turn (Single-Question Guardrail).
-- If the user tries to skip verification, say: "I hear you — but the system produces better results when we move through each step. Let's keep going."
-- Always prompt: "Want to elaborate via voice note? (🎤)"
-- Keep responses concise, mobile-friendly.
-
-User says: "${userInput}"
-Reply:`;
-}
-async function callGemini(prompt){
-  const res=await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key='+geminiKey,{
-    method:'POST',headers:{'Content-Type':'application/json'},
-    body:JSON.stringify({contents:[{parts:[{text:prompt}]}],generationConfig:{temperature:0.7,maxOutputTokens:600}})
-  });
-  const data=await res.json();
-  if(!res.ok) throw new Error(data.error?data.error.message:'Gemini error');
-  return data.candidates[0].content.parts[0].text.trim();
-}
-function triggerVoiceNote(){
-  addShowrunnerMessage('system','🎤 Voice note: Please use your phone’s recorder, then paste the transcript here. I’ll process it immediately.');
-  document.getElementById('srInput').focus();
-}
-function setBadge(tab, show){
-  notificationBadges[tab]=show;
-  const badge=document.getElementById('badge-'+tab);
-  if(show) badge.classList.add('show');
-  else badge.classList.remove('show');
+function buildShowrunnerSystem() {
+  return `You are the Showrunner of Mish Mish OS. Business profile: ${JSON.stringify(profile)}.
+Work through Modes: ingest -> validate -> optimize -> execute. Ask only one question per turn. If the user tries to skip steps, say "I hear you — but the system produces better results when we move through each step. Let's keep going." Always suggest voice note elaboration.`;
 }
 
 // ── CONTENT FACTORY ──
-function setRole(role){
-  activeRole=role;
-  const labels={hook:'Hook Architect', narrative:'Narrative Engineer', offer:'Offer Framer', visual:'Visual Brief Writer', script:'Video Script Director'};
-  document.getElementById('roleLabel').textContent=labels[role];
-  document.querySelectorAll('#panel-factory .btn-sm').forEach(b=>b.classList.remove('active-filter'));
+function setRole(role) {
+  activeRole = role;
+  const labels = { hook: 'Hook Architect', narrative: 'Narrative Engineer', offer: 'Offer Framer', visual: 'Visual Brief Writer', script: 'Video Script Director' };
+  document.getElementById('roleLabel').textContent = labels[role];
+  document.querySelectorAll('#panel-factory .btn-sm').forEach(b => b.classList.remove('active-filter'));
   event.target.classList.add('active-filter');
 }
-async function generateContent(){
-  const input=document.getElementById('cfInput').value.trim();
-  if(!input){setSt('cfSt','error','Describe what you need.');return;}
-  if(!geminiKey){setSt('cfSt','error','Missing Gemini key.');return;}
-  setSt('cfSt','loading','Generating...');
-  const rolePrompts={
-    hook:'Craft an open loop hook for the platform mentioned. Use curiosity gap. Return ONLY the hook.',
-    narrative:'Write a StoryBrand narrative: Character → Problem → Guide → Plan → CTA. Use the input as context.',
-    offer:'Formulate a high-value offer using $100M Offers principles. Include value stack, pricing, guarantee.',
-    visual:'Generate a detailed cinematic prompt for Canva/AI: mood, lighting, color temperature, exclusions.',
-    script:'Write a three-beat video script: Hook (0-3s) → Story (4-45s) → CTA (46-60s).'
+async function generateContent() {
+  const input = document.getElementById('cfInput').value.trim();
+  if (!input) { setSt('cfSt', 'error', 'Describe what you need.'); return; }
+  if (!DS_KEY) { setSt('cfSt', 'error', 'Missing API key.'); return; }
+  setSt('cfSt', 'loading', 'Generating...');
+  const rolePrompts = {
+    hook: 'Craft an open loop hook. Return ONLY the hook.',
+    narrative: 'Write a StoryBrand narrative (Character→Problem→Guide→Plan→CTA).',
+    offer: 'Create a high-value offer using $100M Offers principles.',
+    visual: 'Generate a cinematic prompt for AI image/video tools.',
+    script: 'Write a video script: Hook 0-3s, Story 4-45s, CTA 46-60s.'
   };
-  try{
-    const res=await callGemini(`You are the ${document.getElementById('roleLabel').textContent} of Mish Mish OS Content Factory.
-${rolePrompts[activeRole]}
-Context: ${input}
-Output:`);
-    document.getElementById('cfOutput').innerHTML=`<div class="card"><div class="card-title">${document.getElementById('roleLabel').textContent} Output</div><p style="white-space:pre-wrap;font-size:13px">${esc(res)}</p></div>`;
+  try {
+    const res = await callDeepSeek([{ role: 'user', content: input }], `You are the ${document.getElementById('roleLabel').textContent}. ${rolePrompts[activeRole]}`);
+    document.getElementById('cfOutput').innerHTML = `<div class="card"><div class="card-title">Output</div><p style="white-space:pre-wrap;font-size:13px">${esc(res)}</p></div>`;
     hideSt('cfSt');
-    // auto-save to design staging
-    saveStateFile('staging_'+activeRole+'.json',{role:activeRole,content:res,time:new Date().toISOString()});
-    setBadge('design',true);
-  }catch(e){setSt('cfSt','error',e.message);}
+    saveStateFile('staging_' + activeRole + '.json', { role: activeRole, content: res, time: new Date().toISOString() });
+  } catch (e) { setSt('cfSt', 'error', e.message); }
 }
 
 // ── DESIGN ──
-async function loadDesignFiles(){
-  try{
-    const items=await ghFetch('/repos/'+GH_REPO+'/contents/mishstate?per_page=50');
-    const staging=items.filter(i=>i.name.startsWith('staging_'));
-    document.getElementById('designFileList').innerHTML=staging.length?
-      staging.map(i=>`<div class="list-item" style="justify-content:space-between"><span>${i.name}</span><button class="btn-sm" onclick="pushToMain('${i.name}')">Commit</button></div>`).join(''):
-      '<div class="empty-state">No staged components yet.</div>';
-  }catch(e){}
+async function loadDesignFiles() {
+  try {
+    const items = await ghFetch('/repos/' + GH_REPO + '/contents/mishstate?per_page=50');
+    const staging = items.filter(i => i.name.startsWith('staging_'));
+    document.getElementById('designFileList').innerHTML = staging.length ?
+      staging.map(i => `<div class="file-item"><span>${i.name}</span><button class="btn-sm" onclick="commitDesignFile('${i.name}')">Commit</button></div>`).join('') :
+      '<div class="empty-state">No staged components.</div>';
+  } catch (e) { document.getElementById('designFileList').textContent = 'Could not load files.'; }
 }
-async function pushToMain(filename){
-  setSt('designSt','loading','Committing...');
-  try{
-    const data=await loadStateFile(filename);
-    const targetPath='content/'+filename.replace('staging_','');
-    let sha=null;
-    try{const ex=await ghFetch('/repos/'+GH_REPO+'/contents/'+targetPath);sha=ex.sha;}catch(e){}
-    await ghFetch('/repos/'+GH_REPO+'/contents/'+targetPath,{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify({message:'Commit '+targetPath,content:toBase64(JSON.stringify(data,null,2)),sha:sha||undefined})});
-    setSt('designSt','success','Committed to Cloud Brain.');
-    setBadge('design',false);
-  }catch(e){setSt('designSt','error',e.message);}
+async function commitDesignFile(filename) {
+  setSt('designSt', 'loading', 'Committing...');
+  try {
+    const data = await loadStateFile(filename);
+    const targetPath = 'content/' + filename.replace('staging_', '');
+    let sha = null;
+    try { const ex = await ghFetch('/repos/' + GH_REPO + '/contents/' + targetPath); sha = ex.sha; } catch (e) { }
+    await ghFetch('/repos/' + GH_REPO + '/contents/' + targetPath, {
+      method: 'PUT', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ message: 'Commit ' + targetPath, content: toBase64(JSON.stringify(data)), sha: sha || undefined })
+    });
+    setSt('designSt', 'success', 'Committed to Cloud Brain.');
+  } catch (e) { setSt('designSt', 'error', e.message); }
 }
-function commitDesign(){loadDesignFiles();}
+function commitDesign() { loadDesignFiles(); }
+
+// ── FILES UPLOAD ──
+async function handleFileUpload(event) {
+  const files = event.target.files;
+  if (!files.length) return;
+  setSt('filesSt', 'loading', 'Uploading...');
+  for (const file of files) {
+    try {
+      const reader = new FileReader();
+      await new Promise((resolve, reject) => {
+        reader.onload = async () => {
+          const base64Content = reader.result.split(',')[1];
+          const path = 'uploads/' + file.name;
+          let sha = null;
+          try { const ex = await ghFetch('/repos/' + GH_REPO + '/contents/' + path); sha = ex.sha; } catch (e) { }
+          await ghFetch('/repos/' + GH_REPO + '/contents/' + path, {
+            method: 'PUT', headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ message: 'Upload ' + file.name, content: base64Content, sha: sha || undefined })
+          });
+          resolve();
+        };
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+      });
+    } catch (e) { setSt('filesSt', 'error', 'Upload failed: ' + e.message); }
+  }
+  setSt('filesSt', 'success', 'Files uploaded to Cloud Brain.');
+  loadFileList();
+}
+async function loadFileList() {
+  try {
+    const items = await ghFetch('/repos/' + GH_REPO + '/contents/uploads?per_page=50');
+    document.getElementById('fileList').innerHTML = items.map(i => `<div class="file-item"><span>${i.name}</span></div>`).join('');
+  } catch (e) { document.getElementById('fileList').innerHTML = '<div class="empty-state">No files uploaded yet.</div>'; }
+}
 
 // ── FLYING BUTTON ──
-function toggleRadial(){
-  document.getElementById('radialMenu').classList.toggle('show');
-}
-async function captureClipboard(){
-  try{
-    const text=await navigator.clipboard.readText();
-    addShowrunnerMessage('system','📋 Clipboard captured: '+text.substring(0,200)+(text.length>200?'...':''));
+function toggleRadial() { document.getElementById('radialMenu').classList.toggle('show'); }
+async function captureClipboard() {
+  try {
+    const text = await navigator.clipboard.readText();
+    addShowrunnerMessage('system', '📋 Clipboard: ' + text.substring(0, 200));
     document.getElementById('radialMenu').classList.remove('show');
-  }catch(e){addShowrunnerMessage('system','Clipboard access denied. Paste manually.');}
+  } catch (e) { addShowrunnerMessage('system', 'Clipboard access denied. Paste manually.'); }
 }
-function quickGoal(){
-  const goal=prompt('Set CURRENT_GOAL:');
-  if(goal){
-    profile.goal=goal;
-    saveStateFile('business_profile.json',profile);
-    addShowrunnerMessage('system','🎯 Goal set: '+goal);
-  }
+function quickGoal() {
+  const goal = prompt('Set CURRENT_GOAL:');
+  if (goal) { profile.goal = goal; saveStateFile('business_profile.json', profile); addShowrunnerMessage('system', '🎯 Goal: ' + goal); }
 }
 
 // ── TABS ──
-function switchTab(name,btn){
-  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
-  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+function switchTab(name, btn) {
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
   btn.classList.add('active');
-  document.getElementById('panel-'+name).classList.add('active');
-  setBadge(name,false);
-  if(name==='design') loadDesignFiles();
+  const panel = document.getElementById('panel-' + name);
+  if (panel) panel.classList.add('active');
+  if (name === 'design') loadDesignFiles();
+  if (name === 'files') loadFileList();
 }
-
-// ── MISC ──
-function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
 </script>
 </body>
 </html>
