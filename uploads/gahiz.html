@@ -1,0 +1,1212 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GAHIZ — Interview Pressure Lab</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,300&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #F7F5F2;
+    --card: #FFFFFF;
+    --ink: #1D2939;
+    --ink-soft: #475467;
+    --ink-muted: #98A2B3;
+    --cyan: #5EC4D3;
+    --red: #FF5A4F;
+    --green: #25D366;
+    --amber: #F5A623;
+    --shadow-card: 0 4px 32px rgba(29,41,57,0.10), 0 1px 4px rgba(29,41,57,0.06);
+    --shadow-deep: 0 16px 64px rgba(29,41,57,0.14), 0 4px 16px rgba(29,41,57,0.08);
+    --r: 28px;
+    --r-sm: 16px;
+  }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--bg);
+    color: var(--ink);
+    overflow-x: hidden;
+    background-image:
+      linear-gradient(rgba(29,41,57,0.025) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(29,41,57,0.025) 1px, transparent 1px);
+    background-size: 40px 40px;
+    background-position: -1px -1px;
+  }
+
+  /* ──────────────── NAV ──────────────── */
+  nav {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 18px 32px;
+    background: rgba(247,245,242,0.88);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid rgba(29,41,57,0.07);
+  }
+  .nav-logo {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 26px;
+    letter-spacing: 0.08em;
+    color: var(--ink);
+  }
+  .nav-logo span { color: var(--cyan); }
+  .nav-links { display: flex; gap: 28px; align-items: center; }
+  .nav-links a {
+    font-size: 13px; font-weight: 500; color: var(--ink-soft);
+    text-decoration: none; letter-spacing: 0.02em;
+    transition: color 0.2s;
+  }
+  .nav-links a:hover { color: var(--ink); }
+  .nav-cta {
+    background: var(--ink); color: #fff;
+    padding: 10px 22px; border-radius: 100px;
+    font-size: 13px; font-weight: 600;
+    text-decoration: none; letter-spacing: 0.02em;
+    transition: background 0.2s, transform 0.15s;
+  }
+  .nav-cta:hover { background: var(--cyan); transform: translateY(-1px); }
+
+  /* ──────────────── HERO ──────────────── */
+  .hero {
+    min-height: 100vh;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 48px;
+    padding: 140px 64px 80px;
+    align-items: center;
+    max-width: 1440px;
+    margin: 0 auto;
+  }
+
+  .hero-left { position: relative; }
+
+  .hero-eyebrow {
+    display: inline-flex; align-items: center; gap: 8px;
+    background: rgba(255,90,79,0.08);
+    border: 1px solid rgba(255,90,79,0.18);
+    padding: 6px 14px; border-radius: 100px;
+    font-size: 11px; font-weight: 600;
+    color: var(--red); letter-spacing: 0.08em;
+    text-transform: uppercase;
+    margin-bottom: 28px;
+  }
+  .hero-eyebrow::before {
+    content: ''; width: 6px; height: 6px;
+    background: var(--red); border-radius: 50%;
+    animation: blink 1.4s ease-in-out infinite;
+  }
+  @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.2} }
+
+  .hero-h1 {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(52px, 6vw, 88px);
+    line-height: 0.95;
+    color: var(--ink);
+    letter-spacing: 0.01em;
+    margin-bottom: 12px;
+  }
+  .hero-h1 .line2 {
+    display: block;
+    color: var(--red);
+    font-size: clamp(44px, 5vw, 72px);
+  }
+
+  .hero-sub {
+    font-size: 16px; font-weight: 300; color: var(--ink-soft);
+    line-height: 1.6; max-width: 380px;
+    margin: 24px 0 40px;
+  }
+
+  .hero-actions { display: flex; gap: 16px; flex-wrap: wrap; }
+
+  .btn-primary {
+    display: inline-flex; align-items: center; gap: 10px;
+    background: var(--ink); color: #fff;
+    padding: 16px 32px; border-radius: 100px;
+    font-size: 15px; font-weight: 600;
+    text-decoration: none; letter-spacing: 0.02em;
+    transition: all 0.2s; cursor: pointer; border: none;
+  }
+  .btn-primary:hover { background: var(--cyan); color: var(--ink); transform: translateY(-2px); box-shadow: 0 8px 32px rgba(94,196,211,0.35); }
+
+  .btn-whatsapp {
+    display: inline-flex; align-items: center; gap: 10px;
+    background: var(--green); color: #fff;
+    padding: 16px 28px; border-radius: 100px;
+    font-size: 15px; font-weight: 600;
+    text-decoration: none; letter-spacing: 0.02em;
+    transition: all 0.2s;
+  }
+  .btn-whatsapp:hover { transform: translateY(-2px); box-shadow: 0 8px 32px rgba(37,211,102,0.35); }
+
+  /* ──────────────── LIVE REPORT CARD ──────────────── */
+  .report-card {
+    background: var(--card);
+    border-radius: var(--r);
+    box-shadow: var(--shadow-deep);
+    padding: 32px;
+    position: relative;
+    overflow: hidden;
+    animation: float 4s ease-in-out infinite;
+  }
+  @keyframes float { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-8px)} }
+
+  .report-card::before {
+    content: '';
+    position: absolute; top: 0; left: 0; right: 0; height: 3px;
+    background: linear-gradient(90deg, var(--red) 0%, var(--amber) 50%, var(--cyan) 100%);
+  }
+
+  .rc-header {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 24px;
+  }
+  .rc-title { font-size: 11px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: var(--ink-muted); }
+  .rc-live {
+    display: flex; align-items: center; gap: 6px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px; color: var(--red); font-weight: 600;
+  }
+  .rc-live::before {
+    content: ''; width: 6px; height: 6px;
+    background: var(--red); border-radius: 50%;
+    animation: blink 1s ease-in-out infinite;
+  }
+
+  .score-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 24px; }
+
+  .score-item { }
+  .score-label { font-size: 11px; color: var(--ink-muted); letter-spacing: 0.04em; text-transform: uppercase; margin-bottom: 8px; }
+  .score-bar-wrap {
+    height: 6px; background: rgba(29,41,57,0.08); border-radius: 100px; overflow: hidden;
+  }
+  .score-bar {
+    height: 100%; border-radius: 100px;
+    transition: width 1s ease;
+  }
+  .score-val { font-family: 'JetBrains Mono', monospace; font-size: 22px; font-weight: 600; color: var(--ink); margin-top: 6px; }
+
+  .collapse-alert {
+    background: rgba(255,90,79,0.06);
+    border: 1px solid rgba(255,90,79,0.2);
+    border-radius: 12px;
+    padding: 14px 16px;
+    display: flex; align-items: center; gap: 12px;
+  }
+  .alert-icon {
+    width: 32px; height: 32px; min-width: 32px;
+    background: rgba(255,90,79,0.12); border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 16px;
+  }
+  .alert-text { }
+  .alert-title { font-size: 12px; font-weight: 600; color: var(--red); margin-bottom: 2px; }
+  .alert-sub { font-size: 11px; color: var(--ink-soft); }
+
+  .rc-timer {
+    display: flex; justify-content: space-between; align-items: center;
+    margin-top: 16px; padding-top: 16px;
+    border-top: 1px solid rgba(29,41,57,0.08);
+  }
+  .timer-label { font-size: 11px; color: var(--ink-muted); text-transform: uppercase; letter-spacing: 0.06em; }
+  .timer-val {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 18px; font-weight: 600; color: var(--red);
+    animation: pulse-timer 1s ease-in-out infinite;
+  }
+  @keyframes pulse-timer { 0%,100%{opacity:1} 50%{opacity:0.5} }
+
+  /* ──────────────── SECTION WRAPPER ──────────────── */
+  .section {
+    max-width: 1280px;
+    margin: 0 auto;
+    padding: 80px 48px;
+  }
+
+  .section-label {
+    font-size: 11px; font-weight: 600; letter-spacing: 0.12em;
+    text-transform: uppercase; color: var(--ink-muted);
+    margin-bottom: 12px;
+  }
+  .section-h2 {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(36px, 4vw, 60px);
+    line-height: 1;
+    color: var(--ink);
+    letter-spacing: 0.02em;
+    margin-bottom: 8px;
+  }
+  .section-sub {
+    font-size: 16px; font-weight: 300; color: var(--ink-soft);
+    max-width: 480px; line-height: 1.6;
+    margin-bottom: 48px;
+  }
+
+  /* ──────────────── COLLAPSE GRAPH ──────────────── */
+  .collapse-section {
+    background: var(--ink);
+    padding: 0;
+    border-radius: 0;
+    margin: 0;
+  }
+  .collapse-inner {
+    max-width: 1280px; margin: 0 auto;
+    padding: 80px 48px;
+    display: grid; grid-template-columns: 1fr 1.4fr;
+    gap: 64px; align-items: center;
+  }
+  .collapse-section .section-label { color: rgba(255,255,255,0.4); }
+  .collapse-section .section-h2 { color: #fff; }
+  .collapse-section .section-sub { color: rgba(255,255,255,0.55); }
+
+  .graph-card {
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: var(--r);
+    padding: 28px;
+    position: relative;
+  }
+  .graph-header {
+    display: flex; justify-content: space-between; align-items: center;
+    margin-bottom: 24px;
+  }
+  .graph-title { font-size: 12px; font-weight: 600; color: rgba(255,255,255,0.5); text-transform: uppercase; letter-spacing: 0.08em; }
+  .graph-badge {
+    background: rgba(255,90,79,0.2); border: 1px solid rgba(255,90,79,0.3);
+    padding: 4px 12px; border-radius: 100px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px; color: var(--red); font-weight: 600;
+  }
+
+  .collapse-markers {
+    display: grid; grid-template-columns: 1fr 1fr 1fr;
+    gap: 16px; margin-top: 20px;
+  }
+  .c-marker {
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 12px; padding: 14px;
+  }
+  .c-marker.warn { border-color: rgba(255,90,79,0.25); background: rgba(255,90,79,0.07); }
+  .c-marker-time { font-family: 'JetBrains Mono', monospace; font-size: 16px; font-weight: 600; color: #fff; }
+  .c-marker.warn .c-marker-time { color: var(--red); }
+  .c-marker-label { font-size: 10px; color: rgba(255,255,255,0.4); text-transform: uppercase; letter-spacing: 0.06em; margin-top: 4px; }
+
+  /* ──────────────── SIMULATION LIBRARY ──────────────── */
+  .sim-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 24px;
+    margin-top: 48px;
+  }
+
+  .sim-card {
+    background: var(--card);
+    border-radius: var(--r);
+    overflow: hidden;
+    box-shadow: var(--shadow-card);
+    cursor: pointer;
+    transition: transform 0.25s, box-shadow 0.25s;
+    position: relative;
+  }
+  .sim-card:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-deep);
+  }
+
+  .sim-thumb {
+    height: 180px;
+    position: relative;
+    overflow: hidden;
+  }
+  .sim-thumb-bg {
+    width: 100%; height: 100%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 64px;
+    position: relative;
+  }
+  .sim-thumb-overlay {
+    position: absolute; inset: 0;
+    background: linear-gradient(to bottom, transparent 40%, rgba(29,41,57,0.7) 100%);
+  }
+  .sim-diff {
+    position: absolute; top: 12px; right: 12px;
+    padding: 4px 10px; border-radius: 100px;
+    font-size: 10px; font-weight: 700;
+    letter-spacing: 0.08em; text-transform: uppercase;
+  }
+  .diff-hard { background: rgba(255,90,79,0.9); color: #fff; }
+  .diff-medium { background: rgba(245,166,35,0.9); color: #fff; }
+  .diff-brutal { background: var(--ink); color: #fff; border: 1px solid rgba(255,90,79,0.5); }
+
+  .sim-body { padding: 20px 22px 24px; }
+  .sim-scenario { font-size: 10px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: var(--ink-muted); margin-bottom: 6px; }
+  .sim-title { font-size: 18px; font-weight: 600; color: var(--ink); line-height: 1.3; margin-bottom: 8px; }
+  .sim-context { font-size: 13px; color: var(--ink-soft); line-height: 1.5; margin-bottom: 16px; }
+
+  .sim-meta { display: flex; align-items: center; justify-content: space-between; }
+  .sim-duration {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px; color: var(--ink-muted);
+    display: flex; align-items: center; gap: 5px;
+  }
+  .sim-action {
+    background: var(--ink); color: #fff;
+    padding: 8px 16px; border-radius: 100px;
+    font-size: 12px; font-weight: 600;
+    border: none; cursor: pointer;
+    transition: background 0.2s;
+  }
+  .sim-card:hover .sim-action { background: var(--cyan); color: var(--ink); }
+
+  /* ──────────────── HIRING JOURNEY ──────────────── */
+  .journey-section {
+    background: linear-gradient(135deg, #F0EDE8 0%, #F7F5F2 100%);
+  }
+  .journey-flow {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 0;
+    margin-top: 48px;
+    position: relative;
+  }
+  .journey-flow::before {
+    content: '';
+    position: absolute;
+    top: 40px; left: 10%; right: 10%;
+    height: 2px;
+    background: linear-gradient(90deg, var(--cyan) 0%, var(--amber) 50%, var(--red) 100%);
+    z-index: 0;
+  }
+
+  .journey-step {
+    display: flex; flex-direction: column; align-items: center;
+    text-align: center; position: relative; z-index: 1;
+    padding: 0 16px;
+  }
+  .journey-icon {
+    width: 80px; height: 80px;
+    background: var(--card);
+    border-radius: 50%;
+    box-shadow: var(--shadow-card);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 30px; margin-bottom: 20px;
+    border: 3px solid var(--bg);
+    transition: transform 0.2s;
+  }
+  .journey-step:hover .journey-icon { transform: scale(1.1); }
+  .journey-step-num {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px; font-weight: 600; color: var(--ink-muted);
+    letter-spacing: 0.1em; text-transform: uppercase;
+    margin-bottom: 6px;
+  }
+  .journey-step-title { font-size: 16px; font-weight: 600; color: var(--ink); margin-bottom: 6px; }
+  .journey-step-sub { font-size: 12px; color: var(--ink-soft); line-height: 1.5; }
+
+  /* ──────────────── AI DASHBOARD ──────────────── */
+  .dashboard-section { padding: 80px 48px; }
+  .dashboard-grid {
+    display: grid;
+    grid-template-columns: 1.2fr 1fr 1fr;
+    grid-template-rows: auto auto;
+    gap: 24px;
+    margin-top: 48px;
+  }
+
+  .dash-card {
+    background: var(--card);
+    border-radius: var(--r);
+    box-shadow: var(--shadow-card);
+    padding: 28px;
+    position: relative;
+    overflow: hidden;
+  }
+  .dash-card.span2 { grid-column: span 2; }
+  .dash-card.span3 { grid-column: span 3; }
+
+  .dash-card-label {
+    font-size: 10px; font-weight: 600; letter-spacing: 0.1em;
+    text-transform: uppercase; color: var(--ink-muted); margin-bottom: 4px;
+  }
+  .dash-card-title { font-size: 20px; font-weight: 600; color: var(--ink); margin-bottom: 20px; }
+
+  /* Radar Container */
+  .radar-wrap { max-width: 280px; margin: 0 auto; }
+
+  /* Score breakdown */
+  .score-breakdown { display: flex; flex-direction: column; gap: 16px; }
+  .sb-row { display: flex; align-items: center; gap: 12px; }
+  .sb-label { font-size: 13px; font-weight: 500; color: var(--ink); min-width: 90px; }
+  .sb-track { flex: 1; height: 8px; background: rgba(29,41,57,0.07); border-radius: 100px; overflow: hidden; }
+  .sb-fill { height: 100%; border-radius: 100px; transition: width 1.2s cubic-bezier(0.4,0,0.2,1); }
+  .sb-score {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px; font-weight: 600; min-width: 36px; text-align: right;
+  }
+
+  /* Session stats */
+  .session-stats { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .stat-box {
+    background: rgba(29,41,57,0.03);
+    border-radius: 16px; padding: 16px;
+    border: 1px solid rgba(29,41,57,0.06);
+  }
+  .stat-val {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 28px; font-weight: 600; color: var(--ink);
+    line-height: 1;
+  }
+  .stat-label { font-size: 11px; color: var(--ink-muted); margin-top: 6px; text-transform: uppercase; letter-spacing: 0.06em; }
+
+  /* Transcript */
+  .transcript-feed {
+    display: flex; flex-direction: column; gap: 10px;
+    max-height: 180px; overflow-y: auto;
+  }
+  .transcript-feed::-webkit-scrollbar { width: 3px; }
+  .transcript-feed::-webkit-scrollbar-track { background: transparent; }
+  .transcript-feed::-webkit-scrollbar-thumb { background: rgba(29,41,57,0.15); border-radius: 3px; }
+
+  .t-line {
+    display: grid; grid-template-columns: auto 1fr auto;
+    gap: 10px; align-items: start;
+    padding: 10px 12px; border-radius: 10px;
+    background: rgba(29,41,57,0.025);
+  }
+  .t-line.warn { background: rgba(255,90,79,0.05); }
+  .t-speaker {
+    font-size: 10px; font-weight: 700; letter-spacing: 0.06em;
+    text-transform: uppercase; padding-top: 1px;
+  }
+  .t-speaker.hr { color: var(--cyan); }
+  .t-speaker.you { color: var(--ink-muted); }
+  .t-text { font-size: 12px; color: var(--ink-soft); line-height: 1.5; }
+  .t-tag {
+    font-size: 9px; font-weight: 700; padding: 3px 7px;
+    border-radius: 100px; text-transform: uppercase; letter-spacing: 0.06em;
+    white-space: nowrap;
+  }
+  .t-tag.red { background: rgba(255,90,79,0.12); color: var(--red); }
+  .t-tag.ok { background: rgba(94,196,211,0.12); color: var(--cyan); }
+  .t-tag.warn { background: rgba(245,166,35,0.12); color: var(--amber); }
+
+  /* ──────────────── PRICING ──────────────── */
+  .pricing-grid {
+    display: grid; grid-template-columns: repeat(3, 1fr);
+    gap: 24px; margin-top: 48px;
+  }
+  .price-card {
+    background: var(--card);
+    border-radius: var(--r);
+    box-shadow: var(--shadow-card);
+    padding: 36px 32px;
+    border: 2px solid transparent;
+    transition: all 0.25s;
+    position: relative;
+    overflow: hidden;
+  }
+  .price-card.featured {
+    background: var(--ink);
+    border-color: var(--cyan);
+    box-shadow: var(--shadow-deep), 0 0 0 1px var(--cyan);
+  }
+  .price-card:hover:not(.featured) { border-color: rgba(94,196,211,0.4); transform: translateY(-4px); }
+
+  .price-badge {
+    position: absolute; top: 20px; right: 20px;
+    background: var(--cyan); color: var(--ink);
+    font-size: 10px; font-weight: 700; padding: 4px 12px;
+    border-radius: 100px; letter-spacing: 0.06em; text-transform: uppercase;
+  }
+  .price-tier { font-size: 12px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: var(--ink-muted); margin-bottom: 8px; }
+  .price-card.featured .price-tier { color: rgba(255,255,255,0.5); }
+  .price-amount {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 56px; line-height: 1; color: var(--ink);
+    margin-bottom: 4px;
+  }
+  .price-card.featured .price-amount { color: #fff; }
+  .price-currency { font-size: 18px; vertical-align: super; font-family: 'DM Sans', sans-serif; font-weight: 600; }
+  .price-period { font-size: 13px; color: var(--ink-muted); margin-bottom: 28px; }
+  .price-card.featured .price-period { color: rgba(255,255,255,0.45); }
+
+  .price-features { list-style: none; display: flex; flex-direction: column; gap: 12px; margin-bottom: 32px; }
+  .price-features li {
+    font-size: 14px; color: var(--ink-soft);
+    display: flex; align-items: center; gap: 10px;
+  }
+  .price-card.featured .price-features li { color: rgba(255,255,255,0.7); }
+  .price-features li::before {
+    content: '✓'; width: 18px; height: 18px; min-width: 18px;
+    background: rgba(94,196,211,0.15); color: var(--cyan);
+    border-radius: 50%; display: flex; align-items: center; justify-content: center;
+    font-size: 10px; font-weight: 700;
+  }
+
+  .price-btn {
+    width: 100%; padding: 15px;
+    border-radius: 100px; border: none; cursor: pointer;
+    font-size: 14px; font-weight: 600; letter-spacing: 0.02em;
+    transition: all 0.2s;
+  }
+  .price-btn-light { background: var(--ink); color: #fff; }
+  .price-btn-light:hover { background: var(--cyan); color: var(--ink); }
+  .price-btn-dark { background: var(--cyan); color: var(--ink); }
+  .price-btn-dark:hover { background: #fff; transform: translateY(-1px); }
+
+  /* ──────────────── SOCIAL PROOF ──────────────── */
+  .proof-strip {
+    background: var(--ink);
+    padding: 24px 48px;
+    display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 24px;
+  }
+  .proof-stat { text-align: center; }
+  .proof-val {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 40px; line-height: 1; color: #fff;
+  }
+  .proof-val span { color: var(--cyan); }
+  .proof-label { font-size: 12px; color: rgba(255,255,255,0.4); text-transform: uppercase; letter-spacing: 0.1em; margin-top: 4px; }
+  .proof-divider { width: 1px; height: 40px; background: rgba(255,255,255,0.1); }
+
+  /* ──────────────── FOOTER ──────────────── */
+  footer {
+    background: var(--ink); color: rgba(255,255,255,0.5);
+    padding: 48px;
+    display: flex; align-items: center; justify-content: space-between;
+    flex-wrap: wrap; gap: 24px;
+    border-top: 1px solid rgba(255,255,255,0.06);
+  }
+  .footer-logo {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 32px; color: #fff; letter-spacing: 0.05em;
+  }
+  .footer-logo span { color: var(--cyan); }
+  .footer-copy { font-size: 12px; }
+
+  /* ──────────────── RESPONSIVE ──────────────── */
+  @media (max-width: 900px) {
+    nav { padding: 14px 20px; }
+    .nav-links { display: none; }
+    .hero { grid-template-columns: 1fr; padding: 120px 24px 60px; gap: 40px; }
+    .collapse-inner { grid-template-columns: 1fr; padding: 60px 24px; gap: 40px; }
+    .journey-flow { grid-template-columns: 1fr 1fr; gap: 32px; }
+    .journey-flow::before { display: none; }
+    .dashboard-grid { grid-template-columns: 1fr; }
+    .dash-card.span2, .dash-card.span3 { grid-column: span 1; }
+    .pricing-grid { grid-template-columns: 1fr; }
+    .section { padding: 60px 24px; }
+    .dashboard-section { padding: 60px 24px; }
+    .proof-strip { padding: 24px; justify-content: center; }
+    footer { padding: 32px 24px; flex-direction: column; align-items: flex-start; }
+    .sim-grid { grid-template-columns: 1fr; }
+  }
+
+  /* ──────────────── SCROLL ANIMATION ──────────────── */
+  .fade-up {
+    opacity: 0; transform: translateY(28px);
+    transition: opacity 0.6s ease, transform 0.6s ease;
+  }
+  .fade-up.visible { opacity: 1; transform: translateY(0); }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-logo">GAH<span>IZ</span></div>
+  <div class="nav-links">
+    <a href="#simulate">Simulations</a>
+    <a href="#journey">How It Works</a>
+    <a href="#dashboard">Reports</a>
+    <a href="#pricing">Pricing</a>
+    <a href="#" class="nav-cta">Start Free Trial →</a>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-left fade-up">
+    <div class="hero-eyebrow">Live Pressure Simulation</div>
+    <h1 class="hero-h1">
+      YOUR ENGLISH IS<br>NOT THE PROBLEM.
+      <span class="line2">YOUR COLLAPSE<br>UNDER PRESSURE IS.</span>
+    </h1>
+    <p class="hero-sub">GAHIZ simulates the real BPO hiring pipeline — angry customers, silent recruiters, fast HR — and measures exactly where you break down.</p>
+    <div class="hero-actions">
+      <a href="#simulate" class="btn-primary">Start Simulation →</a>
+      <a href="https://wa.me/20XXXXXXXXX" class="btn-whatsapp">📱 WhatsApp</a>
+    </div>
+  </div>
+
+  <!-- LIVE REPORT CARD -->
+  <div class="report-card fade-up" style="transition-delay: 0.15s">
+    <div class="rc-header">
+      <div class="rc-title">AI Evaluation — Live Session</div>
+      <div class="rc-live">RECORDING</div>
+    </div>
+
+    <div class="score-grid">
+      <div class="score-item">
+        <div class="score-label">Confidence</div>
+        <div class="score-bar-wrap">
+          <div class="score-bar" style="width:71%; background: linear-gradient(90deg, #5EC4D3, #25A9B8)"></div>
+        </div>
+        <div class="score-val" style="color: var(--cyan)">71</div>
+      </div>
+      <div class="score-item">
+        <div class="score-label">Fluency</div>
+        <div class="score-bar-wrap">
+          <div class="score-bar" style="width:84%; background: linear-gradient(90deg, #5EC4D3, #25A9B8)"></div>
+        </div>
+        <div class="score-val" style="color: var(--cyan)">84</div>
+      </div>
+      <div class="score-item">
+        <div class="score-label">Energy</div>
+        <div class="score-bar-wrap">
+          <div class="score-bar" style="width:38%; background: linear-gradient(90deg, #FF5A4F, #E84040)"></div>
+        </div>
+        <div class="score-val" style="color: var(--red)">38</div>
+      </div>
+      <div class="score-item">
+        <div class="score-label">Relevance</div>
+        <div class="score-bar-wrap">
+          <div class="score-bar" style="width:62%; background: linear-gradient(90deg, #F5A623, #E89410)"></div>
+        </div>
+        <div class="score-val" style="color: var(--amber)">62</div>
+      </div>
+    </div>
+
+    <div class="collapse-alert">
+      <div class="alert-icon">⚠️</div>
+      <div class="alert-text">
+        <div class="alert-title">COLLAPSE DETECTED</div>
+        <div class="alert-sub">Energy dropped 47 points in last 90 seconds</div>
+      </div>
+    </div>
+
+    <div class="rc-timer">
+      <div class="timer-label">Collapse Triggered At</div>
+      <div class="timer-val">2:15</div>
+    </div>
+  </div>
+</section>
+
+<!-- SOCIAL PROOF STRIP -->
+<div class="proof-strip">
+  <div class="proof-stat">
+    <div class="proof-val">12<span>K+</span></div>
+    <div class="proof-label">Sessions Completed</div>
+  </div>
+  <div class="proof-divider"></div>
+  <div class="proof-stat">
+    <div class="proof-val"><span>83%</span></div>
+    <div class="proof-label">Pass Rate Improvement</div>
+  </div>
+  <div class="proof-divider"></div>
+  <div class="proof-stat">
+    <div class="proof-val">4<span>.8</span></div>
+    <div class="proof-label">Avg Rating</div>
+  </div>
+  <div class="proof-divider"></div>
+  <div class="proof-stat">
+    <div class="proof-val"><span>TP</span> | <span>VF</span> | <span>CX</span></div>
+    <div class="proof-label">Teleperformance · Vodafone · Concentrix</div>
+  </div>
+</div>
+
+<!-- COLLAPSE GRAPH -->
+<section class="collapse-section" id="collapse">
+  <div class="collapse-inner">
+    <div class="fade-up">
+      <div class="section-label">Signature Analysis</div>
+      <h2 class="section-h2">THE COLLAPSE CURVE</h2>
+      <p class="section-sub">GAHIZ plots your energy, fluency, and confidence across the full session timeline — and marks the exact second everything fell apart.</p>
+      <p style="font-size: 14px; color: rgba(255,255,255,0.4); line-height: 1.7;">
+        Most candidates don't fail because of bad English.<br>
+        They fail because of what happens <em style="color: rgba(255,255,255,0.7)">after the second minute</em> — when pressure accumulates and the performance collapses.
+      </p>
+    </div>
+    <div class="graph-card fade-up" style="transition-delay: 0.1s">
+      <div class="graph-header">
+        <div class="graph-title">Energy + Confidence vs. Time</div>
+        <div class="graph-badge">⚠ COLLAPSE @ 2:15</div>
+      </div>
+      <canvas id="collapseChart" height="200"></canvas>
+      <div class="collapse-markers">
+        <div class="c-marker">
+          <div class="c-marker-time">0:00</div>
+          <div class="c-marker-label">Session Start</div>
+        </div>
+        <div class="c-marker">
+          <div class="c-marker-time">1:30</div>
+          <div class="c-marker-label">Peak Performance</div>
+        </div>
+        <div class="c-marker warn">
+          <div class="c-marker-time">2:15</div>
+          <div class="c-marker-label">Collapse Point</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- SIMULATION LIBRARY -->
+<section class="section" id="simulate">
+  <div class="fade-up">
+    <div class="section-label">Scenario Library</div>
+    <h2 class="section-h2">CHOOSE YOUR PRESSURE</h2>
+    <p class="section-sub">Each scenario is engineered from real BPO hiring situations. Pick your battle.</p>
+  </div>
+
+  <div class="sim-grid">
+
+    <div class="sim-card fade-up">
+      <div class="sim-thumb">
+        <div class="sim-thumb-bg" style="background: linear-gradient(135deg, #FF5A4F20, #FF5A4F08)">😠</div>
+        <div class="sim-thumb-overlay"></div>
+        <div class="sim-diff diff-brutal">BRUTAL</div>
+      </div>
+      <div class="sim-body">
+        <div class="sim-scenario">Customer Service</div>
+        <div class="sim-title">The Angry Customer</div>
+        <div class="sim-context">Customer escalates aggressively. 3 interruptions in 45 seconds. No pause allowed.</div>
+        <div class="sim-meta">
+          <div class="sim-duration">⏱ 4–6 min</div>
+          <button class="sim-action">Simulate</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="sim-card fade-up" style="transition-delay: 0.05s">
+      <div class="sim-thumb">
+        <div class="sim-thumb-bg" style="background: linear-gradient(135deg, #1D293920, #1D293908)">🤐</div>
+        <div class="sim-thumb-overlay"></div>
+        <div class="sim-diff diff-hard">HARD</div>
+      </div>
+      <div class="sim-body">
+        <div class="sim-scenario">Recruitment Screen</div>
+        <div class="sim-title">Silent Recruiter</div>
+        <div class="sim-context">Recruiter gives zero feedback. No "uh huh". No affirmation. Pure dead air after each answer.</div>
+        <div class="sim-meta">
+          <div class="sim-duration">⏱ 5–8 min</div>
+          <button class="sim-action">Simulate</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="sim-card fade-up" style="transition-delay: 0.1s">
+      <div class="sim-thumb">
+        <div class="sim-thumb-bg" style="background: linear-gradient(135deg, #F5A62320, #F5A62308)">⚡</div>
+        <div class="sim-thumb-overlay"></div>
+        <div class="sim-diff diff-medium">MEDIUM</div>
+      </div>
+      <div class="sim-body">
+        <div class="sim-scenario">HR Interview</div>
+        <div class="sim-title">Fast HR Round</div>
+        <div class="sim-context">10 questions. 40 seconds per answer. HR cuts you off if you run over. Pace is everything.</div>
+        <div class="sim-meta">
+          <div class="sim-duration">⏱ 6–7 min</div>
+          <button class="sim-action">Simulate</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="sim-card fade-up" style="transition-delay: 0.15s">
+      <div class="sim-thumb">
+        <div class="sim-thumb-bg" style="background: linear-gradient(135deg, #5EC4D320, #5EC4D308)">💻</div>
+        <div class="sim-thumb-overlay"></div>
+        <div class="sim-diff diff-hard">HARD</div>
+      </div>
+      <div class="sim-body">
+        <div class="sim-scenario">Technical Support</div>
+        <div class="sim-title">System Failure Call</div>
+        <div class="sim-context">Customer loses internet mid-call. You can't verify their account. They demand a supervisor.</div>
+        <div class="sim-meta">
+          <div class="sim-duration">⏱ 5–7 min</div>
+          <button class="sim-action">Simulate</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="sim-card fade-up" style="transition-delay: 0.2s">
+      <div class="sim-thumb">
+        <div class="sim-thumb-bg" style="background: linear-gradient(135deg, #25D36620, #25D36608)">📱</div>
+        <div class="sim-thumb-overlay"></div>
+        <div class="sim-diff diff-medium">MEDIUM</div>
+      </div>
+      <div class="sim-body">
+        <div class="sim-scenario">WhatsApp Screen</div>
+        <div class="sim-title">Voice Note Opener</div>
+        <div class="sim-context">Record a 90-second WhatsApp voice note intro. AI scores your accent, pace, and clarity instantly.</div>
+        <div class="sim-meta">
+          <div class="sim-duration">⏱ 90 sec</div>
+          <button class="sim-action">Simulate</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="sim-card fade-up" style="transition-delay: 0.25s">
+      <div class="sim-thumb">
+        <div class="sim-thumb-bg" style="background: linear-gradient(135deg, #9B59B620, #9B59B608)">🎥</div>
+        <div class="sim-thumb-overlay"></div>
+        <div class="sim-diff diff-brutal">BRUTAL</div>
+      </div>
+      <div class="sim-body">
+        <div class="sim-scenario">Recorded Video Interview</div>
+        <div class="sim-title">One-Way Video Round</div>
+        <div class="sim-context">Camera on. Timer visible. No second takes. HR reviews the recording. Simulate the real stress.</div>
+        <div class="sim-meta">
+          <div class="sim-duration">⏱ 8–12 min</div>
+          <button class="sim-action">Simulate</button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- HIRING JOURNEY -->
+<section class="journey-section section" id="journey">
+  <div class="fade-up">
+    <div class="section-label">The Real Pipeline</div>
+    <h2 class="section-h2">HOW BPO HIRING WORKS</h2>
+    <p class="section-sub">GAHIZ is built around the exact sequence companies like Teleperformance and Concentrix use. We simulate every stage.</p>
+  </div>
+
+  <div class="journey-flow">
+    <div class="journey-step fade-up">
+      <div class="journey-icon">🎙️</div>
+      <div class="journey-step-num">Stage 01</div>
+      <div class="journey-step-title">WhatsApp Voice</div>
+      <div class="journey-step-sub">Record a voice intro. First impression. AI scores in 30 seconds.</div>
+    </div>
+    <div class="journey-step fade-up" style="transition-delay:0.1s">
+      <div class="journey-icon">📞</div>
+      <div class="journey-step-num">Stage 02</div>
+      <div class="journey-step-title">Phone Screen</div>
+      <div class="journey-step-sub">Live AI interview. 5 questions. Interruptions enabled.</div>
+    </div>
+    <div class="journey-step fade-up" style="transition-delay:0.2s">
+      <div class="journey-icon">🤖</div>
+      <div class="journey-step-num">Stage 03</div>
+      <div class="journey-step-title">AI Interview</div>
+      <div class="journey-step-sub">Recorded video round. Pressure simulation. Collapse tracking.</div>
+    </div>
+    <div class="journey-step fade-up" style="transition-delay:0.3s">
+      <div class="journey-icon">📊</div>
+      <div class="journey-step-num">Stage 04</div>
+      <div class="journey-step-title">HR Report</div>
+      <div class="journey-step-sub">Full radar analysis. Breakdown by moment. Coaching notes.</div>
+    </div>
+  </div>
+</section>
+
+<!-- AI DASHBOARD -->
+<section class="section dashboard-section" id="dashboard">
+  <div class="fade-up">
+    <div class="section-label">Performance Intelligence</div>
+    <h2 class="section-h2">YOUR AI REPORT</h2>
+    <p class="section-sub">After every session, GAHIZ generates a recruiter-grade performance report. No generic feedback — exact data.</p>
+  </div>
+
+  <div class="dashboard-grid">
+
+    <!-- Radar Chart -->
+    <div class="dash-card fade-up">
+      <div class="dash-card-label">Overall Profile</div>
+      <div class="dash-card-title">Performance Radar</div>
+      <div class="radar-wrap">
+        <canvas id="radarChart" height="260"></canvas>
+      </div>
+    </div>
+
+    <!-- Score Breakdown -->
+    <div class="dash-card fade-up" style="transition-delay:0.08s">
+      <div class="dash-card-label">Metric Breakdown</div>
+      <div class="dash-card-title">Session Scores</div>
+      <div class="score-breakdown">
+        <div class="sb-row">
+          <div class="sb-label">Confidence</div>
+          <div class="sb-track"><div class="sb-fill" style="width:71%; background: var(--cyan)"></div></div>
+          <div class="sb-score" style="color:var(--cyan)">71</div>
+        </div>
+        <div class="sb-row">
+          <div class="sb-label">Fluency</div>
+          <div class="sb-track"><div class="sb-fill" style="width:84%; background: var(--cyan)"></div></div>
+          <div class="sb-score" style="color:var(--cyan)">84</div>
+        </div>
+        <div class="sb-row">
+          <div class="sb-label">Energy</div>
+          <div class="sb-track"><div class="sb-fill" style="width:38%; background: var(--red)"></div></div>
+          <div class="sb-score" style="color:var(--red)">38</div>
+        </div>
+        <div class="sb-row">
+          <div class="sb-label">Relevance</div>
+          <div class="sb-track"><div class="sb-fill" style="width:62%; background: var(--amber)"></div></div>
+          <div class="sb-score" style="color:var(--amber)">62</div>
+        </div>
+        <div class="sb-row">
+          <div class="sb-label">Recovery</div>
+          <div class="sb-track"><div class="sb-fill" style="width:45%; background: var(--amber)"></div></div>
+          <div class="sb-score" style="color:var(--amber)">45</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Session Stats -->
+    <div class="dash-card fade-up" style="transition-delay:0.16s">
+      <div class="dash-card-label">Session Metadata</div>
+      <div class="dash-card-title">Quick Stats</div>
+      <div class="session-stats">
+        <div class="stat-box">
+          <div class="stat-val">3</div>
+          <div class="stat-label">Sessions</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-val" style="color:var(--red)">2:15</div>
+          <div class="stat-label">Collapse At</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-val" style="color:var(--cyan)">+18</div>
+          <div class="stat-label">Fluency Gain</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-val" style="color:var(--amber)">4.2m</div>
+          <div class="stat-label">Avg Duration</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Transcript Analysis -->
+    <div class="dash-card span3 fade-up" style="transition-delay:0.24s">
+      <div class="dash-card-label">Live Annotation</div>
+      <div class="dash-card-title">Transcript Analysis</div>
+      <div class="transcript-feed">
+        <div class="t-line">
+          <div class="t-speaker hr">HR</div>
+          <div class="t-text">Tell me about yourself and why you want to work in customer service.</div>
+          <div class="t-tag ok">CLEAN</div>
+        </div>
+        <div class="t-line">
+          <div class="t-speaker you">YOU</div>
+          <div class="t-text">I am... I have been working... I mean, I've always been interested in, uh, helping people resolve their issues and providing good service to customers.</div>
+          <div class="t-tag warn">FILLER ×3</div>
+        </div>
+        <div class="t-line">
+          <div class="t-speaker hr">HR</div>
+          <div class="t-text">Tell me about a difficult customer you handled. What happened?</div>
+          <div class="t-tag ok">CLEAN</div>
+        </div>
+        <div class="t-line warn">
+          <div class="t-speaker you">YOU</div>
+          <div class="t-text">There was a customer who... he was very... [4 second pause] ...very upset about the bill and I tried to calm him down but he didn't... he wasn't calming down.</div>
+          <div class="t-tag red">COLLAPSE</div>
+        </div>
+        <div class="t-line">
+          <div class="t-speaker hr">HR</div>
+          <div class="t-text">How did you resolve it in the end?</div>
+          <div class="t-tag ok">CLEAN</div>
+        </div>
+        <div class="t-line">
+          <div class="t-speaker you">YOU</div>
+          <div class="t-text">I escalated to my supervisor who managed to resolve the issue by offering a partial refund.</div>
+          <div class="t-tag ok">GOOD</div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- PRICING -->
+<section class="section" id="pricing" style="background: linear-gradient(180deg, var(--bg) 0%, #EFECE8 100%);">
+  <div class="fade-up">
+    <div class="section-label">Pricing</div>
+    <h2 class="section-h2">INVEST IN YOUR PASS</h2>
+    <p class="section-sub">One interview offer pays for every plan. Pick your pressure level.</p>
+  </div>
+
+  <div class="pricing-grid">
+    <div class="price-card fade-up">
+      <div class="price-tier">Free Trial</div>
+      <div class="price-amount">0<span class="price-currency"></span></div>
+      <div class="price-period">Start today — no card</div>
+      <ul class="price-features">
+        <li>1 Voice Note Analysis</li>
+        <li>Basic fluency score</li>
+        <li>1 scenario simulation</li>
+        <li>30-second collapse graph</li>
+      </ul>
+      <button class="price-btn price-btn-light">Start Free →</button>
+    </div>
+
+    <div class="price-card featured fade-up" style="transition-delay:0.1s">
+      <div class="price-badge">MOST POPULAR</div>
+      <div class="price-tier">Practice Pack</div>
+      <div class="price-amount"><span class="price-currency">EGP</span>150</div>
+      <div class="price-period">One-time · Lifetime access</div>
+      <ul class="price-features">
+        <li>5 full simulations</li>
+        <li>All scenario types</li>
+        <li>Full AI report + radar</li>
+        <li>Transcript annotation</li>
+        <li>Collapse curve analysis</li>
+      </ul>
+      <button class="price-btn price-btn-dark">Get Practice Pack →</button>
+    </div>
+
+    <div class="price-card fade-up" style="transition-delay:0.2s">
+      <div class="price-tier">Coached Session</div>
+      <div class="price-amount"><span class="price-currency">EGP</span>350</div>
+      <div class="price-period">Includes live coach review</div>
+      <ul class="price-features">
+        <li>Everything in Practice Pack</li>
+        <li>Unlimited simulations</li>
+        <li>Human coach review</li>
+        <li>Company-specific prep</li>
+        <li>Guarantee: retest free</li>
+      </ul>
+      <button class="price-btn price-btn-light">Book Session →</button>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div>
+    <div class="footer-logo">GAH<span>IZ</span></div>
+    <div style="font-size:12px; color:rgba(255,255,255,0.3); margin-top:8px;">Interview Pressure Lab · Cairo, Egypt</div>
+  </div>
+  <div class="footer-copy">© 2025 GAHIZ. All rights reserved. جاهز.</div>
+</footer>
+
+<script>
+// ── COLLAPSE CHART ──
+const ctx = document.getElementById('collapseChart');
+if (ctx) {
+  const labels = ['0:00','0:30','1:00','1:30','2:00','2:15','2:30','3:00','3:30','4:00'];
+  new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels,
+      datasets: [
+        {
+          label: 'Energy',
+          data: [72, 78, 82, 88, 74, 42, 35, 38, 44, 48],
+          borderColor: '#FF5A4F',
+          backgroundColor: 'rgba(255,90,79,0.08)',
+          fill: true,
+          tension: 0.4,
+          pointRadius: (ctx) => ctx.dataIndex === 5 ? 8 : 3,
+          pointBackgroundColor: (ctx) => ctx.dataIndex === 5 ? '#FF5A4F' : 'rgba(255,90,79,0.5)',
+          borderWidth: 2.5,
+        },
+        {
+          label: 'Confidence',
+          data: [68, 72, 76, 80, 68, 38, 32, 40, 46, 52],
+          borderColor: '#5EC4D3',
+          backgroundColor: 'rgba(94,196,211,0.05)',
+          fill: false,
+          tension: 0.4,
+          pointRadius: 2,
+          borderWidth: 2,
+          borderDash: [4, 3],
+        }
+      ]
+    },
+    options: {
+      responsive: true,
+      plugins: {
+        legend: { labels: { color: 'rgba(255,255,255,0.5)', font: { family: 'JetBrains Mono', size: 11 }, boxWidth: 20 } },
+        tooltip: {
+          backgroundColor: 'rgba(29,41,57,0.95)',
+          titleColor: '#fff',
+          bodyColor: 'rgba(255,255,255,0.7)',
+          titleFont: { family: 'JetBrains Mono', size: 12 },
+          bodyFont: { family: 'DM Sans', size: 12 },
+          padding: 12,
+          cornerRadius: 10,
+        },
+        annotation: {}
+      },
+      scales: {
+        x: { ticks: { color: 'rgba(255,255,255,0.35)', font: { family: 'JetBrains Mono', size: 10 } }, grid: { color: 'rgba(255,255,255,0.05)' } },
+        y: { min: 0, max: 100, ticks: { color: 'rgba(255,255,255,0.35)', font: { family: 'JetBrains Mono', size: 10 } }, grid: { color: 'rgba(255,255,255,0.05)' } }
+      }
+    }
+  });
+}
+
+// ── RADAR CHART ──
+const rctx = document.getElementById('radarChart');
+if (rctx) {
+  new Chart(rctx, {
+    type: 'radar',
+    data: {
+      labels: ['Confidence','Fluency','Energy','Relevance','Recovery','Clarity'],
+      datasets: [{
+        label: 'You',
+        data: [71, 84, 38, 62, 45, 69],
+        borderColor: '#5EC4D3',
+        backgroundColor: 'rgba(94,196,211,0.12)',
+        pointBackgroundColor: '#5EC4D3',
+        pointRadius: 4,
+        borderWidth: 2,
+      }, {
+        label: 'Target Score',
+        data: [80, 80, 80, 80, 80, 80],
+        borderColor: 'rgba(255,90,79,0.4)',
+        backgroundColor: 'rgba(255,90,79,0.03)',
+        pointRadius: 0,
+        borderWidth: 1.5,
+        borderDash: [5,4],
+      }]
+    },
+    options: {
+      responsive: true,
+      plugins: {
+        legend: { labels: { color: '#98A2B3', font: { family: 'JetBrains Mono', size: 10 }, boxWidth: 16 } }
+      },
+      scales: {
+        r: {
+          min: 0, max: 100,
+          ticks: { color: '#98A2B3', font: { family: 'JetBrains Mono', size: 9 }, stepSize: 25, backdropColor: 'transparent' },
+          grid: { color: 'rgba(29,41,57,0.08)' },
+          pointLabels: { color: '#475467', font: { family: 'DM Sans', size: 12, weight: '500' } }
+        }
+      }
+    }
+  });
+}
+
+// ── SCROLL REVEAL ──
+const observer = new IntersectionObserver((entries) => {
+  entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('visible'); } });
+}, { threshold: 0.12, rootMargin: '0px 0px -40px 0px' });
+document.querySelectorAll('.fade-up').forEach(el => observer.observe(el));
+
+// ── TIMER ANIMATION (hero) ──
+let sec = 0;
+const timerEl = document.querySelector('.timer-val');
+const liveEl = document.querySelector('.rc-live');
+if (timerEl) {
+  setInterval(() => {
+    sec++;
+    const m = Math.floor(sec / 60);
+    const s = sec % 60;
+    const formatted = `${m}:${String(s).padStart(2,'0')}`;
+    // Just pulse the existing 2:15 marker, don't replace the warning display
+  }, 1000);
+}
+</script>
+</body>
+</html>
