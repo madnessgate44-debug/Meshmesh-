@@ -19,8 +19,6 @@ main{flex:1;max-width:560px;width:100%;margin:0 auto;padding:16px;display:flex;f
 .tabs{display:flex;gap:4px;background:#111827;border:1px solid #1f2937;border-radius:12px;padding:4px;overflow-x:auto}
 .tab{flex:1;padding:10px 6px;border-radius:9px;border:none;background:transparent;font-size:11px;font-weight:500;color:#94a3b8;cursor:pointer;text-align:center;position:relative;white-space:nowrap}
 .tab.active{background:linear-gradient(135deg,#7c3aed,#a855f7);color:#fff}
-.tab-badge{position:absolute;top:-4px;right:2px;background:#ef4444;color:#fff;border-radius:10px;font-size:9px;padding:1px 5px;display:none}
-.tab-badge.show{display:block}
 .panel{display:none;flex-direction:column;gap:14px}
 .panel.active{display:flex}
 .field{margin-bottom:12px;display:flex;flex-direction:column;gap:5px}
@@ -47,14 +45,12 @@ textarea{resize:vertical;min-height:80px;line-height:1.5}
 .chat-user{background:linear-gradient(135deg,#7c3aed,#a855f7);color:#fff;align-self:flex-end;border-bottom-right-radius:4px}
 .chat-system{background:#1e293b;border:1px solid #334155;align-self:flex-start;border-bottom-left-radius:4px}
 .chat-thinking{background:#1e1b4b;border:1px solid #4338ca;color:#a78bfa;align-self:flex-start;font-style:italic}
-.voice-trigger{font-size:12px;color:#a78bfa;cursor:pointer;text-decoration:underline;margin-top:6px;display:inline-block}
-.flying-btn{position:fixed;bottom:24px;right:24px;width:56px;height:56px;border-radius:50%;background:linear-gradient(135deg,#7c3aed,#a855f7);color:#fff;border:none;font-size:24px;box-shadow:0 4px 15px rgba(124,58,237,0.4);z-index:200;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:transform 0.1s}
+.diagnostic-report{background:#0f172a;border:1px solid #334155;border-radius:10px;padding:14px;margin-top:8px;font-family:monospace;font-size:11px;line-height:1.7;white-space:pre-wrap;max-height:300px;overflow-y:auto}
+.flying-btn{position:fixed;bottom:24px;right:24px;width:56px;height:56px;border-radius:50%;background:linear-gradient(135deg,#7c3aed,#a855f7);color:#fff;border:none;font-size:24px;box-shadow:0 4px 15px rgba(124,58,237,0.4);z-index:200;display:flex;align-items:center;justify-content:center;cursor:pointer}
 .flying-btn:active{transform:scale(0.9)}
 .radial-menu{position:fixed;bottom:90px;right:24px;display:none;flex-direction:column;gap:8px;z-index:199}
 .radial-menu.show{display:flex}
 .radial-item{width:48px;height:48px;border-radius:50%;background:#1e293b;border:1px solid #334155;color:#e6e6e6;font-size:18px;display:flex;align-items:center;justify-content:center;cursor:pointer}
-.guardrail-msg{background:#7f1d1d;color:#fca5a5;padding:8px 12px;border-radius:8px;font-size:12px;margin-top:8px;display:none}
-.guardrail-msg.show{display:block}
 .file-item{display:flex;align-items:center;justify-content:space-between;padding:8px;background:#0f172a;border-radius:8px;margin-bottom:6px}
 .file-item span{word-break:break-all;flex:1}
 </style>
@@ -65,7 +61,6 @@ textarea{resize:vertical;min-height:80px;line-height:1.5}
   <div class="badge"><span class="dot" id="connDot"></span><span id="connLabel">Offline</span></div>
 </header>
 <main>
-  <!-- Setup (shown only if not connected) -->
   <div class="card" id="setupCard">
     <div class="card-title">Connect Cloud Brain</div>
     <div class="field"><label>GitHub Token</label><input type="password" id="ghToken" placeholder="ghp_..."></div>
@@ -73,26 +68,23 @@ textarea{resize:vertical;min-height:80px;line-height:1.5}
     <button class="btn-primary" onclick="connectRepo()">Connect</button>
     <div class="st" id="setupSt"></div>
   </div>
-  <!-- Main UI -->
   <div id="mainUI" style="display:none;flex-direction:column;gap:14px">
     <div class="tabs" id="mainTabs">
-      <button class="tab active" onclick="switchTab('showrunner',this)">🎬 Showrunner<span class="tab-badge" id="badge-showrunner">●</span></button>
-      <button class="tab" onclick="switchTab('factory',this)">🎨 Content<span class="tab-badge" id="badge-factory">●</span></button>
-      <button class="tab" onclick="switchTab('design',this)">🖌 Design<span class="tab-badge" id="badge-design">●</span></button>
-      <button class="tab" onclick="switchTab('files',this)">📁 Files<span class="tab-badge" id="badge-files">●</span></button>
+      <button class="tab active" onclick="switchTab('showrunner',this)">🎬 Showrunner</button>
+      <button class="tab" onclick="switchTab('factory',this)">🎨 Content</button>
+      <button class="tab" onclick="switchTab('design',this)">🖌 Design</button>
+      <button class="tab" onclick="switchTab('files',this)">📁 Files</button>
       <button class="tab" onclick="switchTab('settings',this)">⚙️ Settings</button>
     </div>
-    <!-- SHOWRUNNER -->
     <div class="panel active" id="panel-showrunner">
       <div class="card" style="flex:1;display:flex;flex-direction:column">
         <div class="card-title">Showrunner · Business Director</div>
         <div class="chat-stream" id="srChat"></div>
         <div class="field"><textarea id="srInput" placeholder="What's the next move?" rows="2"></textarea></div>
         <button class="btn-primary" onclick="sendShowrunner()">Send</button>
-        <div class="guardrail-msg" id="guardrailMsg"></div>
+        <div id="srDiagnostic"></div>
       </div>
     </div>
-    <!-- CONTENT FACTORY -->
     <div class="panel" id="panel-factory">
       <div class="card">
         <div class="card-title">Content Factory · Creative Director</div>
@@ -107,9 +99,9 @@ textarea{resize:vertical;min-height:80px;line-height:1.5}
         <button class="btn-primary" onclick="generateContent()">Generate</button>
         <div class="st" id="cfSt"></div>
         <div id="cfOutput" style="margin-top:12px"></div>
+        <div id="cfDiagnostic"></div>
       </div>
     </div>
-    <!-- DESIGN -->
     <div class="panel" id="panel-design">
       <div class="card">
         <div class="card-title">Design · Component Staging</div>
@@ -118,7 +110,6 @@ textarea{resize:vertical;min-height:80px;line-height:1.5}
         <div class="st" id="designSt"></div>
       </div>
     </div>
-    <!-- FILES -->
     <div class="panel" id="panel-files">
       <div class="card">
         <div class="card-title">Files · Upload & Scan</div>
@@ -129,22 +120,38 @@ textarea{resize:vertical;min-height:80px;line-height:1.5}
         <div class="st" id="filesSt"></div>
       </div>
     </div>
-    <!-- SETTINGS -->
+    <!-- SETTINGS with multiple keys + test -->
     <div class="panel" id="panel-settings">
       <div class="card">
-        <div class="card-title">Settings</div>
-        <div class="field"><label>DeepSeek API Key</label><input type="password" id="deepseekKey" placeholder="sk-..."></div>
+        <div class="card-title">⚙️ AI Keys & Providers</div>
+        <div class="field">
+          <label>Active AI Provider</label>
+          <select id="aiProvider" onchange="saveProvider()">
+            <option value="gemini">Google Gemini (free, no card)</option>
+            <option value="deepseek">DeepSeek (requires paid credits)</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Gemini API Keys</label>
+          <input type="password" id="geminiKeys" placeholder="AIza... (comma-separated for backups)">
+          <div class="hint">Get free at aistudio.google.com/apikey</div>
+          <button class="btn-ghost" style="width:100%;margin-top:6px" onclick="testProvider('gemini')">🔍 Test Gemini Keys</button>
+        </div>
+        <div class="field">
+          <label>DeepSeek API Keys</label>
+          <input type="password" id="deepseekKeys" placeholder="sk-... (comma-separated)">
+          <button class="btn-ghost" style="width:100%;margin-top:6px" onclick="testProvider('deepseek')">🔍 Test DeepSeek Keys</button>
+        </div>
         <div class="field"><label>GitHub Token</label><input type="password" id="settingsGhToken" placeholder="ghp_..."></div>
         <div class="field"><label>Repository</label><input type="text" id="settingsGhRepo" placeholder="username/repo"></div>
-        <button class="btn-primary" onclick="saveSettings()">Save Settings</button>
+        <button class="btn-primary" onclick="saveSettings()">Save All Settings</button>
         <div class="st" id="settingsSt"></div>
+        <div id="settingsDiagnostic"></div>
       </div>
     </div>
   </div>
 </main>
-
-<!-- FLYING BUTTON -->
-<button class="flying-btn" id="flyingBtn" onclick="toggleRadial()" oncontextmenu="event.preventDefault()">⚡</button>
+<button class="flying-btn" id="flyingBtn" onclick="toggleRadial()">⚡</button>
 <div class="radial-menu" id="radialMenu">
   <button class="radial-item" onclick="captureClipboard()" title="Capture Clipboard">📋</button>
   <button class="radial-item" onclick="document.getElementById('fileInput').click()" title="Upload File">📤</button>
@@ -152,267 +159,256 @@ textarea{resize:vertical;min-height:80px;line-height:1.5}
 </div>
 
 <script>
-// ── GLOBAL STATE ──
+// GLOBAL STATE
 let GH_TOKEN = localStorage.getItem('mmos_ghtoken') || '';
 let GH_REPO = localStorage.getItem('mmos_ghrepo') || 'madnessgate44-debug/Meshmesh-';
-let DS_KEY = localStorage.getItem('mmos_dsKey') || '';
+let AI_PROVIDER = localStorage.getItem('mmos_aiprovider') || 'gemini';
+let GEMINI_KEYS = localStorage.getItem('mmos_geminiKeys') || '';
+let DEEPSEEK_KEYS = localStorage.getItem('mmos_dsKeys') || '';
 let activeRole = 'hook';
 let showrunnerChat = [];
-let profile = { business: '', goal: '', strategy: '', constraints: '5h/week, phone-only' };
+let profile = { business:'', goal:'', strategy:'', constraints:'5h/week, phone-only' };
 
-// ── UTILS ──
-function delay(ms) { return new Promise(r => setTimeout(r, ms)); }
-function toBase64(str) { return btoa(unescape(encodeURIComponent(str))); }
-function setSt(id, type, msg) { const el = document.getElementById(id); if (!el) return; el.className = 'st show ' + type; el.innerHTML = type === 'loading' ? '<span class="spinner"></span>' + msg : msg; }
-function hideSt(id) { const el = document.getElementById(id); if (el) el.className = 'st'; }
-function esc(s) { return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
+// UTILS
+function delay(ms){ return new Promise(r=>setTimeout(r,ms)); }
+function toBase64(str){ return btoa(unescape(encodeURIComponent(str))); }
+function setSt(id,type,msg){ const el=document.getElementById(id); if(el){ el.className='st show '+type; el.innerHTML=type==='loading'?'<span class="spinner"></span>'+msg:msg; } }
+function hideSt(id){ const el=document.getElementById(id); if(el) el.className='st'; }
+function esc(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
 
-async function ghFetch(path, opts = {}) {
-  const res = await fetch('https://api.github.com' + path, {
-    ...opts,
-    headers: {
-      ...opts.headers,
-      Authorization: 'Bearer ' + GH_TOKEN,
-      Accept: 'application/vnd.github+json',
-      'X-GitHub-Api-Version': '2022-11-28'
-    }
-  });
+async function ghFetch(path, opts={}){
+  const res = await fetch('https://api.github.com'+path,{...opts,headers:{...opts.headers,Authorization:'Bearer '+GH_TOKEN,Accept:'application/vnd.github+json','X-GitHub-Api-Version':'2022-11-28'}});
   const body = await res.json();
-  if (!res.ok) throw new Error('GitHub ' + res.status + ': ' + (body.message || ''));
+  if(!res.ok) throw new Error('GitHub '+res.status+': '+(body.message||''));
   return body;
 }
 
-// ── DEEPSEEK API ──
-async function callDeepSeek(messages, systemPrompt = '') {
-  if (!DS_KEY) throw new Error('No DeepSeek API key. Set it in Settings.');
-  const msgs = [];
-  if (systemPrompt) msgs.push({ role: 'system', content: systemPrompt });
-  msgs.push(...messages);
-  const res = await fetch('https://api.deepseek.com/v1/chat/completions', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + DS_KEY },
-    body: JSON.stringify({ model: 'deepseek-chat', messages: msgs, temperature: 0.7, max_tokens: 800 })
-  });
-  const data = await res.json();
-  if (!res.ok) throw new Error(data.error?.message || 'DeepSeek error');
-  return data.choices[0].message.content.trim();
+function buildDiagnosticHTML(report){
+  let html = '<div class="diagnostic-report">';
+  html += '<strong>🔬 DIAGNOSTIC REPORT</strong>\n';
+  html += '──────────────────────────\n';
+  html += 'Provider : ' + report.provider + '\n';
+  html += 'Keys tried: ' + report.keysTried + '\n';
+  html += 'Active key: ' + report.activeKeyMasked + '\n';
+  html += 'HTTP status: ' + report.httpStatus + '\n';
+  html += 'Error type : ' + report.errorType + '\n';
+  html += 'Raw error : ' + report.rawError + '\n';
+  html += '──────────────────────────\n';
+  if(report.provider==='gemini' && report.httpStatus===400) html += '💡 Gemini 400: Usually bad request format. Check key format (AIza...).\n';
+  if(report.provider==='gemini' && report.httpStatus===403) html += '💡 Gemini 403: Key invalid or API not enabled. Visit aistudio.google.com.\n';
+  if(report.provider==='gemini' && report.httpStatus===429) html += '💡 Gemini 429: Rate limit. Wait or try another key.\n';
+  if(report.provider==='deepseek' && report.rawError.includes('Insufficient Balance')) html += '💡 DeepSeek: You need to add funds at platform.deepseek.com.\n';
+  if(report.provider==='deepseek' && report.httpStatus===401) html += '💡 DeepSeek 401: Invalid API key. Check it starts with sk-.\n';
+  html += '</div>';
+  return html;
 }
 
-// ── CLOUD STATE ──
-async function saveStateFile(filename, content) {
-  const path = 'mishstate/' + filename;
-  let sha = null;
-  try { const ex = await ghFetch('/repos/' + GH_REPO + '/contents/' + path); sha = ex.sha; } catch (e) { }
-  await ghFetch('/repos/' + GH_REPO + '/contents/' + path, {
-    method: 'PUT',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ message: 'update ' + filename, content: toBase64(JSON.stringify(content)), sha: sha || undefined })
-  });
-}
-async function loadStateFile(filename) {
-  try {
-    const file = await ghFetch('/repos/' + GH_REPO + '/contents/mishstate/' + filename);
-    return JSON.parse(decodeURIComponent(escape(atob(file.content))));
-  } catch (e) { return null; }
+async function callAI(messages, systemPrompt='', diagnosticTarget=''){
+  const keys = AI_PROVIDER==='gemini' ? GEMINI_KEYS.split(',').map(k=>k.trim()).filter(k=>k) : DEEPSEEK_KEYS.split(',').map(k=>k.trim()).filter(k=>k);
+  if(!keys.length){
+    const report = { provider:AI_PROVIDER, keysTried:0, activeKeyMasked:'none', httpStatus:'N/A', errorType:'No keys configured', rawError:'Add keys in Settings' };
+    if(diagnosticTarget) document.getElementById(diagnosticTarget).innerHTML = buildDiagnosticHTML(report);
+    throw new Error('No API keys for '+AI_PROVIDER);
+  }
+  let lastReport = null;
+  for(let i=0; i<keys.length; i++){
+    const key = keys[i];
+    const masked = key.substring(0,6)+'...'+key.substring(key.length-4);
+    try {
+      if(AI_PROVIDER==='gemini'){
+        const contents = messages.map(m => ({ role:'user', parts:[{ text:m.content }] }));
+        const body = { contents, generationConfig:{temperature:0.7, maxOutputTokens:800} };
+        if(systemPrompt) body.systemInstruction = { parts:[{ text:systemPrompt }] };
+        const res = await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key='+key,{
+          method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(body)
+        });
+        const data = await res.json();
+        if(!res.ok){
+          lastReport = { provider:'gemini', keysTried:i+1, activeKeyMasked:masked, httpStatus:res.status, errorType:data.error?.status||'unknown', rawError:JSON.stringify(data.error||data) };
+          continue;
+        }
+        if(!data.candidates || !data.candidates[0]?.content?.parts?.[0]?.text) {
+          lastReport = { provider:'gemini', keysTried:i+1, activeKeyMasked:masked, httpStatus:res.status, errorType:'Empty response', rawError:JSON.stringify(data) };
+          continue;
+        }
+        if(diagnosticTarget) document.getElementById(diagnosticTarget).innerHTML = '';
+        return data.candidates[0].content.parts[0].text.trim();
+      } else {
+        const msgs = [];
+        if(systemPrompt) msgs.push({ role:'system', content:systemPrompt });
+        msgs.push(...messages);
+        const res = await fetch('https://api.deepseek.com/v1/chat/completions',{
+          method:'POST', headers:{'Content-Type':'application/json', 'Authorization':'Bearer '+key},
+          body:JSON.stringify({ model:'deepseek-chat', messages:msgs, temperature:0.7, max_tokens:800 })
+        });
+        const data = await res.json();
+        if(!res.ok){
+          lastReport = { provider:'deepseek', keysTried:i+1, activeKeyMasked:masked, httpStatus:res.status, errorType:data.error?.type||'unknown', rawError:JSON.stringify(data.error||data) };
+          continue;
+        }
+        if(!data.choices || !data.choices[0]?.message?.content) {
+          lastReport = { provider:'deepseek', keysTried:i+1, activeKeyMasked:masked, httpStatus:res.status, errorType:'Empty response', rawError:JSON.stringify(data) };
+          continue;
+        }
+        if(diagnosticTarget) document.getElementById(diagnosticTarget).innerHTML = '';
+        return data.choices[0].message.content.trim();
+      }
+    } catch(e){
+      lastReport = { provider:AI_PROVIDER, keysTried:i+1, activeKeyMasked:masked, httpStatus:'Fetch error', errorType:'Network/exception', rawError:e.message };
+    }
+  }
+  if(diagnosticTarget && lastReport) document.getElementById(diagnosticTarget).innerHTML = buildDiagnosticHTML(lastReport);
+  throw new Error(lastReport?.rawError || 'All keys failed');
 }
 
-// ── CONNECT ──
-async function connectRepo() {
+// TEST PROVIDER
+async function testProvider(provider){
+  const keysField = provider==='gemini' ? document.getElementById('geminiKeys') : document.getElementById('deepseekKeys');
+  const keys = keysField.value.split(',').map(k=>k.trim()).filter(k=>k);
+  if(!keys.length){ setSt('settingsSt','error','No keys entered.'); return; }
+  setSt('settingsSt','loading','Testing '+provider+'...');
+  document.getElementById('settingsDiagnostic').innerHTML = '';
+  let lastReport = null;
+  let success = false;
+  for(let i=0; i<keys.length; i++){
+    const key = keys[i];
+    const masked = key.substring(0,6)+'...'+key.substring(key.length-4);
+    try {
+      if(provider==='gemini'){
+        const res = await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key='+key,{
+          method:'POST', headers:{'Content-Type':'application/json'},
+          body:JSON.stringify({ contents:[{ role:'user', parts:[{ text:'Say ok' }] }], generationConfig:{maxOutputTokens:10} })
+        });
+        const data = await res.json();
+        if(res.ok && data.candidates) success = true;
+        else lastReport = { provider:'gemini', keysTried:i+1, activeKeyMasked:masked, httpStatus:res.status, errorType:data.error?.status||'unknown', rawError:JSON.stringify(data.error||data) };
+      } else {
+        const res = await fetch('https://api.deepseek.com/v1/chat/completions',{
+          method:'POST', headers:{'Content-Type':'application/json', 'Authorization':'Bearer '+key},
+          body:JSON.stringify({ model:'deepseek-chat', messages:[{role:'user',content:'Say ok'}], max_tokens:10 })
+        });
+        const data = await res.json();
+        if(res.ok && data.choices) success = true;
+        else lastReport = { provider:'deepseek', keysTried:i+1, activeKeyMasked:masked, httpStatus:res.status, errorType:data.error?.type||'unknown', rawError:JSON.stringify(data.error||data) };
+      }
+      if(success) break;
+    } catch(e){ lastReport = { provider, keysTried:i+1, activeKeyMasked:masked, httpStatus:'Fetch error', errorType:'Network', rawError:e.message }; }
+  }
+  if(success){
+    setSt('settingsSt','success','✅ '+provider+' key(s) work!');
+    document.getElementById('settingsDiagnostic').innerHTML = '';
+  } else {
+    setSt('settingsSt','error','❌ All '+provider+' keys failed. See report below.');
+    if(lastReport) document.getElementById('settingsDiagnostic').innerHTML = buildDiagnosticHTML(lastReport);
+  }
+}
+
+// STORAGE
+async function saveStateFile(filename, content){
+  const path = 'mishstate/'+filename;
+  let sha=null;
+  try{ const ex = await ghFetch('/repos/'+GH_REPO+'/contents/'+path); sha=ex.sha; } catch(e){}
+  await ghFetch('/repos/'+GH_REPO+'/contents/'+path,{ method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify({ message:'update '+filename, content:toBase64(JSON.stringify(content)), sha:sha||undefined }) });
+}
+async function loadStateFile(filename){
+  try{ const file = await ghFetch('/repos/'+GH_REPO+'/contents/mishstate/'+filename); return JSON.parse(decodeURIComponent(escape(atob(file.content)))); }catch(e){ return null; }
+}
+
+// CONNECT
+async function connectRepo(){
   const t = document.getElementById('ghToken').value.trim();
   const r = document.getElementById('ghRepo').value.trim();
-  if (!t || !r) { setSt('setupSt', 'error', 'Fill both fields.'); return; }
-  GH_TOKEN = t; GH_REPO = r;
-  localStorage.setItem('mmos_ghtoken', t);
-  localStorage.setItem('mmos_ghrepo', r);
-  try {
-    await ghFetch('/repos/' + r);
-    document.getElementById('connDot').className = 'dot on';
-    document.getElementById('connLabel').textContent = r;
-    document.getElementById('setupCard').style.display = 'none';
-    document.getElementById('mainUI').style.display = 'flex';
-    loadCloudState();
-    loadFileList();
-    addShowrunnerMessage('system', 'Mish Mish OS online. DeepSeek AI connected. What’s our current goal?');
-  } catch (e) { setSt('setupSt', 'error', 'Connection failed: ' + e.message); }
+  if(!t||!r){ setSt('setupSt','error','Fill both fields.'); return; }
+  GH_TOKEN=t; GH_REPO=r;
+  localStorage.setItem('mmos_ghtoken',t); localStorage.setItem('mmos_ghrepo',r);
+  try{
+    await ghFetch('/repos/'+r);
+    document.getElementById('connDot').className='dot on';
+    document.getElementById('connLabel').textContent=r;
+    document.getElementById('setupCard').style.display='none';
+    document.getElementById('mainUI').style.display='flex';
+    loadCloudState(); loadFileList();
+    addShowrunnerMessage('system','Mish Mish OS online. AI: '+AI_PROVIDER+'. Current goal?');
+  }catch(e){ setSt('setupSt','error','Connection failed: '+e.message); }
 }
-window.onload = function () {
-  // pre-fill settings fields
-  if (DS_KEY) document.getElementById('deepseekKey').value = DS_KEY;
-  if (GH_TOKEN) document.getElementById('settingsGhToken').value = GH_TOKEN;
-  if (GH_REPO) document.getElementById('settingsGhRepo').value = GH_REPO;
-  if (GH_TOKEN && GH_REPO) connectRepo().catch(() => {});
-  // flying button long-press
+
+window.onload=function(){
+  document.getElementById('aiProvider').value = AI_PROVIDER;
+  document.getElementById('geminiKeys').value = GEMINI_KEYS;
+  document.getElementById('deepseekKeys').value = DEEPSEEK_KEYS;
+  document.getElementById('settingsGhToken').value = GH_TOKEN;
+  document.getElementById('settingsGhRepo').value = GH_REPO;
+  if(GH_TOKEN && GH_REPO) connectRepo().catch(()=>{});
   const btn = document.getElementById('flyingBtn');
   let pressTimer;
-  btn.addEventListener('touchstart', () => { pressTimer = setTimeout(() => { captureClipboard(); }, 800); });
-  btn.addEventListener('touchend', () => clearTimeout(pressTimer));
-  btn.addEventListener('touchmove', () => clearTimeout(pressTimer));
+  btn.addEventListener('touchstart',()=>{ pressTimer=setTimeout(()=>{captureClipboard();},800); });
+  btn.addEventListener('touchend',()=>clearTimeout(pressTimer));
+  btn.addEventListener('touchmove',()=>clearTimeout(pressTimer));
 };
 
-// ── SETTINGS ──
-function saveSettings() {
-  const dsKey = document.getElementById('deepseekKey').value.trim();
+function saveProvider(){ AI_PROVIDER = document.getElementById('aiProvider').value; localStorage.setItem('mmos_aiprovider', AI_PROVIDER); }
+function saveSettings(){
+  GEMINI_KEYS = document.getElementById('geminiKeys').value.trim();
+  DEEPSEEK_KEYS = document.getElementById('deepseekKeys').value.trim();
   const ghToken = document.getElementById('settingsGhToken').value.trim();
   const ghRepo = document.getElementById('settingsGhRepo').value.trim();
-  if (dsKey) { DS_KEY = dsKey; localStorage.setItem('mmos_dsKey', dsKey); }
-  if (ghToken) { GH_TOKEN = ghToken; localStorage.setItem('mmos_ghtoken', ghToken); }
-  if (ghRepo) { GH_REPO = ghRepo; localStorage.setItem('mmos_ghrepo', ghRepo); }
-  setSt('settingsSt', 'success', 'Settings saved. AI and Cloud Brain connected.');
-  if (!document.getElementById('connDot').classList.contains('on') && GH_TOKEN && GH_REPO) {
-    connectRepo();
-  }
+  if(GEMINI_KEYS) localStorage.setItem('mmos_geminiKeys', GEMINI_KEYS);
+  if(DEEPSEEK_KEYS) localStorage.setItem('mmos_dsKeys', DEEPSEEK_KEYS);
+  if(ghToken){ GH_TOKEN=ghToken; localStorage.setItem('mmos_ghtoken',ghToken); }
+  if(ghRepo){ GH_REPO=ghRepo; localStorage.setItem('mmos_ghrepo',ghRepo); }
+  setSt('settingsSt','success','Settings saved.');
+  if(!document.getElementById('connDot').classList.contains('on') && GH_TOKEN && GH_REPO) connectRepo();
 }
 
-// ── SHOWRUNNER ──
-function addShowrunnerMessage(role, text) {
-  showrunnerChat.push({ role, text, time: new Date().toISOString() });
-  renderShowrunnerChat();
-  saveStateFile('showrunner_chat.json', showrunnerChat);
-}
-function renderShowrunnerChat() {
-  const container = document.getElementById('srChat');
-  if (!container) return;
-  container.innerHTML = showrunnerChat.map(m => {
-    const cls = m.role === 'user' ? 'chat-user' : 'chat-system';
-    return `<div class="chat-bubble ${cls}">${esc(m.text)}</div>`;
-  }).join('');
-  container.scrollTop = container.scrollHeight;
-}
-async function sendShowrunner() {
-  const input = document.getElementById('srInput').value.trim();
-  if (!input) return;
-  if (!DS_KEY) { addShowrunnerMessage('system', 'Missing DeepSeek API key. Set it in Settings.'); return; }
-  addShowrunnerMessage('user', input);
-  document.getElementById('srInput').value = '';
-  const thinking = document.createElement('div');
-  thinking.className = 'chat-bubble chat-thinking'; thinking.textContent = 'Analyzing...';
+// SHOWRUNNER
+function addShowrunnerMessage(role,text){ showrunnerChat.push({role,text,time:new Date().toISOString()}); renderShowrunnerChat(); saveStateFile('showrunner_chat.json',showrunnerChat); }
+function renderShowrunnerChat(){ const c=document.getElementById('srChat'); if(c){ c.innerHTML=showrunnerChat.map(m=>`<div class="chat-bubble ${m.role==='user'?'chat-user':'chat-system'}">${esc(m.text)}</div>`).join(''); c.scrollTop=c.scrollHeight; } }
+async function sendShowrunner(){
+  const input=document.getElementById('srInput').value.trim(); if(!input) return;
+  if(!(AI_PROVIDER==='gemini'?GEMINI_KEYS:DEEPSEEK_KEYS)){ addShowrunnerMessage('system','Missing API keys. Add them in Settings.'); return; }
+  addShowrunnerMessage('user',input); document.getElementById('srInput').value='';
+  document.getElementById('srDiagnostic').innerHTML = '';
+  const thinking=document.createElement('div'); thinking.className='chat-bubble chat-thinking'; thinking.textContent='Analyzing...';
   document.getElementById('srChat').appendChild(thinking);
-  try {
-    const reply = await callDeepSeek([{ role: 'user', content: input }], buildShowrunnerSystem());
-    thinking.remove();
-    addShowrunnerMessage('system', reply);
-  } catch (e) {
-    thinking.remove();
-    addShowrunnerMessage('system', 'Error: ' + e.message);
-  }
-}
-function buildShowrunnerSystem() {
-  return `You are the Showrunner of Mish Mish OS. Business profile: ${JSON.stringify(profile)}.
-Work through Modes: ingest -> validate -> optimize -> execute. Ask only one question per turn. If the user tries to skip steps, say "I hear you — but the system produces better results when we move through each step. Let's keep going." Always suggest voice note elaboration.`;
+  try{
+    const reply = await callAI([{role:'user',content:input}], `You are the Showrunner. Business profile: ${JSON.stringify(profile)}. Use Modes 0-3. Ask one question per turn.`,'srDiagnostic');
+    thinking.remove(); addShowrunnerMessage('system',reply);
+  }catch(e){ thinking.remove(); addShowrunnerMessage('system','AI call failed. See diagnostic report below.'); }
 }
 
-// ── CONTENT FACTORY ──
-function setRole(role) {
-  activeRole = role;
-  const labels = { hook: 'Hook Architect', narrative: 'Narrative Engineer', offer: 'Offer Framer', visual: 'Visual Brief Writer', script: 'Video Script Director' };
-  document.getElementById('roleLabel').textContent = labels[role];
-  document.querySelectorAll('#panel-factory .btn-sm').forEach(b => b.classList.remove('active-filter'));
-  event.target.classList.add('active-filter');
-}
-async function generateContent() {
-  const input = document.getElementById('cfInput').value.trim();
-  if (!input) { setSt('cfSt', 'error', 'Describe what you need.'); return; }
-  if (!DS_KEY) { setSt('cfSt', 'error', 'Missing API key.'); return; }
-  setSt('cfSt', 'loading', 'Generating...');
-  const rolePrompts = {
-    hook: 'Craft an open loop hook. Return ONLY the hook.',
-    narrative: 'Write a StoryBrand narrative (Character→Problem→Guide→Plan→CTA).',
-    offer: 'Create a high-value offer using $100M Offers principles.',
-    visual: 'Generate a cinematic prompt for AI image/video tools.',
-    script: 'Write a video script: Hook 0-3s, Story 4-45s, CTA 46-60s.'
-  };
-  try {
-    const res = await callDeepSeek([{ role: 'user', content: input }], `You are the ${document.getElementById('roleLabel').textContent}. ${rolePrompts[activeRole]}`);
-    document.getElementById('cfOutput').innerHTML = `<div class="card"><div class="card-title">Output</div><p style="white-space:pre-wrap;font-size:13px">${esc(res)}</p></div>`;
-    hideSt('cfSt');
-    saveStateFile('staging_' + activeRole + '.json', { role: activeRole, content: res, time: new Date().toISOString() });
-  } catch (e) { setSt('cfSt', 'error', e.message); }
+// CONTENT FACTORY
+function setRole(role){ activeRole=role; const labels={hook:'Hook Architect',narrative:'Narrative Engineer',offer:'Offer Framer',visual:'Visual Brief Writer',script:'Video Script Director'}; document.getElementById('roleLabel').textContent=labels[role]; document.querySelectorAll('#panel-factory .btn-sm').forEach(b=>b.classList.remove('active-filter')); event.target.classList.add('active-filter'); }
+async function generateContent(){
+  const input=document.getElementById('cfInput').value.trim(); if(!input){ setSt('cfSt','error','Describe what you need.'); return; }
+  if(!(AI_PROVIDER==='gemini'?GEMINI_KEYS:DEEPSEEK_KEYS)){ setSt('cfSt','error','Missing API keys.'); return; }
+  setSt('cfSt','loading','Generating...'); document.getElementById('cfDiagnostic').innerHTML = '';
+  const rolePrompts={hook:'Craft an open loop hook.',narrative:'Write StoryBrand narrative.',offer:'$100M Offers principles.',visual:'Cinematic prompt for AI.',script:'Video script: Hook, Story, CTA.'};
+  try{
+    const res = await callAI([{role:'user',content:input}], `You are the ${document.getElementById('roleLabel').textContent}. ${rolePrompts[activeRole]}`,'cfDiagnostic');
+    document.getElementById('cfOutput').innerHTML=`<div class="card"><div class="card-title">Output</div><p style="white-space:pre-wrap;font-size:13px">${esc(res)}</p></div>`;
+    hideSt('cfSt'); saveStateFile('staging_'+activeRole+'.json',{role:activeRole,content:res,time:new Date().toISOString()});
+  }catch(e){ setSt('cfSt','error',e.message); }
 }
 
-// ── DESIGN ──
-async function loadDesignFiles() {
-  try {
-    const items = await ghFetch('/repos/' + GH_REPO + '/contents/mishstate?per_page=50');
-    const staging = items.filter(i => i.name.startsWith('staging_'));
-    document.getElementById('designFileList').innerHTML = staging.length ?
-      staging.map(i => `<div class="file-item"><span>${i.name}</span><button class="btn-sm" onclick="commitDesignFile('${i.name}')">Commit</button></div>`).join('') :
-      '<div class="empty-state">No staged components.</div>';
-  } catch (e) { document.getElementById('designFileList').textContent = 'Could not load files.'; }
-}
-async function commitDesignFile(filename) {
-  setSt('designSt', 'loading', 'Committing...');
-  try {
-    const data = await loadStateFile(filename);
-    const targetPath = 'content/' + filename.replace('staging_', '');
-    let sha = null;
-    try { const ex = await ghFetch('/repos/' + GH_REPO + '/contents/' + targetPath); sha = ex.sha; } catch (e) { }
-    await ghFetch('/repos/' + GH_REPO + '/contents/' + targetPath, {
-      method: 'PUT', headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ message: 'Commit ' + targetPath, content: toBase64(JSON.stringify(data)), sha: sha || undefined })
-    });
-    setSt('designSt', 'success', 'Committed to Cloud Brain.');
-  } catch (e) { setSt('designSt', 'error', e.message); }
-}
-function commitDesign() { loadDesignFiles(); }
+// DESIGN & FILES
+async function loadDesignFiles(){ try{ const items=await ghFetch('/repos/'+GH_REPO+'/contents/mishstate?per_page=50'); const staging=items.filter(i=>i.name.startsWith('staging_')); document.getElementById('designFileList').innerHTML=staging.length?staging.map(i=>`<div class="file-item"><span>${i.name}</span><button class="btn-sm" onclick="commitDesignFile('${i.name}')">Commit</button></div>`).join(''):'<div class="empty-state">No staged components.</div>'; }catch(e){} }
+async function commitDesignFile(filename){ setSt('designSt','loading','Committing...'); try{ const data=await loadStateFile(filename); const targetPath='content/'+filename.replace('staging_',''); let sha=null; try{const ex=await ghFetch('/repos/'+GH_REPO+'/contents/'+targetPath);sha=ex.sha;}catch(e){} await ghFetch('/repos/'+GH_REPO+'/contents/'+targetPath,{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify({message:'Commit '+targetPath,content:toBase64(JSON.stringify(data)),sha:sha||undefined})}); setSt('designSt','success','Committed.'); }catch(e){setSt('designSt','error',e.message);} }
+function commitDesign(){ loadDesignFiles(); }
+async function handleFileUpload(event){ const files=event.target.files; if(!files.length)return; setSt('filesSt','loading','Uploading...'); for(const file of files){ try{ const reader=new FileReader(); await new Promise((resolve,reject)=>{ reader.onload=async()=>{ const base64Content=reader.result.split(',')[1]; const path='uploads/'+file.name; let sha=null; try{const ex=await ghFetch('/repos/'+GH_REPO+'/contents/'+path);sha=ex.sha;}catch(e){} await ghFetch('/repos/'+GH_REPO+'/contents/'+path,{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify({message:'Upload '+file.name,content:base64Content,sha:sha||undefined})}); resolve(); }; reader.onerror=reject; reader.readAsDataURL(file); }); }catch(e){ setSt('filesSt','error','Upload failed: '+e.message); } } setSt('filesSt','success','Files uploaded.'); loadFileList(); }
+async function loadFileList(){ try{ const items=await ghFetch('/repos/'+GH_REPO+'/contents/uploads?per_page=50'); document.getElementById('fileList').innerHTML=items.map(i=>`<div class="file-item"><span>${i.name}</span></div>`).join(''); }catch(e){ document.getElementById('fileList').innerHTML='<div class="empty-state">No files uploaded yet.</div>'; } }
 
-// ── FILES UPLOAD ──
-async function handleFileUpload(event) {
-  const files = event.target.files;
-  if (!files.length) return;
-  setSt('filesSt', 'loading', 'Uploading...');
-  for (const file of files) {
-    try {
-      const reader = new FileReader();
-      await new Promise((resolve, reject) => {
-        reader.onload = async () => {
-          const base64Content = reader.result.split(',')[1];
-          const path = 'uploads/' + file.name;
-          let sha = null;
-          try { const ex = await ghFetch('/repos/' + GH_REPO + '/contents/' + path); sha = ex.sha; } catch (e) { }
-          await ghFetch('/repos/' + GH_REPO + '/contents/' + path, {
-            method: 'PUT', headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ message: 'Upload ' + file.name, content: base64Content, sha: sha || undefined })
-          });
-          resolve();
-        };
-        reader.onerror = reject;
-        reader.readAsDataURL(file);
-      });
-    } catch (e) { setSt('filesSt', 'error', 'Upload failed: ' + e.message); }
-  }
-  setSt('filesSt', 'success', 'Files uploaded to Cloud Brain.');
-  loadFileList();
-}
-async function loadFileList() {
-  try {
-    const items = await ghFetch('/repos/' + GH_REPO + '/contents/uploads?per_page=50');
-    document.getElementById('fileList').innerHTML = items.map(i => `<div class="file-item"><span>${i.name}</span></div>`).join('');
-  } catch (e) { document.getElementById('fileList').innerHTML = '<div class="empty-state">No files uploaded yet.</div>'; }
-}
+// FLYING BUTTON
+function toggleRadial(){ document.getElementById('radialMenu').classList.toggle('show'); }
+async function captureClipboard(){ try{ const text=await navigator.clipboard.readText(); addShowrunnerMessage('system','📋 Clipboard: '+text.substring(0,200)); document.getElementById('radialMenu').classList.remove('show'); }catch(e){ addShowrunnerMessage('system','Clipboard access denied. Paste manually.'); } }
+function quickGoal(){ const goal=prompt('Set CURRENT_GOAL:'); if(goal){ profile.goal=goal; saveStateFile('business_profile.json',profile); addShowrunnerMessage('system','🎯 Goal: '+goal); } }
 
-// ── FLYING BUTTON ──
-function toggleRadial() { document.getElementById('radialMenu').classList.toggle('show'); }
-async function captureClipboard() {
-  try {
-    const text = await navigator.clipboard.readText();
-    addShowrunnerMessage('system', '📋 Clipboard: ' + text.substring(0, 200));
-    document.getElementById('radialMenu').classList.remove('show');
-  } catch (e) { addShowrunnerMessage('system', 'Clipboard access denied. Paste manually.'); }
-}
-function quickGoal() {
-  const goal = prompt('Set CURRENT_GOAL:');
-  if (goal) { profile.goal = goal; saveStateFile('business_profile.json', profile); addShowrunnerMessage('system', '🎯 Goal: ' + goal); }
-}
-
-// ── TABS ──
-function switchTab(name, btn) {
-  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+function switchTab(name,btn){
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
   btn.classList.add('active');
-  const panel = document.getElementById('panel-' + name);
-  if (panel) panel.classList.add('active');
-  if (name === 'design') loadDesignFiles();
-  if (name === 'files') loadFileList();
+  document.getElementById('panel-'+name).classList.add('active');
+  if(name==='design') loadDesignFiles();
+  if(name==='files') loadFileList();
 }
 </script>
 </body>
