@@ -2,20 +2,27 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Mission Runner — Mish Mish OS</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>Mish Mish OS</title>
 <style>
-*{box-sizing:border-box;margin:0;padding:0}
-body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#0b0f19;color:#e6e6e6;min-height:100vh;display:flex;flex-direction:column}
-header{background:#111827;padding:12px 16px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid #1f2937;position:sticky;top:0;z-index:10}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#0b0f19;color:#e6e6e6;min-height:100vh;display:flex;flex-direction:column;overflow-x:hidden}
+header{background:#111827;padding:12px 16px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid #1f2937;position:sticky;top:0;z-index:20}
 .logo{font-weight:700;font-size:16px;display:flex;align-items:center;gap:8px}
 .logo-icon{width:28px;height:28px;background:linear-gradient(135deg,#7c3aed,#a855f7);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:14px;color:#fff}
 .badge{font-size:11px;background:#1e293b;padding:4px 10px;border-radius:20px;display:flex;align-items:center;gap:6px;color:#94a3b8}
 .dot{width:7px;height:7px;border-radius:50%;background:#475569}
 .dot.on{background:#22c55e}
-main{flex:1;max-width:560px;width:100%;margin:0 auto;padding:16px;display:flex;flex-direction:column;gap:14px}
+main{flex:1;max-width:560px;width:100%;margin:0 auto;padding:16px;display:flex;flex-direction:column;gap:14px;padding-bottom:80px}
 .card{background:#111827;border:1px solid #1f2937;border-radius:14px;padding:16px}
 .card-title{font-size:11px;font-weight:600;color:#64748b;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:12px}
+.tabs{display:flex;gap:4px;background:#111827;border:1px solid #1f2937;border-radius:12px;padding:4px}
+.tab{flex:1;padding:10px 6px;border-radius:9px;border:none;background:transparent;font-size:11px;font-weight:500;color:#94a3b8;cursor:pointer;text-align:center;position:relative}
+.tab.active{background:linear-gradient(135deg,#7c3aed,#a855f7);color:#fff}
+.tab-badge{position:absolute;top:-4px;right:2px;background:#ef4444;color:#fff;border-radius:10px;font-size:9px;padding:1px 5px;display:none}
+.tab-badge.show{display:block}
+.panel{display:none;flex-direction:column;gap:14px}
+.panel.active{display:flex}
 .field{margin-bottom:12px;display:flex;flex-direction:column;gap:5px}
 label{font-size:11px;font-weight:600;color:#94a3b8;text-transform:uppercase}
 input,select,textarea{background:#0f172a;border:1px solid #1f2937;border-radius:10px;padding:11px 13px;font-size:14px;color:#e6e6e6;font-family:inherit;outline:none;width:100%}
@@ -26,7 +33,7 @@ textarea{resize:vertical;min-height:80px;line-height:1.5}
 .btn-primary:disabled{opacity:0.5;cursor:not-allowed}
 .btn-ghost{padding:10px 16px;background:#1e293b;color:#cbd5e1;border:1px solid #334155;border-radius:10px;font-size:13px;font-weight:500;cursor:pointer}
 .btn-sm{padding:5px 10px;font-size:10px;background:#1e293b;color:#cbd5e1;border:1px solid #334155;border-radius:8px;cursor:pointer;margin:2px}
-.btn-sm.active-filter{background:#7c3aed;color:#fff;border-color:#7c3aed}
+.btn-sm.active-filter{background:#7c3aed;color:#fff}
 .row{display:flex;gap:8px;align-items:center;margin-top:8px;flex-wrap:wrap}
 .st{border-radius:10px;padding:10px 13px;font-size:13px;display:none;margin-top:10px}
 .st.show{display:block}
@@ -35,152 +42,126 @@ textarea{resize:vertical;min-height:80px;line-height:1.5}
 .st.loading{background:#1e1b4b;color:#a78bfa;border:1px solid #4338ca}
 .spinner{display:inline-block;width:12px;height:12px;border:2px solid rgba(167,139,250,0.3);border-top-color:#a78bfa;border-radius:50%;animation:spin 0.7s linear infinite;vertical-align:middle;margin-right:6px}
 @keyframes spin{to{transform:rotate(360deg)}}
-.tabs{display:flex;gap:4px;background:#111827;border:1px solid #1f2937;border-radius:12px;padding:4px;overflow-x:auto}
-.tab{flex:1;padding:9px 6px;border-radius:9px;border:none;background:transparent;font-size:11px;font-weight:500;color:#94a3b8;cursor:pointer;white-space:nowrap;text-align:center}
-.tab.active{background:linear-gradient(135deg,#7c3aed,#a855f7);color:#fff}
-.panel{display:none;flex-direction:column;gap:14px}
-.panel.active{display:flex}
-.stat-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:12px}
-.stat-card{background:#0f172a;border:1px solid #1f2937;border-radius:10px;padding:10px;text-align:center}
-.stat-value{font-size:20px;font-weight:700;color:#a78bfa}
-.stat-label{font-size:10px;color:#64748b;margin-top:4px}
-.list-item{background:#0f172a;border:1px solid #1f2937;border-radius:9px;padding:10px 13px;margin-bottom:6px;cursor:pointer}
-.list-item:hover{border-color:#7c3aed}
-.task-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:4px;flex-wrap:wrap;gap:4px}
-.task-title{font-weight:600;word-break:break-all;flex:1}
-.task-dept{font-size:10px;color:#64748b;margin-left:4px}
-.task-meta{font-size:11px;color:#94a3b8;display:flex;gap:8px;flex-wrap:wrap;align-items:center}
-.tag{display:inline-block;padding:2px 8px;border-radius:20px;font-size:10px;font-weight:600}
-.tag-CRITICAL{background:#7f1d1d;color:#fca5a5}
-.tag-HIGH{background:#78350f;color:#fbbf24}
-.tag-MEDIUM{background:#1e3a5f;color:#93c5fd}
-.tag-LOW{background:#1e293b;color:#cbd5e1}
-.tag-status-CREATED{background:#1e293b;color:#94a3b8}
-.tag-status-VALIDATED{background:#1e293b;color:#93c5fd}
-.tag-status-QUEUED{background:#1e3a5f;color:#60a5fa}
-.tag-status-RUNNING{background:#4a1d96;color:#c4b5fd;animation:pulse 1.5s infinite}
-.tag-status-WAITING_DEPENDENCY{background:#78350f;color:#fbbf24}
-.tag-status-WAITING_APPROVAL{background:#713f12;color:#facc15}
-.tag-status-BLOCKED{background:#7f1d1d;color:#fca5a5}
-.tag-status-RETRYING{background:#5b21b6;color:#ddd6fe}
-.tag-status-COMPLETED{background:#022c22;color:#4ade80}
-.tag-status-FAILED{background:#450a0a;color:#f87171}
-.tag-status-ARCHIVED{background:#1e293b;color:#475569}
-.tag-status-CANCELLED{background:#1e293b;color:#6b7280;text-decoration:line-through}
-@keyframes pulse{0%,100%{opacity:1}50%{opacity:0.6}}
-.empty-state{text-align:center;padding:30px;color:#64748b;font-size:13px}
-.modal-overlay{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.85);z-index:100;display:none;justify-content:center;align-items:center;padding:16px}
-.modal{background:#111827;border:1px solid #1f2937;border-radius:16px;padding:20px;width:100%;max-width:480px;max-height:90vh;overflow-y:auto}
-.modal-title{font-size:18px;font-weight:700;margin-bottom:12px;padding-right:30px}
-.modal-close{float:right;font-size:22px;color:#64748b;cursor:pointer;background:none;border:none;margin-top:-28px}
-.modal-section{margin-bottom:14px}
-.modal-section h4{font-size:12px;color:#64748b;text-transform:uppercase;margin-bottom:6px}
-.modal-section p,.modal-section pre{font-size:13px;line-height:1.6;word-break:break-all}
-.modal-section pre{background:#0f172a;padding:10px;border-radius:8px;overflow-x:auto;white-space:pre-wrap}
-.dep-dept-section{margin-top:12px;padding-top:12px;border-top:1px solid #1f2937}
-.exec-mode-badge{display:inline-block;padding:3px 10px;border-radius:20px;font-size:10px;font-weight:600}
-.exec-sequential{background:#1e3a5f;color:#93c5fd}
-.exec-parallel{background:#022c22;color:#4ade80}
-.exec-locked{background:#78350f;color:#fbbf24}
-.recovery-log{background:#0f172a;border:1px solid #1f2937;border-radius:8px;padding:8px;margin-top:8px;font-family:monospace;font-size:11px;max-height:150px;overflow-y:auto}
+/* Chat stream */
+.chat-stream{max-height:400px;overflow-y:auto;display:flex;flex-direction:column;gap:10px;margin-bottom:12px}
+.chat-bubble{padding:10px 14px;border-radius:12px;font-size:13px;line-height:1.6;max-width:92%;word-break:break-word}
+.chat-user{background:linear-gradient(135deg,#7c3aed,#a855f7);color:#fff;align-self:flex-end;border-bottom-right-radius:4px}
+.chat-system{background:#1e293b;border:1px solid #334155;align-self:flex-start;border-bottom-left-radius:4px}
+.chat-thinking{background:#1e1b4b;border:1px solid #4338ca;color:#a78bfa;align-self:flex-start;font-style:italic}
+.voice-trigger{font-size:12px;color:#a78bfa;cursor:pointer;text-decoration:underline;margin-top:6px;display:inline-block}
+/* Flying button */
+.flying-btn{position:fixed;bottom:24px;right:24px;width:56px;height:56px;border-radius:50%;background:linear-gradient(135deg,#7c3aed,#a855f7);color:#fff;border:none;font-size:24px;box-shadow:0 4px 15px rgba(124,58,237,0.4);z-index:200;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:transform 0.1s}
+.flying-btn:active{transform:scale(0.9)}
+.radial-menu{position:fixed;bottom:90px;right:24px;display:none;flex-direction:column;gap:8px;z-index:199}
+.radial-menu.show{display:flex}
+.radial-item{width:48px;height:48px;border-radius:50%;background:#1e293b;border:1px solid #334155;color:#e6e6e6;font-size:18px;display:flex;align-items:center;justify-content:center;cursor:pointer}
+.guardrail-msg{background:#7f1d1d;color:#fca5a5;padding:8px 12px;border-radius:8px;font-size:12px;margin-top:8px;display:none}
+.guardrail-msg.show{display:block}
 </style>
 </head>
 <body>
 <header>
-  <div class="logo"><div class="logo-icon">🏃</div>Mission Runner</div>
-  <div class="badge"><span class="dot" id="connDot"></span><span id="connLabel">Not connected</span></div>
+  <div class="logo"><div class="logo-icon">M</div>Mish Mish OS</div>
+  <div class="badge"><span class="dot" id="connDot"></span><span id="connLabel">Offline</span></div>
 </header>
 <main>
-  <!-- SETUP -->
+  <!-- Setup card -->
   <div class="card" id="setupCard">
-    <div class="card-title">Connect to GitHub</div>
+    <div class="card-title">Connect Cloud Brain</div>
     <div class="field"><label>GitHub Token</label><input type="password" id="ghToken" placeholder="ghp_..."></div>
-    <div class="field"><label>Repository</label><input type="text" id="ghRepo" placeholder="username/repo"></div>
+    <div class="field"><label>Repository</label><input type="text" id="ghRepo" placeholder="madnessgate44-debug/Meshmesh-"></div>
     <button class="btn-primary" onclick="connectRepo()">Connect</button>
     <div class="st" id="setupSt"></div>
   </div>
-  <!-- MAIN UI -->
+  <!-- Main UI after connected -->
   <div id="mainUI" style="display:none;flex-direction:column;gap:14px">
     <div class="tabs">
-      <button class="tab active" onclick="switchTab('create',this)">➕ Create</button>
-      <button class="tab" onclick="switchTab('queue',this)">📋 Queue</button>
-      <button class="tab" onclick="switchTab('board',this)">🗂 Board</button>
-      <button class="tab" onclick="switchTab('dash',this)">📊 Dash</button>
+      <button class="tab active" onclick="switchTab('showrunner',this)" id="tab-showrunner">🎬 Showrunner<span class="tab-badge" id="badge-showrunner">●</span></button>
+      <button class="tab" onclick="switchTab('factory',this)" id="tab-factory">🎨 Content<span class="tab-badge" id="badge-factory">●</span></button>
+      <button class="tab" onclick="switchTab('design',this)" id="tab-design">🖌 Design<span class="tab-badge" id="badge-design">●</span></button>
     </div>
-    <!-- CREATE -->
-    <div class="panel active" id="panel-create">
-      <div class="card">
-        <div class="card-title">New Mission Task</div>
-        <div class="field"><label>Title</label><input type="text" id="taskTitle" placeholder="What needs to happen"></div>
-        <div class="field"><label>Department</label><select id="taskDept"><option value="general">General</option><option value="video">Video</option><option value="social">Social</option><option value="content">Content</option></select></div>
-        <div class="field"><label>Execution Mode</label><select id="taskExecMode"><option value="parallel">Parallel (default)</option><option value="sequential">Sequential</option><option value="locked">Locked (resource)</option></select></div>
-        <div class="field" id="lockedResField" style="display:none"><label>Locked Resource Name</label><input type="text" id="lockedResource" placeholder="e.g. video_renderer"></div>
-        <div class="field"><label>Priority</label><select id="taskPriorityLabel"><option value="MEDIUM">Medium</option><option value="CRITICAL">Critical</option><option value="HIGH">High</option><option value="LOW">Low</option></select></div>
-        <div class="field"><label>Impact (0-1)</label><input type="number" id="taskImpact" value="0.5" min="0" max="1" step="0.1"></div>
-        <div class="field"><label>Urgency (0-1)</label><input type="number" id="taskUrgency" value="0.5" min="0" max="1" step="0.1"></div>
-        <div class="field"><label>ROI (0-1)</label><input type="number" id="taskROI" value="0.5" min="0" max="1" step="0.1"></div>
-        <div class="field"><label>Dependencies</label><textarea id="taskDeps" placeholder='One per line:&#10;task-123 | succeeded&#10;task-456 | completed' style="min-height:60px"></textarea><div class="hint">Format: task_id | condition (completed/succeeded/failed)</div></div>
-        <div class="field"><label>Max Retries</label><input type="number" id="taskMaxRetries" value="3" min="0" max="10"></div>
-        <div class="field"><label>Payload (JSON)</label><textarea id="taskPayload" placeholder='{"action":"deploy","files":["index.html"]}'></textarea></div>
-        <button class="btn-primary" onclick="createTask()">Create & Queue</button>
-        <div class="st" id="createSt"></div>
+    <!-- SHOWRUNNER PANEL -->
+    <div class="panel active" id="panel-showrunner">
+      <div class="card" style="flex:1;display:flex;flex-direction:column">
+        <div class="card-title">Showrunner · Business Director</div>
+        <div class="chat-stream" id="srChat"></div>
+        <div class="field">
+          <textarea id="srInput" placeholder="What's the next move?" rows="2"></textarea>
+          <span class="voice-trigger" onclick="triggerVoiceNote()">🎤 Or drop a voice note...</span>
+        </div>
+        <button class="btn-primary" onclick="sendShowrunner()">Send</button>
+        <div class="guardrail-msg" id="guardrailMsg"></div>
       </div>
     </div>
-    <!-- QUEUE -->
-    <div class="panel" id="panel-queue">
-      <div id="queueDeptFilters" style="margin-bottom:10px;display:flex;gap:4px;flex-wrap:wrap"></div>
-      <div id="queueList"></div>
-      <button class="btn-ghost" style="width:100%;margin-top:8px" onclick="refreshAll()">Refresh Queue</button>
+    <!-- CONTENT FACTORY PANEL -->
+    <div class="panel" id="panel-factory">
+      <div class="card">
+        <div class="card-title">Content Factory · Creative Director</div>
+        <div class="row" style="margin-bottom:12px">
+          <button class="btn-sm active-filter" onclick="setRole('hook')">🪝 Hook</button>
+          <button class="btn-sm" onclick="setRole('narrative')">📖 Narrative</button>
+          <button class="btn-sm" onclick="setRole('offer')">💸 Offer</button>
+          <button class="btn-sm" onclick="setRole('visual')">🖼 Visual</button>
+          <button class="btn-sm" onclick="setRole('script')">🎬 Script</button>
+        </div>
+        <div class="field"><label id="roleLabel">Hook Architect</label><textarea id="cfInput" placeholder="Describe the content need..."></textarea></div>
+        <button class="btn-primary" onclick="generateContent()">Generate</button>
+        <div class="st" id="cfSt"></div>
+        <div id="cfOutput" style="margin-top:12px"></div>
+      </div>
     </div>
-    <!-- BOARD -->
-    <div class="panel" id="panel-board">
-      <div id="boardFilters" style="margin-bottom:10px;display:flex;gap:4px;flex-wrap:wrap"></div>
-      <div id="taskBoard"></div>
-      <button class="btn-ghost" style="width:100%;margin-top:8px" onclick="refreshAll()">Refresh Board</button>
-    </div>
-    <!-- DASHBOARD -->
-    <div class="panel" id="panel-dash">
-      <div id="dashContent"></div>
-      <button class="btn-ghost" style="width:100%" onclick="refreshAll()">Refresh</button>
-    </div>
-  </div>
-  <!-- TASK DETAIL MODAL -->
-  <div class="modal-overlay" id="taskModal">
-    <div class="modal">
-      <button class="modal-close" onclick="closeModal()">✕</button>
-      <div class="modal-title" id="modalTitle"></div>
-      <div id="modalBody"></div>
+    <!-- DESIGN PANEL -->
+    <div class="panel" id="panel-design">
+      <div class="card">
+        <div class="card-title">Design · Component Staging</div>
+        <div id="designFileList">Loading...</div>
+        <button class="btn-ghost" style="width:100%;margin-top:8px" onclick="commitDesign()">Commit to Cloud Brain</button>
+        <div class="st" id="designSt"></div>
+      </div>
     </div>
   </div>
 </main>
 
-<script>
-// ──────────────────────────────────────
-// MISSION RUNNER — FULL SPEC ENGINE v1.0
-// ──────────────────────────────────────
+<!-- FLYING BUTTON -->
+<button class="flying-btn" id="flyingBtn" onclick="toggleRadial()" oncontextmenu="event.preventDefault()">⚡</button>
+<div class="radial-menu" id="radialMenu">
+  <button class="radial-item" onclick="captureClipboard()" title="Capture Clipboard">📋</button>
+  <button class="radial-item" onclick="triggerVoiceNote()" title="Voice Note">🎤</button>
+  <button class="radial-item" onclick="quickGoal()" title="Set Goal">🎯</button>
+</div>
 
-let GH_TOKEN=localStorage.getItem('mr_ghtoken')||'';
-let GH_REPO=localStorage.getItem('mr_ghrepo')||'';
-let tasks={};
-let schedulerInterval=null;
-let boardFilter='ALL';
-let queueDept='ALL';
-let lockedResources={}; // track which resources are locked
-const DEPT_WORKER_LIMITS={general:2, video:1, social:2, content:1};
-let deptRunning={};
+<script>
+// ── STATE ──
+let GH_TOKEN=localStorage.getItem('mmos_ghtoken')||'';
+let GH_REPO=localStorage.getItem('mmos_ghrepo')||'madnessgate44-debug/Meshmesh-';
+let geminiKey=localStorage.getItem('meshmesh_gemini_direct')||'';
+let activeRole='hook';
+let showrunnerChat=[];
+let profile={business:'', goal:'', strategy:'', constraints:'5h/week, phone-only'};
+let notificationBadges={showrunner:false, factory:false, design:false};
 
 // ── UTILS ──
 function delay(ms){return new Promise(r=>setTimeout(r,ms));}
-function toBase64(str){try{return btoa(unescape(encodeURIComponent(str)));}catch(e){const bytes=new TextEncoder().encode(str);let bin='';bytes.forEach(b=>bin+=String.fromCharCode(b));return btoa(bin);}}
+function toBase64(str){try{return btoa(unescape(encodeURIComponent(str)));}catch(e){return btoa(String.fromCharCode(...new TextEncoder().encode(str)));}}
 function setSt(id,type,msg){const el=document.getElementById(id);if(!el)return;el.className='st show '+type;el.innerHTML=type==='loading'?'<span class="spinner"></span>'+msg:msg;}
 function hideSt(id){const el=document.getElementById(id);if(el)el.className='st';}
-function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
-
 async function ghFetch(path,opts={}){
   const res=await fetch('https://api.github.com'+path,{...opts,headers:{...opts.headers,Authorization:'Bearer '+GH_TOKEN,Accept:'application/vnd.github+json','X-GitHub-Api-Version':'2022-11-28'}});
   const body=await res.json();
   if(!res.ok) throw new Error('GitHub '+res.status+': '+(body.message||''));
   return body;
+}
+async function saveStateFile(filename, content){
+  const path='mishstate/'+filename;
+  let sha=null;
+  try{const ex=await ghFetch('/repos/'+GH_REPO+'/contents/'+path);sha=ex.sha;}catch(e){}
+  await ghFetch('/repos/'+GH_REPO+'/contents/'+path,{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify({message:'update '+filename,content:toBase64(JSON.stringify(content,null,2)),sha:sha||undefined})});
+}
+async function loadStateFile(filename){
+  try{
+    const file=await ghFetch('/repos/'+GH_REPO+'/contents/mishstate/'+filename);
+    return JSON.parse(decodeURIComponent(escape(atob(file.content))));
+  }catch(e){return null;}
 }
 
 // ── CONNECT ──
@@ -188,7 +169,7 @@ async function connectRepo(){
   const t=document.getElementById('ghToken').value.trim();
   const r=document.getElementById('ghRepo').value.trim();
   if(!t||!r){setSt('setupSt','error','Fill both fields.');return;}
-  localStorage.setItem('mr_ghtoken',t); localStorage.setItem('mr_ghrepo',r);
+  localStorage.setItem('mmos_ghtoken',t); localStorage.setItem('mmos_ghrepo',r);
   GH_TOKEN=t; GH_REPO=r;
   try{
     await ghFetch('/repos/'+r);
@@ -196,347 +177,202 @@ async function connectRepo(){
     document.getElementById('connLabel').textContent=r;
     document.getElementById('setupCard').style.display='none';
     document.getElementById('mainUI').style.display='flex';
-    await loadAllTasks();
-    startScheduler();
-    refreshAll();
+    await loadCloudState();
+    addShowrunnerMessage('system','Mish Mish OS online. Mode 0 active — I’m listening. What’s our current goal?');
   }catch(e){setSt('setupSt','error','Connection failed: '+e.message);}
 }
-
 window.onload=function(){
-  document.getElementById('taskExecMode').addEventListener('change',function(){
-    document.getElementById('lockedResField').style.display=this.value==='locked'?'block':'none';
-  });
-  if(GH_TOKEN&&GH_REPO) connectRepo().catch(()=>{});
+  if(GH_TOKEN) connectRepo().catch(()=>{});
+  // long-press on flying button
+  const btn=document.getElementById('flyingBtn');
+  let pressTimer;
+  btn.addEventListener('touchstart',(e)=>{pressTimer=setTimeout(()=>{captureClipboard();},800);});
+  btn.addEventListener('touchend',()=>clearTimeout(pressTimer));
+  btn.addEventListener('touchmove',()=>clearTimeout(pressTimer));
+  btn.addEventListener('mousedown',(e)=>{pressTimer=setTimeout(()=>{captureClipboard();},800);});
+  btn.addEventListener('mouseup',()=>clearTimeout(pressTimer));
+  btn.addEventListener('mouseleave',()=>clearTimeout(pressTimer));
 };
 
-// ── TASK STORAGE ──
-async function saveTask(task){
-  const path='tasks/'+task.task_id+'.json';
-  let sha=null;
-  try{const ex=await ghFetch('/repos/'+GH_REPO+'/contents/'+path);sha=ex.sha;}catch(e){}
-  await ghFetch('/repos/'+GH_REPO+'/contents/'+path,{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify({message:'update '+task.task_id,content:toBase64(JSON.stringify(task,null,2)),sha:sha||undefined})});
+// ── CLOUD STATE ──
+async function loadCloudState(){
+  const bp=await loadStateFile('business_profile.json');
+  if(bp) profile=bp;
+  const chat=await loadStateFile('showrunner_chat.json');
+  if(chat) showrunnerChat=chat;
+  renderShowrunnerChat();
 }
 
-async function loadAllTasks(){
-  tasks={};
-  deptRunning={};
-  lockedResources={};
+// ── SHOWRUNNER ──
+function addShowrunnerMessage(role, text){
+  showrunnerChat.push({role, text, time:new Date().toISOString()});
+  renderShowrunnerChat();
+  saveStateFile('showrunner_chat.json', showrunnerChat);
+}
+function renderShowrunnerChat(){
+  const container=document.getElementById('srChat');
+  container.innerHTML=showrunnerChat.map(m=>{
+    const cls=m.role==='user'?'chat-user':'chat-system';
+    return `<div class="chat-bubble ${cls}">${esc(m.text)}</div>`;
+  }).join('');
+  container.scrollTop=container.scrollHeight;
+}
+async function sendShowrunner(){
+  const input=document.getElementById('srInput').value.trim();
+  if(!input) return;
+  if(!geminiKey){addShowrunnerMessage('system','Missing Gemini key. Go to AI Builder in Meshmesh and save it.');return;}
+  // Single-question guard: if last system message was a question, only allow answer
+  const lastMsg=showrunnerChat[showrunnerChat.length-1];
+  if(lastMsg&&lastMsg.role==='system'&&lastMsg.text.includes('?')){
+    // That's fine, answer allowed
+  }
+  addShowrunnerMessage('user',input);
+  document.getElementById('srInput').value='';
+  // Call Gemini as Showrunner
+  const thinking=document.createElement('div');
+  thinking.className='chat-bubble chat-thinking'; thinking.textContent='Analyzing...';
+  document.getElementById('srChat').appendChild(thinking);
   try{
-    const items=await ghFetch('/repos/'+GH_REPO+'/contents/tasks?per_page=100');
-    if(!Array.isArray(items)) return;
-    for(const item of items){
-      if(item.name.endsWith('.json')){
-        try{
-          const file=await ghFetch('/repos/'+GH_REPO+'/contents/'+item.path);
-          const content=JSON.parse(decodeURIComponent(escape(atob(file.content))));
-          tasks[content.task_id]=content;
-          if(content.status==='RUNNING'){
-            deptRunning[content.department]=(deptRunning[content.department]||0)+1;
-            if(content.execution_mode==='locked'&&content.locked_resource) lockedResources[content.locked_resource]=content.task_id;
-          }
-        }catch(e){}
-      }
+    const prompt=buildShowrunnerPrompt(input);
+    const reply=await callGemini(prompt);
+    thinking.remove();
+    addShowrunnerMessage('system',reply);
+    // Set notification badge on Content Factory if task dispatched
+    if(reply.includes('Content Factory')||reply.includes('dispatch')){
+      setBadge('factory',true);
     }
+  }catch(e){
+    thinking.remove();
+    addShowrunnerMessage('system','Error: '+e.message);
+  }
+}
+function buildShowrunnerPrompt(userInput){
+  return `You are the Showrunner of Mish Mish OS, an autonomous business engine.
+Current profile: ${JSON.stringify(profile)}.
+Your job: Guide the user through Modes 0-3.
+- Mode 0 (ingest): You are continuously receiving context.
+- Mode 1 (validate): If critical variables missing, ask max 2 target questions.
+- Mode 2 (optimize): Offer strategic paths with trade-offs.
+- Mode 3 (execute): Dispatch a single task to Content Factory.
+
+Rules:
+- Only ONE question per turn (Single-Question Guardrail).
+- If the user tries to skip verification, say: "I hear you — but the system produces better results when we move through each step. Let's keep going."
+- Always prompt: "Want to elaborate via voice note? (🎤)"
+- Keep responses concise, mobile-friendly.
+
+User says: "${userInput}"
+Reply:`;
+}
+async function callGemini(prompt){
+  const res=await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key='+geminiKey,{
+    method:'POST',headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({contents:[{parts:[{text:prompt}]}],generationConfig:{temperature:0.7,maxOutputTokens:600}})
+  });
+  const data=await res.json();
+  if(!res.ok) throw new Error(data.error?data.error.message:'Gemini error');
+  return data.candidates[0].content.parts[0].text.trim();
+}
+function triggerVoiceNote(){
+  addShowrunnerMessage('system','🎤 Voice note: Please use your phone’s recorder, then paste the transcript here. I’ll process it immediately.');
+  document.getElementById('srInput').focus();
+}
+function setBadge(tab, show){
+  notificationBadges[tab]=show;
+  const badge=document.getElementById('badge-'+tab);
+  if(show) badge.classList.add('show');
+  else badge.classList.remove('show');
+}
+
+// ── CONTENT FACTORY ──
+function setRole(role){
+  activeRole=role;
+  const labels={hook:'Hook Architect', narrative:'Narrative Engineer', offer:'Offer Framer', visual:'Visual Brief Writer', script:'Video Script Director'};
+  document.getElementById('roleLabel').textContent=labels[role];
+  document.querySelectorAll('#panel-factory .btn-sm').forEach(b=>b.classList.remove('active-filter'));
+  event.target.classList.add('active-filter');
+}
+async function generateContent(){
+  const input=document.getElementById('cfInput').value.trim();
+  if(!input){setSt('cfSt','error','Describe what you need.');return;}
+  if(!geminiKey){setSt('cfSt','error','Missing Gemini key.');return;}
+  setSt('cfSt','loading','Generating...');
+  const rolePrompts={
+    hook:'Craft an open loop hook for the platform mentioned. Use curiosity gap. Return ONLY the hook.',
+    narrative:'Write a StoryBrand narrative: Character → Problem → Guide → Plan → CTA. Use the input as context.',
+    offer:'Formulate a high-value offer using $100M Offers principles. Include value stack, pricing, guarantee.',
+    visual:'Generate a detailed cinematic prompt for Canva/AI: mood, lighting, color temperature, exclusions.',
+    script:'Write a three-beat video script: Hook (0-3s) → Story (4-45s) → CTA (46-60s).'
+  };
+  try{
+    const res=await callGemini(`You are the ${document.getElementById('roleLabel').textContent} of Mish Mish OS Content Factory.
+${rolePrompts[activeRole]}
+Context: ${input}
+Output:`);
+    document.getElementById('cfOutput').innerHTML=`<div class="card"><div class="card-title">${document.getElementById('roleLabel').textContent} Output</div><p style="white-space:pre-wrap;font-size:13px">${esc(res)}</p></div>`;
+    hideSt('cfSt');
+    // auto-save to design staging
+    saveStateFile('staging_'+activeRole+'.json',{role:activeRole,content:res,time:new Date().toISOString()});
+    setBadge('design',true);
+  }catch(e){setSt('cfSt','error',e.message);}
+}
+
+// ── DESIGN ──
+async function loadDesignFiles(){
+  try{
+    const items=await ghFetch('/repos/'+GH_REPO+'/contents/mishstate?per_page=50');
+    const staging=items.filter(i=>i.name.startsWith('staging_'));
+    document.getElementById('designFileList').innerHTML=staging.length?
+      staging.map(i=>`<div class="list-item" style="justify-content:space-between"><span>${i.name}</span><button class="btn-sm" onclick="pushToMain('${i.name}')">Commit</button></div>`).join(''):
+      '<div class="empty-state">No staged components yet.</div>';
   }catch(e){}
 }
-
-// ── PRIORITY ENGINE ──
-function computePriorityScore(task){
-  const weights={impact:0.30, urgency:0.25, roi:0.20, dependency:0.15, cost:0.05, load:0.05};
-  const impact=parseFloat(task.impact)||0.5;
-  const urgency=parseFloat(task.urgency)||0.5;
-  const roi=parseFloat(task.roi)||0.5;
-  const depCount=task.depends_on?task.depends_on.length:0;
-  const depBonus=Math.min(1,depCount/5);
-  const cost=parseFloat(task.cost)||0;
-  const load=parseFloat(task.system_load)||0;
-  return weights.impact*impact + weights.urgency*urgency + weights.roi*roi + weights.dependency*depBonus - weights.cost*cost - weights.load*load;
+async function pushToMain(filename){
+  setSt('designSt','loading','Committing...');
+  try{
+    const data=await loadStateFile(filename);
+    const targetPath='content/'+filename.replace('staging_','');
+    let sha=null;
+    try{const ex=await ghFetch('/repos/'+GH_REPO+'/contents/'+targetPath);sha=ex.sha;}catch(e){}
+    await ghFetch('/repos/'+GH_REPO+'/contents/'+targetPath,{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify({message:'Commit '+targetPath,content:toBase64(JSON.stringify(data,null,2)),sha:sha||undefined})});
+    setSt('designSt','success','Committed to Cloud Brain.');
+    setBadge('design',false);
+  }catch(e){setSt('designSt','error',e.message);}
 }
+function commitDesign(){loadDesignFiles();}
 
-// ── CREATE TASK ──
-function generateUUID(){return 'task-'+Date.now()+'-'+Math.random().toString(36).substr(2,6);}
-async function createTask(){
-  const title=document.getElementById('taskTitle').value.trim();
-  if(!title){setSt('createSt','error','Title required.');return;}
-  let payload={};
-  try{payload=JSON.parse(document.getElementById('taskPayload').value||'{}');}catch(e){setSt('createSt','error','Invalid payload JSON.');return;}
-  const depsRaw=document.getElementById('taskDeps').value.trim();
-  const depends_on=[];
-  if(depsRaw){
-    for(const line of depsRaw.split('\n')){
-      const parts=line.split('|').map(s=>s.trim());
-      if(parts[0]) depends_on.push({task_id:parts[0], condition:parts[1]||'completed'});
-    }
+// ── FLYING BUTTON ──
+function toggleRadial(){
+  document.getElementById('radialMenu').classList.toggle('show');
+}
+async function captureClipboard(){
+  try{
+    const text=await navigator.clipboard.readText();
+    addShowrunnerMessage('system','📋 Clipboard captured: '+text.substring(0,200)+(text.length>200?'...':''));
+    document.getElementById('radialMenu').classList.remove('show');
+  }catch(e){addShowrunnerMessage('system','Clipboard access denied. Paste manually.');}
+}
+function quickGoal(){
+  const goal=prompt('Set CURRENT_GOAL:');
+  if(goal){
+    profile.goal=goal;
+    saveStateFile('business_profile.json',profile);
+    addShowrunnerMessage('system','🎯 Goal set: '+goal);
   }
-  const task={
-    task_id:generateUUID(), title,
-    department:document.getElementById('taskDept').value,
-    execution_mode:document.getElementById('taskExecMode').value,
-    locked_resource:document.getElementById('taskExecMode').value==='locked'?document.getElementById('lockedResource').value.trim():null,
-    status:'CREATED',
-    priority_label:document.getElementById('taskPriorityLabel').value,
-    priority_score:0,
-    impact:parseFloat(document.getElementById('taskImpact').value)||0.5,
-    urgency:parseFloat(document.getElementById('taskUrgency').value)||0.5,
-    roi:parseFloat(document.getElementById('taskROI').value)||0.5,
-    cost:0, system_load:0,
-    depends_on, payload,
-    max_retries:parseInt(document.getElementById('taskMaxRetries').value)||3,
-    retry_count:0,
-    recovery_stage:0,
-    recovery_log:[],
-    created_at:new Date().toISOString(), updated_at:new Date().toISOString()
-  };
-  task.priority_score=computePriorityScore(task);
-  // CREATED → VALIDATED → QUEUED
-  task.status='VALIDATED'; task.updated_at=new Date().toISOString();
-  task.recovery_log.push({time:new Date().toISOString(), event:'VALIDATED'});
-  task.status='QUEUED'; task.updated_at=new Date().toISOString();
-  task.recovery_log.push({time:new Date().toISOString(), event:'QUEUED'});
-  await saveTask(task);
-  tasks[task.task_id]=task;
-  setSt('createSt','success','Task '+task.task_id+' created & queued.');
-  document.getElementById('taskTitle').value=''; document.getElementById('taskPayload').value=''; document.getElementById('taskDeps').value='';
-  refreshAll();
 }
 
-// ── STATE MACHINE ──
-function canDispatch(task){
-  if(task.status!=='QUEUED') return false;
-  // check department worker limit
-  const running=deptRunning[task.department]||0;
-  const limit=DEPT_WORKER_LIMITS[task.department]||2;
-  if(task.execution_mode==='sequential' && running>0) return false;
-  if(running>=limit) return false;
-  // check locked resource
-  if(task.execution_mode==='locked' && task.locked_resource && lockedResources[task.locked_resource]) return false;
-  // check dependencies
-  if(!task.depends_on||task.depends_on.length===0) return true;
-  return task.depends_on.every(dep=>{
-    const depTask=tasks[dep.task_id];
-    if(!depTask) return false;
-    const cond=dep.condition||'completed';
-    if(cond==='completed') return depTask.status==='COMPLETED'||depTask.status==='ARCHIVED';
-    if(cond==='succeeded') return depTask.status==='COMPLETED';
-    if(cond==='failed') return depTask.status==='FAILED';
-    return depTask.status==='COMPLETED';
-  });
-}
-
-async function dispatchTask(task){
-  task.status='RUNNING'; task.updated_at=new Date().toISOString();
-  task.recovery_log.push({time:new Date().toISOString(), event:'RUNNING'});
-  deptRunning[task.department]=(deptRunning[task.department]||0)+1;
-  if(task.execution_mode==='locked'&&task.locked_resource) lockedResources[task.locked_resource]=task.task_id;
-  await saveTask(task);
-  // Simulate work — in production this calls external workers
-  const duration=2000+Math.random()*4000;
-  setTimeout(async ()=>{
-    const success=Math.random()>0.15; // 85% success rate
-    if(success){
-      task.status='COMPLETED'; task.completed_at=new Date().toISOString();
-      task.recovery_log.push({time:new Date().toISOString(), event:'COMPLETED'});
-    } else {
-      task.status='RETRYING'; task.retry_count=1;
-      task.recovery_log.push({time:new Date().toISOString(), event:'RETRYING', retry:1});
-    }
-    task.updated_at=new Date().toISOString();
-    deptRunning[task.department]=Math.max(0,(deptRunning[task.department]||1)-1);
-    if(task.execution_mode==='locked'&&task.locked_resource) delete lockedResources[task.locked_resource];
-    await saveTask(task);
-    if(task.status==='RETRYING'){
-      const backoff=Math.pow(2,task.retry_count)*1000;
-      setTimeout(async()=>{
-        if(task.retry_count>=task.max_retries){
-          task.status='FAILED'; task.recovery_log.push({time:new Date().toISOString(), event:'FAILED', reason:'Max retries exhausted'});
-        } else {
-          task.status='QUEUED'; task.recovery_log.push({time:new Date().toISOString(), event:'REQUEUED'});
-        }
-        task.updated_at=new Date().toISOString();
-        await saveTask(task);
-        refreshAll();
-      },backoff);
-    }
-    refreshAll();
-    // Auto-archive completed tasks after 10 seconds
-    if(task.status==='COMPLETED'){
-      setTimeout(async()=>{
-        if(tasks[task.task_id]&&tasks[task.task_id].status==='COMPLETED'){
-          tasks[task.task_id].status='ARCHIVED';
-          tasks[task.task_id].recovery_log.push({time:new Date().toISOString(), event:'ARCHIVED'});
-          tasks[task.task_id].updated_at=new Date().toISOString();
-          await saveTask(tasks[task.task_id]);
-          refreshAll();
-        }
-      },10000);
-    }
-  },duration);
-}
-
-// ── SCHEDULER LOOP ──
-async function runSchedulerTick(){
-  const queued=Object.values(tasks).filter(t=>t.status==='QUEUED');
-  queued.sort((a,b)=>b.priority_score-a.priority_score);
-  for(const task of queued){
-    // check if dependencies are unmet → WAITING_DEPENDENCY
-    if(task.depends_on&&task.depends_on.length>0){
-      const unmet=task.depends_on.some(dep=>{
-        const dt=tasks[dep.task_id];
-        if(!dt) return true;
-        const cond=dep.condition||'completed';
-        if(cond==='completed') return dt.status!=='COMPLETED'&&dt.status!=='ARCHIVED';
-        if(cond==='succeeded') return dt.status!=='COMPLETED';
-        if(cond==='failed') return dt.status!=='FAILED';
-        return dt.status!=='COMPLETED';
-      });
-      if(unmet){
-        task.status='WAITING_DEPENDENCY'; task.updated_at=new Date().toISOString();
-        task.recovery_log.push({time:new Date().toISOString(), event:'WAITING_DEPENDENCY'});
-        await saveTask(task); continue;
-      }
-    }
-    if(canDispatch(task)){
-      await dispatchTask(task);
-      // if sequential, only dispatch one per department per tick
-      if(task.execution_mode==='sequential') break;
-    }
-  }
-  refreshAll();
-}
-
-function startScheduler(){
-  if(schedulerInterval) clearInterval(schedulerInterval);
-  schedulerInterval=setInterval(runSchedulerTick,5000);
-  runSchedulerTick(); // immediate first tick
-}
-
-// ── UI: QUEUE ──
-function renderQueue(){
-  const container=document.getElementById('queueList');
-  let list=Object.values(tasks).filter(t=>t.status==='QUEUED'||t.status==='WAITING_DEPENDENCY');
-  if(queueDept!=='ALL') list=list.filter(t=>t.department===queueDept);
-  list.sort((a,b)=>b.priority_score-a.priority_score);
-  if(!list.length){container.innerHTML='<div class="empty-state">Queue empty</div>';return;}
-  container.innerHTML=list.map(t=>`
-    <div class="list-item" onclick="openTaskDetail('${t.task_id}')">
-      <div class="task-header">
-        <span class="task-title">${esc(t.title)} <span class="task-dept">[${t.department}]</span></span>
-        <span class="tag tag-${t.priority_label}">${t.priority_label}</span>
-      </div>
-      <div class="task-meta">
-        <span class="tag tag-status-${t.status}">${t.status}</span>
-        <span>Score: ${t.priority_score.toFixed(2)}</span>
-        ${t.execution_mode!=='parallel'?`<span class="exec-mode-badge exec-${t.execution_mode}">${t.execution_mode}</span>`:''}
-      </div>
-    </div>
-  `).join('');
-  // dept filters
-  const depts=['ALL',...new Set(Object.values(tasks).map(t=>t.department))];
-  document.getElementById('queueDeptFilters').innerHTML=depts.map(d=>`<button class="btn-sm${queueDept===d?' active-filter':''}" onclick="queueDept='${d}';renderQueue();">${d}</button>`).join('');
-}
-
-// ── UI: BOARD ──
-function renderBoard(){
-  const container=document.getElementById('taskBoard');
-  let list=Object.values(tasks);
-  if(boardFilter!=='ALL') list=list.filter(t=>t.status===boardFilter);
-  list.sort((a,b)=>new Date(b.updated_at)-new Date(a.updated_at));
-  if(!list.length){container.innerHTML='<div class="empty-state">No tasks</div>';return;}
-  container.innerHTML=list.map(t=>`
-    <div class="list-item" onclick="openTaskDetail('${t.task_id}')">
-      <div class="task-header">
-        <span class="task-title">${esc(t.title)} <span class="task-dept">[${t.department}]</span></span>
-        <span class="tag tag-${t.priority_label}">${t.priority_label}</span>
-      </div>
-      <div class="task-meta">
-        <span class="tag tag-status-${t.status}">${t.status}</span>
-        ${t.retry_count>0?`<span>Retries:${t.retry_count}/${t.max_retries}</span>`:''}
-        <span style="font-size:10px">${new Date(t.updated_at).toLocaleTimeString()}</span>
-      </div>
-    </div>
-  `).join('');
-  const statuses=['ALL','QUEUED','RUNNING','WAITING_DEPENDENCY','WAITING_APPROVAL','BLOCKED','RETRYING','COMPLETED','FAILED','ARCHIVED','CANCELLED'];
-  document.getElementById('boardFilters').innerHTML=statuses.map(s=>`<button class="btn-sm${boardFilter===s?' active-filter':''}" onclick="boardFilter='${s}';renderBoard();">${s.replace('_',' ')}</button>`).join('');
-}
-
-// ── UI: DASHBOARD ──
-function renderDashboard(){
-  const all=Object.values(tasks);
-  const counts={};
-  ['CREATED','VALIDATED','QUEUED','RUNNING','WAITING_DEPENDENCY','WAITING_APPROVAL','BLOCKED','RETRYING','COMPLETED','FAILED','ARCHIVED','CANCELLED'].forEach(s=>counts[s]=all.filter(t=>t.status===s).length);
-  const depts={};
-  all.forEach(t=>{if(!depts[t.department])depts[t.department]={total:0,running:0,completed:0,failed:0,queued:0};depts[t.department].total++;depts[t.department][t.status.toLowerCase()]=(depts[t.department][t.status.toLowerCase()]||0)+1;});
-  let html='<div class="stat-grid">';
-  html+=`<div class="stat-card"><div class="stat-value">${counts.QUEUED}</div><div class="stat-label">Queued</div></div>`;
-  html+=`<div class="stat-card"><div class="stat-value">${counts.RUNNING}</div><div class="stat-label">Running</div></div>`;
-  html+=`<div class="stat-card"><div class="stat-value">${counts.COMPLETED}</div><div class="stat-label">Completed</div></div>`;
-  html+=`<div class="stat-card"><div class="stat-value">${counts.FAILED}</div><div class="stat-label">Failed</div></div>`;
-  html+=`<div class="stat-card"><div class="stat-value">${counts.WAITING_DEPENDENCY}</div><div class="stat-label">Waiting Dep</div></div>`;
-  html+=`<div class="stat-card"><div class="stat-value">${counts.RETRYING+counts.BLOCKED}</div><div class="stat-label">Retry/Blocked</div></div>`;
-  html+='</div>';
-  html+='<div class="card" style="margin-top:8px"><div class="card-title">Departments</div>';
-  for(const [dept,stats] of Object.entries(depts)){
-    html+=`<div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid #1f2937;font-size:13px"><span>${dept} (${stats.total})</span><span style="color:#94a3b8">Running:${stats.running||0} | Done:${stats.completed||0} | Failed:${stats.failed||0}</span></div>`;
-  }
-  html+='</div>';
-  document.getElementById('dashContent').innerHTML=html;
-}
-
-// ── TASK DETAIL MODAL ──
-function openTaskDetail(id){
-  const t=tasks[id];
-  if(!t) return;
-  document.getElementById('modalTitle').textContent=t.title||t.task_id;
-  let depsHtml='';
-  if(t.depends_on&&t.depends_on.length>0){
-    depsHtml='<div class="modal-section"><h4>Dependencies</h4>'+t.depends_on.map(d=>{
-      const dt=tasks[d.task_id];
-      return `<p>→ ${d.task_id} | condition: ${d.condition} ${dt?`<span class="tag tag-status-${dt.status}">${dt.status}</span>`:'(not found)'}</p>`;
-    }).join('')+'</div>';
-  }
-  let recoveryHtml='';
-  if(t.recovery_log&&t.recovery_log.length>0){
-    recoveryHtml='<div class="modal-section"><h4>Recovery Log</h4><div class="recovery-log">'+t.recovery_log.map(r=>`[${new Date(r.time).toLocaleTimeString()}] ${r.event} ${r.retry?'(retry '+r.retry+')':''} ${r.reason||''}`).join('\n')+'</div></div>';
-  }
-  document.getElementById('modalBody').innerHTML=`
-    <div class="modal-section"><p><strong>ID:</strong> ${t.task_id}</p><p><strong>Department:</strong> ${t.department} | <strong>Mode:</strong> ${t.execution_mode}${t.locked_resource?' → '+t.locked_resource:''}</p><p><strong>Status:</strong> <span class="tag tag-status-${t.status}">${t.status}</span></p><p><strong>Priority:</strong> ${t.priority_label} (score: ${t.priority_score.toFixed(3)})</p><p><strong>Impact:</strong> ${t.impact} | <strong>Urgency:</strong> ${t.urgency} | <strong>ROI:</strong> ${t.roi}</p><p><strong>Retries:</strong> ${t.retry_count}/${t.max_retries} | <strong>Recovery Stage:</strong> ${t.recovery_stage}/5</p><p><strong>Created:</strong> ${new Date(t.created_at).toLocaleString()}</p></div>
-    ${depsHtml}
-    <div class="modal-section"><h4>Payload</h4><pre>${esc(JSON.stringify(t.payload,null,2))}</pre></div>
-    ${recoveryHtml}
-    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:12px">
-      ${t.status==='QUEUED'||t.status==='WAITING_DEPENDENCY'?`<button class="btn-ghost" onclick="forceRun('${id}')">▶ Force Run</button>`:''}
-      ${t.status==='FAILED'||t.status==='RETRYING'?`<button class="btn-ghost" onclick="manualReset('${id}')">🔄 Reset & Requeue</button>`:''}
-      ${t.status==='RUNNING'?`<button class="btn-ghost" onclick="forceComplete('${id}')">✅ Force Complete</button><button class="btn-ghost" onclick="forceFail('${id}')">❌ Force Fail</button>`:''}
-      <button class="btn-ghost" onclick="cancelTask('${id}')">🚫 Cancel</button>
-    </div>
-  `;
-  document.getElementById('taskModal').style.display='flex';
-}
-function closeModal(){document.getElementById('taskModal').style.display='none';}
-
-async function forceRun(id){const t=tasks[id];if(t){t.status='QUEUED';t.updated_at=new Date().toISOString();await saveTask(t);refreshAll();closeModal();}}
-async function manualReset(id){const t=tasks[id];if(t){t.retry_count=0;t.recovery_stage=0;t.status='QUEUED';t.updated_at=new Date().toISOString();t.recovery_log.push({time:new Date().toISOString(),event:'MANUAL_RESET'});await saveTask(t);refreshAll();closeModal();}}
-async function forceComplete(id){const t=tasks[id];if(t){t.status='COMPLETED';t.completed_at=new Date().toISOString();t.updated_at=new Date().toISOString();deptRunning[t.department]=Math.max(0,(deptRunning[t.department]||1)-1);if(t.locked_resource)delete lockedResources[t.locked_resource];t.recovery_log.push({time:new Date().toISOString(),event:'FORCE_COMPLETED'});await saveTask(t);refreshAll();closeModal();}}
-async function forceFail(id){const t=tasks[id];if(t){t.status='FAILED';t.updated_at=new Date().toISOString();deptRunning[t.department]=Math.max(0,(deptRunning[t.department]||1)-1);if(t.locked_resource)delete lockedResources[t.locked_resource];t.recovery_log.push({time:new Date().toISOString(),event:'FORCE_FAILED'});await saveTask(t);refreshAll();closeModal();}}
-async function cancelTask(id){const t=tasks[id];if(t&&confirm('Cancel task '+id+'?')){t.status='CANCELLED';t.updated_at=new Date().toISOString();t.recovery_log.push({time:new Date().toISOString(),event:'CANCELLED'});await saveTask(t);refreshAll();closeModal();}}
-
-// ── REFRESH ──
-async function refreshAll(){
-  await loadAllTasks();
-  renderQueue();
-  renderBoard();
-  renderDashboard();
-}
-
+// ── TABS ──
 function switchTab(name,btn){
   document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
   document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
   btn.classList.add('active');
   document.getElementById('panel-'+name).classList.add('active');
-  if(name==='queue') renderQueue();
-  if(name==='board') renderBoard();
-  if(name==='dash') renderDashboard();
+  setBadge(name,false);
+  if(name==='design') loadDesignFiles();
 }
+
+// ── MISC ──
+function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
 </script>
 </body>
 </html>
