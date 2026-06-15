@@ -1,0 +1,906 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>Mish Mish OS · GAHIZ Builder</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#0b0f19;color:#e6e6e6;min-height:100vh;display:flex;flex-direction:column;overflow-x:hidden}
+header{background:#111827;padding:12px 16px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid #1f2937;position:sticky;top:0;z-index:20}
+.logo{font-weight:700;font-size:16px;display:flex;align-items:center;gap:8px}
+.logo-icon{width:28px;height:28px;background:linear-gradient(135deg,#7c3aed,#a855f7);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:14px;color:#fff}
+.badge{font-size:11px;background:#1e293b;padding:4px 10px;border-radius:20px;display:flex;align-items:center;gap:6px;color:#94a3b8}
+.dot{width:7px;height:7px;border-radius:50%;background:#475569}
+.dot.on{background:#22c55e}
+main{flex:1;max-width:560px;width:100%;margin:0 auto;padding:16px;display:flex;flex-direction:column;gap:14px;padding-bottom:80px}
+.card{background:#111827;border:1px solid #1f2937;border-radius:14px;padding:16px}
+.card-title{font-size:11px;font-weight:600;color:#64748b;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:12px}
+.tabs{display:flex;gap:4px;background:#111827;border:1px solid #1f2937;border-radius:12px;padding:4px;overflow-x:auto}
+.tab{flex:1;padding:10px 6px;border-radius:9px;border:none;background:transparent;font-size:11px;font-weight:500;color:#94a3b8;cursor:pointer;text-align:center;position:relative;white-space:nowrap}
+.tab.active{background:linear-gradient(135deg,#7c3aed,#a855f7);color:#fff}
+.panel{display:none;flex-direction:column;gap:14px}
+.panel.active{display:flex}
+.field{margin-bottom:12px;display:flex;flex-direction:column;gap:5px}
+label{font-size:11px;font-weight:600;color:#94a3b8;text-transform:uppercase}
+input,select,textarea{background:#0f172a;border:1px solid #1f2937;border-radius:10px;padding:11px 13px;font-size:14px;color:#e6e6e6;font-family:inherit;outline:none;width:100%}
+input:focus,select:focus,textarea:focus{border-color:#a855f7;box-shadow:0 0 0 3px rgba(168,85,247,0.15)}
+textarea{resize:vertical;min-height:80px;line-height:1.5}
+.btn-primary{width:100%;padding:12px;background:linear-gradient(135deg,#7c3aed,#a855f7);color:#fff;border:none;border-radius:10px;font-size:14px;font-weight:600;cursor:pointer}
+.btn-primary:disabled{opacity:0.5;cursor:not-allowed}
+.btn-ghost{padding:10px 16px;background:#1e293b;color:#cbd5e1;border:1px solid #334155;border-radius:10px;font-size:13px;font-weight:500;cursor:pointer}
+.btn-sm{padding:5px 10px;font-size:10px;background:#1e293b;color:#cbd5e1;border:1px solid #334155;border-radius:8px;cursor:pointer;margin:2px}
+.btn-sm.active-filter{background:#7c3aed;color:#fff}
+.row{display:flex;gap:8px;align-items:center;margin-top:8px;flex-wrap:wrap}
+.st{border-radius:10px;padding:10px 13px;font-size:13px;display:none;margin-top:10px}
+.st.show{display:block}
+.st.success{background:#022c22;color:#4ade80;border:1px solid #166534}
+.st.error{background:#2c0000;color:#f87171;border:1px solid #7f1d1d}
+.st.loading{background:#1e1b4b;color:#a78bfa;border:1px solid #4338ca}
+.spinner{display:inline-block;width:12px;height:12px;border:2px solid rgba(167,139,250,0.3);border-top-color:#a78bfa;border-radius:50%;animation:spin 0.7s linear infinite;vertical-align:middle;margin-right:6px}
+@keyframes spin{to{transform:rotate(360deg)}}
+.chat-stream{max-height:400px;overflow-y:auto;display:flex;flex-direction:column;gap:10px;margin-bottom:12px}
+.chat-bubble{padding:10px 14px;border-radius:12px;font-size:13px;line-height:1.6;max-width:92%;word-break:break-word}
+.chat-user{background:linear-gradient(135deg,#7c3aed,#a855f7);color:#fff;align-self:flex-end;border-bottom-right-radius:4px}
+.chat-system{background:#1e293b;border:1px solid #334155;align-self:flex-start;border-bottom-left-radius:4px}
+.chat-thinking{background:#1e1b4b;border:1px solid #4338ca;color:#a78bfa;align-self:flex-start;font-style:italic}
+.diagnostic-report{background:#0f172a;border:1px solid #334155;border-radius:10px;padding:14px;margin-top:8px;font-family:monospace;font-size:11px;line-height:1.7;white-space:pre-wrap;max-height:300px;overflow-y:auto}
+.flying-btn{position:fixed;bottom:24px;right:24px;width:56px;height:56px;border-radius:50%;background:linear-gradient(135deg,#7c3aed,#a855f7);color:#fff;border:none;font-size:24px;box-shadow:0 4px 15px rgba(124,58,237,0.4);z-index:200;display:flex;align-items:center;justify-content:center;cursor:pointer}
+.flying-btn:active{transform:scale(0.9)}
+.radial-menu{position:fixed;bottom:90px;right:24px;display:none;flex-direction:column;gap:8px;z-index:199}
+.radial-menu.show{display:flex}
+.radial-item{width:48px;height:48px;border-radius:50%;background:#1e293b;border:1px solid #334155;color:#e6e6e6;font-size:18px;display:flex;align-items:center;justify-content:center;cursor:pointer}
+.file-item{display:flex;align-items:center;justify-content:space-between;padding:8px;background:#0f172a;border-radius:8px;margin-bottom:6px}
+.file-item span{word-break:break-all;flex:1;font-size:12px;margin-right:8px}
+.mission-card{background:#0f172a;border:1px solid #2d3a4a;border-radius:12px;padding:12px;margin-bottom:10px;cursor:pointer}
+.mission-card:hover{background:#1e2a3a}
+.mission-title{font-weight:bold;color:#a78bfa;margin-bottom:5px;font-size:13px}
+.mission-preview{font-size:11px;color:#94a3b8}
+.mission-expanded{display:none;margin-top:10px;padding:10px;background:#0f172a;border-radius:8px;font-size:12px;white-space:pre-wrap}
+.final-output-card{background:linear-gradient(135deg,#1e1b4b,#0f172a);border:1px solid #7c3aed;border-radius:16px;padding:16px;margin-top:10px}
+.progress-tracker{background:#0f172a;border-radius:12px;padding:12px;font-size:12px;font-family:monospace;margin:10px 0}
+.progress-item{display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid #1f2937}
+.progress-status{font-weight:bold}
+.status-done{color:#4ade80}
+.status-running{color:#fbbf24}
+.status-queued{color:#64748b}
+.status-failed{color:#f87171}
+.department-badge{background:#7c3aed20;border:1px solid #7c3aed;border-radius:12px;padding:4px 8px;font-size:10px;display:inline-block;margin-left:8px}
+.empty-state{color:#64748b;text-align:center;padding:20px;font-size:12px}
+</style>
+</head>
+<body>
+<header>
+  <div class="logo"><div class="logo-icon">M</div>Mish Mish OS · GAHIZ Builder</div>
+  <div class="badge"><span class="dot" id="connDot"></span><span id="connLabel">Offline</span></div>
+</header>
+<main>
+  <div class="card" id="setupCard" style="display:block">
+    <div class="card-title">Connect Cloud Brain</div>
+    <div class="field"><label>GitHub Token</label><input type="password" id="ghToken" placeholder="ghp_..."></div>
+    <div class="field"><label>Repository</label><input type="text" id="ghRepo" placeholder="owner/repo-name"></div>
+    <button class="btn-primary" onclick="connectRepo()">Connect</button>
+    <div class="st" id="setupSt"></div>
+  </div>
+  <div id="mainUI" style="display:none;flex-direction:column;gap:14px">
+    <div class="tabs" id="mainTabs">
+      <button class="tab active" onclick="switchTab('showrunner',this)">🎬 Showrunner</button>
+      <button class="tab" onclick="switchTab('factory',this)">🎨 Content</button>
+      <button class="tab" onclick="switchTab('design',this)">🖌 Design</button>
+      <button class="tab" onclick="switchTab('files',this)">📁 Files</button>
+      <button class="tab" onclick="switchTab('missions',this)">🎯 Missions</button>
+      <button class="tab" onclick="switchTab('settings',this)">⚙️ Settings</button>
+    </div>
+    <div class="panel active" id="panel-showrunner">
+      <div class="card" style="flex:1;display:flex;flex-direction:column">
+        <div class="card-title">Showrunner · Autonomous Agent Director <span class="department-badge">Orchestrator</span></div>
+        <div class="chat-stream" id="srChat"></div>
+        <div class="field"><textarea id="srInput" placeholder="Paste your GAHIZ project brief here..." rows="3"></textarea></div>
+        <button class="btn-primary" id="srSendBtn" onclick="sendShowrunner()">Send to Departments</button>
+        <div id="srDiagnostic"></div>
+      </div>
+    </div>
+    <div class="panel" id="panel-factory">
+      <div class="card">
+        <div class="card-title">Content Factory · Creative Director <span class="department-badge" style="background:#22c55e20;border-color:#22c55e">Receives Tasks</span></div>
+        <div id="incomingTasks" style="background:#0f172a;border-radius:8px;padding:10px;margin-bottom:12px;font-size:12px;max-height:200px;overflow-y:auto"></div>
+        <div class="row" style="margin-bottom:12px">
+          <button class="btn-sm active-filter" onclick="setRole('hook', this)">🪝 Hook</button>
+          <button class="btn-sm" onclick="setRole('narrative', this)">📖 Narrative</button>
+          <button class="btn-sm" onclick="setRole('offer', this)">💸 Offer</button>
+          <button class="btn-sm" onclick="setRole('visual', this)">🖼 Visual</button>
+          <button class="btn-sm" onclick="setRole('script', this)">🎬 Script</button>
+        </div>
+        <div class="field"><label id="roleLabel">Hook Architect</label><textarea id="cfInput" placeholder="Select a task from above or type a brief..."></textarea></div>
+        <button class="btn-primary" id="cfGenBtn" onclick="generateContent()">Generate</button>
+        <div class="st" id="cfSt"></div>
+        <div id="cfOutput" style="margin-top:12px"></div>
+      </div>
+    </div>
+    <div class="panel" id="panel-design">
+      <div class="card">
+        <div class="card-title">Design · Component Staging <span class="department-badge" style="background:#fbbf24;border-color:#fbbf24;color:#000">Receives Tasks</span></div>
+        <div id="designIncomingTasks" style="background:#0f172a;border-radius:8px;padding:10px;margin-bottom:12px;font-size:12px;max-height:200px;overflow-y:auto"></div>
+        <div class="card-title" style="margin-top:8px">Staged Components</div>
+        <div id="designFileList"><div class="empty-state">No staged components yet.</div></div>
+        <button class="btn-ghost" style="width:100%;margin-top:8px" onclick="loadDesignFiles()">↻ Refresh Staged Files</button>
+        <div class="st" id="designSt"></div>
+      </div>
+    </div>
+    <div class="panel" id="panel-files">
+      <div class="card">
+        <div class="card-title">Files · Upload & Scan</div>
+        <input type="file" id="fileInput" multiple style="display:none" onchange="handleFileUpload(event)">
+        <button class="btn-primary" onclick="document.getElementById('fileInput').click()">📤 Upload Files</button>
+        <div class="hint" style="margin-top:6px;font-size:11px;color:#64748b">Select images, docs, or any file from your phone</div>
+        <div id="fileList" style="margin-top:12px"><div class="empty-state">No files uploaded yet.</div></div>
+        <div class="st" id="filesSt"></div>
+      </div>
+    </div>
+    <div class="panel" id="panel-missions">
+      <div class="card">
+        <div class="card-title">📜 Mission Archive</div>
+        <button class="btn-ghost" style="width:100%;margin-bottom:12px" onclick="loadMissions()">↻ Refresh Missions</button>
+        <div id="missionsList"><div class="empty-state">No missions yet. Send a project brief in Showrunner.</div></div>
+      </div>
+    </div>
+    <div class="panel" id="panel-settings">
+      <div class="card">
+        <div class="card-title">⚙️ AI Keys & Providers</div>
+        <div class="field">
+          <label>Active AI Provider</label>
+          <select id="aiProvider" onchange="saveProvider()">
+            <option value="gemini">Gemini</option>
+            <option value="deepseek">DeepSeek</option>
+            <option value="huggingface">Hugging Face</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Gemini API Key</label>
+          <input type="password" id="geminiKeys" placeholder="AIza...">
+          <button class="btn-ghost" style="margin-top:6px;width:100%" onclick="testProvider('gemini')">Test Gemini</button>
+        </div>
+        <div class="field">
+          <label>DeepSeek API Key</label>
+          <input type="password" id="deepseekKeys" placeholder="sk-...">
+          <button class="btn-ghost" style="margin-top:6px;width:100%" onclick="testProvider('deepseek')">Test DeepSeek</button>
+        </div>
+        <div class="field">
+          <label>Hugging Face Token</label>
+          <input type="password" id="hfKeys" placeholder="hf_...">
+          <button class="btn-ghost" style="margin-top:6px;width:100%" onclick="testProvider('huggingface')">Test HF</button>
+        <pre id="hfDebug" style="display:none;background:#0f172a;color:#fbbf24;border:1px solid #334155;border-radius:8px;padding:10px;font-size:10px;white-space:pre-wrap;word-break:break-all;margin-top:8px;max-height:200px;overflow-y:auto"></pre>
+        </div>
+        <div class="field"><label>GitHub Token</label><input type="password" id="settingsGhToken"></div>
+        <div class="field"><label>Repository</label><input type="text" id="settingsGhRepo"></div>
+        <button class="btn-primary" onclick="saveSettings()">Save All</button>
+        <div class="st" id="settingsSt"></div>
+      </div>
+    </div>
+  </div>
+</main>
+<button class="flying-btn" id="flyingBtn" onclick="toggleRadial()">⚡</button>
+<div class="radial-menu" id="radialMenu">
+  <button class="radial-item" title="Paste Clipboard" onclick="captureClipboard()">📋</button>
+  <button class="radial-item" title="Upload File" onclick="document.getElementById('fileInput').click()">📤</button>
+  <button class="radial-item" title="Quick Goal" onclick="quickGoal()">🎯</button>
+</div>
+
+<script>
+// ==================== STATE ====================
+let GH_TOKEN = localStorage.getItem('mmos_ghtoken') || '';
+let GH_REPO  = localStorage.getItem('mmos_ghrepo')  || '';
+let AI_PROVIDER   = localStorage.getItem('mmos_aiprovider') || 'gemini';
+let GEMINI_KEYS   = localStorage.getItem('mmos_geminiKeys') || '';
+let DEEPSEEK_KEYS = localStorage.getItem('mmos_dsKeys') || '';
+let HF_KEYS       = localStorage.getItem('mmos_hfKeys') || '';
+let activeRole    = 'hook';
+let showrunnerChat = [];
+let contentTasks   = [];
+let designTasks    = [];
+let uploadedFiles  = []; // FIX #8: track uploaded files in memory
+
+// ==================== UTILS ====================
+
+// FIX #11: safe base64 that handles Arabic / UTF-8 without double-encoding
+function toBase64(str) {
+  const bytes = new TextEncoder().encode(String(str));
+  let bin = '';
+  bytes.forEach(b => bin += String.fromCharCode(b));
+  return btoa(bin);
+}
+
+function base64ToUtf8(b64) {
+  try {
+    const bin   = atob(b64.replace(/\s/g, ''));
+    const bytes = new Uint8Array(bin.length);
+    for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+    return new TextDecoder().decode(bytes);
+  } catch(e) { return ''; }
+}
+
+function esc(s) {
+  return String(s || '')
+    .replace(/&/g,'&amp;')
+    .replace(/</g,'&lt;')
+    .replace(/>/g,'&gt;')
+    .replace(/"/g,'&quot;');
+}
+
+function delay(ms) { return new Promise(r => setTimeout(r, ms)); }
+
+function setSt(id, type, msg) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  el.className = `st show ${type}`;
+  el.innerHTML = type === 'loading'
+    ? `<span class="spinner"></span>${msg}`
+    : msg;
+}
+function hideSt(id) {
+  const el = document.getElementById(id);
+  if (el) el.className = 'st';
+}
+
+// FIX #10: auto-scroll chat to bottom
+function scrollChat() {
+  const c = document.getElementById('srChat');
+  if (c) c.scrollTop = c.scrollHeight;
+}
+
+// ==================== GITHUB ====================
+
+async function ghFetch(path, opts = {}) {
+  const res = await fetch(`https://api.github.com${path}`, {
+    ...opts,
+    headers: {
+      ...opts.headers,
+      Authorization: `Bearer ${GH_TOKEN}`,
+      Accept: 'application/vnd.github+json'
+    }
+  });
+  const body = await res.json();
+  if (!res.ok) throw new Error(`GitHub ${res.status}: ${body.message || 'Unknown error'}`);
+  return body;
+}
+
+async function saveStateFileInternal(filename, content) {
+  const path = `mishstate/${filename}`;
+  let sha = null;
+  try {
+    const ex = await ghFetch(`/repos/${GH_REPO}/contents/${path}`);
+    sha = ex.sha;
+  } catch(e) { /* new file */ }
+  await ghFetch(`/repos/${GH_REPO}/contents/${path}`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      message: `update ${filename}`,
+      content: toBase64(JSON.stringify(content, null, 2)),
+      ...(sha ? { sha } : {})
+    })
+  });
+}
+
+async function loadStateFileInternal(filename) {
+  try {
+    const file = await ghFetch(`/repos/${GH_REPO}/contents/mishstate/${filename}`);
+    return JSON.parse(base64ToUtf8(file.content));
+  } catch(e) { return null; }
+}
+
+// ==================== AI CALL (FIX #12) ====================
+// All three providers are now implemented.
+
+async function callAI(messages, systemPrompt = '') {
+  // FIX #12: DeepSeek and HuggingFace are now real, not stubs
+
+  if (AI_PROVIDER === 'gemini') {
+    const keys = GEMINI_KEYS.split(',').map(k => k.trim()).filter(Boolean);
+    if (!keys.length) throw new Error('No Gemini key set. Go to Settings.');
+    for (const key of keys) {
+      try {
+        const body = {
+          contents: messages.map(m => ({
+            role: 'user',
+            parts: [{ text: String(m.content) }]
+          })),
+          generationConfig: { temperature: 0.7, maxOutputTokens: 1500 }
+        };
+        if (systemPrompt) body.systemInstruction = { parts: [{ text: systemPrompt }] };
+        const res  = await fetch(
+          `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${key}`,
+          { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) }
+        );
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error?.message || res.status);
+        if (data.candidates?.[0]?.content?.parts?.[0]?.text) {
+          return data.candidates[0].content.parts[0].text;
+        }
+        throw new Error('Empty Gemini response');
+      } catch(e) { console.warn('Gemini key failed:', e.message); }
+    }
+    throw new Error('All Gemini keys failed');
+  }
+
+  if (AI_PROVIDER === 'deepseek') {
+    const keys = DEEPSEEK_KEYS.split(',').map(k => k.trim()).filter(Boolean);
+    if (!keys.length) throw new Error('No DeepSeek key set. Go to Settings.');
+    for (const key of keys) {
+      try {
+        const msgs = [];
+        if (systemPrompt) msgs.push({ role: 'system', content: systemPrompt });
+        messages.forEach(m => msgs.push({ role: m.role || 'user', content: m.content }));
+        const res  = await fetch('https://api.deepseek.com/v1/chat/completions', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${key}` },
+          body: JSON.stringify({ model: 'deepseek-chat', messages: msgs, max_tokens: 1500 })
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error?.message || res.status);
+        if (data.choices?.[0]?.message?.content) return data.choices[0].message.content;
+        throw new Error('Empty DeepSeek response');
+      } catch(e) { console.warn('DeepSeek key failed:', e.message); }
+    }
+    throw new Error('All DeepSeek keys failed');
+  }
+
+  if (AI_PROVIDER === 'huggingface') {
+    const keys = HF_KEYS.split(',').map(k => k.trim()).filter(Boolean);
+    if (!keys.length) throw new Error('No Hugging Face token set. Go to Settings.');
+    const model = 'mistralai/Mistral-7B-Instruct-v0.2';
+    for (const key of keys) {
+      try {
+        const prompt = (systemPrompt ? `<s>[INST] ${systemPrompt} [/INST]</s>\n` : '')
+          + messages.map(m => `[INST] ${m.content} [/INST]`).join('\n');
+        const res = await fetch(`https://api-inference.huggingface.co/models/${model}`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${key}` },
+          body: JSON.stringify({
+            inputs: prompt,
+            parameters: { max_new_tokens: 1000, temperature: 0.7 }
+          })
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || String(res.status));
+        let raw = Array.isArray(data) ? data[0]?.generated_text : data?.generated_text;
+        if (typeof raw !== 'string') throw new Error('Unexpected shape: ' + JSON.stringify(data).substring(0,200));
+        if (raw.includes('[/INST]')) raw = raw.split('[/INST]').pop();
+        raw = raw.trim();
+        if (!raw) throw new Error('Empty HF completion');
+        return raw;
+      } catch(e) { console.warn('HF attempt failed:', e.message); }
+    }
+    throw new Error('All Hugging Face tokens failed');
+  }
+
+  throw new Error('Unknown AI provider');
+}
+
+// ==================== CONNECT REPO ====================
+
+async function connectRepo() {
+  const t = document.getElementById('ghToken').value.trim();
+  const r = document.getElementById('ghRepo').value.trim();
+  if (!t || !r) { setSt('setupSt', 'error', 'Fill both fields.'); return; }
+  setSt('setupSt', 'loading', 'Connecting...');
+  GH_TOKEN = t; GH_REPO = r;
+  localStorage.setItem('mmos_ghtoken', t);
+  localStorage.setItem('mmos_ghrepo', r);
+  try {
+    await ghFetch(`/repos/${r}`);
+    document.getElementById('connDot').className  = 'dot on';
+    document.getElementById('connLabel').textContent = r.split('/')[1] || r;
+    document.getElementById('setupCard').style.display = 'none';
+    document.getElementById('mainUI').style.display    = 'flex';
+    hideSt('setupSt');
+    // restore chat history
+    const savedChat = await loadStateFileInternal('showrunner_chat.json');
+    if (savedChat && Array.isArray(savedChat)) {
+      showrunnerChat = savedChat;
+      document.getElementById('srChat').innerHTML = showrunnerChat.map(m =>
+        `<div class="chat-bubble ${m.role === 'user' ? 'chat-user' : 'chat-system'}">${esc(m.text)}</div>`
+      ).join('');
+      scrollChat();
+    }
+    updateDepartmentDisplays();
+  } catch(e) {
+    setSt('setupSt', 'error', `Connection failed: ${e.message}`);
+    GH_TOKEN = ''; GH_REPO = '';
+  }
+}
+
+// ==================== DEPARTMENT DISPLAYS ====================
+
+function updateDepartmentDisplays() {
+  const incomingDiv = document.getElementById('incomingTasks');
+  if (incomingDiv) {
+    if (!contentTasks.length) {
+      incomingDiv.innerHTML = '<div class="empty-state">No tasks yet. Send a project to Showrunner.</div>';
+    } else {
+      incomingDiv.innerHTML = contentTasks.map((task, idx) => `
+        <div style="background:#111827;padding:8px;margin-bottom:6px;border-radius:6px;border-left:3px solid #22c55e">
+          <strong>${esc(task.role.toUpperCase())}</strong><br>
+          <span style="font-size:11px">${esc((task.brief || '').substring(0, 120))}…</span><br>
+          <button class="btn-sm" style="margin-top:4px" onclick="executeContentTask(${idx})">▶ Generate</button>
+          <button class="btn-sm" style="margin-top:4px;color:#f87171" onclick="dismissContentTask(${idx})">✕</button>
+        </div>`).join('');
+    }
+  }
+  const designDiv = document.getElementById('designIncomingTasks');
+  if (designDiv) {
+    if (!designTasks.length) {
+      designDiv.innerHTML = '<div class="empty-state">No tasks yet. Send a project to Showrunner.</div>';
+    } else {
+      designDiv.innerHTML = designTasks.map((task, idx) => `
+        <div style="background:#111827;padding:8px;margin-bottom:6px;border-radius:6px;border-left:3px solid #fbbf24">
+          <strong>${esc(task.role.toUpperCase())}</strong><br>
+          <span style="font-size:11px">${esc((task.brief || '').substring(0, 120))}…</span><br>
+          <button class="btn-sm" style="margin-top:4px" onclick="executeDesignTask(${idx})">▶ Use Brief</button>
+          <button class="btn-sm" style="margin-top:4px;color:#f87171" onclick="dismissDesignTask(${idx})">✕</button>
+        </div>`).join('');
+    }
+  }
+}
+
+function dismissContentTask(idx) { contentTasks.splice(idx,1); updateDepartmentDisplays(); }
+function dismissDesignTask(idx)  { designTasks.splice(idx,1);  updateDepartmentDisplays(); }
+
+async function executeContentTask(idx) {
+  const task = contentTasks[idx];
+  if (!task) return;
+  document.getElementById('cfInput').value = task.brief || '';
+  activeRole = task.role;
+  const labels = { hook:'Hook Architect', narrative:'Narrative Engineer', offer:'Offer Framer', visual:'Visual Brief Writer', script:'Video Script Director' };
+  document.getElementById('roleLabel').textContent = labels[task.role] || task.role;
+  document.querySelectorAll('#panel-factory .btn-sm').forEach(b => b.classList.remove('active-filter'));
+  contentTasks.splice(idx, 1);
+  updateDepartmentDisplays();
+  // switch to factory tab
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab')[1].classList.add('active');
+  document.getElementById('panel-factory').classList.add('active');
+  await generateContent();
+}
+
+async function executeDesignTask(idx) {
+  const task = designTasks[idx];
+  if (!task) return;
+  // Copy brief to clipboard and show in design tab
+  try { await navigator.clipboard.writeText(task.brief || ''); } catch(e) {}
+  const div = document.getElementById('designIncomingTasks');
+  if (div) {
+    const note = document.createElement('div');
+    note.className = 'st show success';
+    note.style.marginTop = '8px';
+    note.textContent = `Brief copied to clipboard: "${(task.brief || '').substring(0,80)}…"`;
+    div.after(note);
+    setTimeout(() => note.remove(), 4000);
+  }
+  designTasks.splice(idx, 1);
+  updateDepartmentDisplays();
+}
+
+// ==================== SHOWRUNNER ====================
+
+async function addShowrunnerMessage(role, text, isFinalCard = false, missionData = null) {
+  const bubble = document.createElement('div');
+  bubble.className = `chat-bubble ${role === 'user' ? 'chat-user' : 'chat-system'}`;
+  if (isFinalCard && missionData) {
+    let html = `<div class="final-output-card">
+      <strong>✅ MISSION COMPLETE</strong>
+      <div style="margin-top:8px;white-space:pre-wrap;font-size:12px">${esc(missionData.finalOutput)}</div>`;
+    if (missionData.contentTasksDispatched?.length) {
+      html += `<details style="margin-top:8px"><summary style="cursor:pointer;color:#a78bfa">📋 Content Tasks (${missionData.contentTasksDispatched.length})</summary>
+        ${missionData.contentTasksDispatched.map(t => `<div style="margin-top:4px;font-size:11px"><b>${esc(t.role)}</b>: ${esc(t.brief)}</div>`).join('')}
+      </details>`;
+    }
+    if (missionData.designTasksDispatched?.length) {
+      html += `<details style="margin-top:8px"><summary style="cursor:pointer;color:#fbbf24">🎨 Design Tasks (${missionData.designTasksDispatched.length})</summary>
+        ${missionData.designTasksDispatched.map(t => `<div style="margin-top:4px;font-size:11px"><b>${esc(t.role)}</b>: ${esc(t.brief)}</div>`).join('')}
+      </details>`;
+    }
+    html += `</div>`;
+    bubble.innerHTML = html;
+  } else {
+    bubble.textContent = String(text || '');
+  }
+  document.getElementById('srChat').appendChild(bubble);
+  scrollChat(); // FIX #10
+
+  const record = { role, text: isFinalCard ? '[Mission Complete]' : String(text || ''), time: new Date().toISOString() };
+  showrunnerChat.push(record);
+  if (showrunnerChat.length > 50) showrunnerChat.shift();
+
+  // persist async, don't block UI
+  saveStateFileInternal('showrunner_chat.json', showrunnerChat).catch(() => {});
+}
+
+async function sendShowrunner() {
+  const input = document.getElementById('srInput').value.trim();
+  if (!input) return;
+  const btn = document.getElementById('srSendBtn');
+  btn.disabled = true;
+  await addShowrunnerMessage('user', input);
+  document.getElementById('srInput').value = '';
+
+  const thinking = document.createElement('div');
+  thinking.className = 'chat-bubble chat-thinking';
+  thinking.innerHTML = '<span class="spinner"></span> Analyzing project...';
+  document.getElementById('srChat').appendChild(thinking);
+  scrollChat();
+
+  try {
+    const planPrompt = `You are a project planner. Analyze this GAHIZ project brief and extract tasks.
+Return ONLY valid JSON, no markdown fences. Example:
+{"userGoal":"one-line summary","contentJobs":[{"id":"c1","role":"hook","brief":"specific brief for this project"}],"designJobs":[{"id":"d1","role":"visual","brief":"specific design brief"}],"assemblyInstruction":"how to combine outputs"}
+
+Roles for contentJobs: hook, narrative, offer, script
+Roles for designJobs: visual
+
+PROJECT:
+${input.substring(0, 8000)}`;
+
+    const planText = await callAI([{ role: 'user', content: planPrompt }], 'You are a project planner. Return only JSON.');
+    let plan;
+    try {
+      const cleaned = planText.replace(/```json/g,'').replace(/```/g,'').trim();
+      plan = JSON.parse(cleaned);
+    } catch(e) {
+      // graceful fallback: create a single generic content job
+      plan = {
+        userGoal: input.substring(0, 100),
+        contentJobs: [{ id: 'c1', role: 'hook', brief: input }],
+        designJobs: [],
+        assemblyInstruction: 'Build the project.'
+      };
+    }
+
+    if (plan.contentJobs?.length) {
+      plan.contentJobs.forEach(j => contentTasks.push(j));
+      updateDepartmentDisplays();
+    }
+    if (plan.designJobs?.length) {
+      plan.designJobs.forEach(j => designTasks.push(j));
+      updateDepartmentDisplays();
+    }
+
+    thinking.remove();
+
+    const summaryLines = [
+      `Goal: ${plan.userGoal || '—'}`,
+      plan.contentJobs?.length ? `📋 ${plan.contentJobs.length} content task(s) → Content Factory tab` : '',
+      plan.designJobs?.length  ? `🎨 ${plan.designJobs.length} design task(s) → Design tab` : '',
+    ].filter(Boolean).join('\n');
+
+    await addShowrunnerMessage('system', null, true, {
+      finalOutput: summaryLines,
+      contentTasksDispatched: plan.contentJobs || [],
+      designTasksDispatched:  plan.designJobs  || []
+    });
+
+    // save mission
+    saveStateFileInternal(`missions/mission_${Date.now()}.json`, {
+      timestamp: new Date().toISOString(),
+      userMessage: input.substring(0, 500),
+      plan
+    }).catch(() => {});
+
+  } catch(e) {
+    thinking.remove();
+    await addShowrunnerMessage('system', `⚠️ Error: ${e.message}`);
+  }
+  btn.disabled = false;
+}
+
+// ==================== CONTENT FACTORY ====================
+
+async function generateContent() {
+  const input = document.getElementById('cfInput').value.trim();
+  if (!input) { setSt('cfSt','error','Enter a brief first.'); return; }
+  const btn = document.getElementById('cfGenBtn');
+  btn.disabled = true;
+  setSt('cfSt','loading','Generating...');
+  const rolePrompts = {
+    hook:      'You are a Hook Architect. Write a punchy, urgent opening hook for this brief. 3-5 lines max.',
+    narrative: 'You are a Narrative Engineer. Write a StoryBrand-style narrative arc for this project.',
+    offer:     'You are an Offer Framer. Structure a compelling price and offer for this product/service.',
+    visual:    'You are a Visual Brief Writer. Describe the visual direction: colors, fonts, layout, mood.',
+    script:    'You are a Video Script Director. Write a 60-second script with hook, story, CTA.'
+  };
+  try {
+    const res = await callAI(
+      [{ role: 'user', content: input }],
+      rolePrompts[activeRole] || 'Generate professional marketing content for this brief.'
+    );
+    document.getElementById('cfOutput').innerHTML = `
+      <div class="card">
+        <div class="card-title" style="display:flex;justify-content:space-between">
+          <span>${esc(document.getElementById('roleLabel').textContent)} · Output</span>
+          <button class="btn-sm" onclick="copyOutput(this)">Copy</button>
+        </div>
+        <p style="white-space:pre-wrap;font-size:13px;line-height:1.7">${esc(res)}</p>
+      </div>`;
+    hideSt('cfSt');
+    saveStateFileInternal(`staging_${activeRole}.json`, {
+      role: activeRole, content: res, time: new Date().toISOString()
+    }).catch(() => {});
+  } catch(e) {
+    setSt('cfSt','error', `Generation failed: ${e.message}`);
+  }
+  btn.disabled = false;
+}
+
+function copyOutput(btn) {
+  const text = btn.closest('.card').querySelector('p')?.textContent || '';
+  navigator.clipboard.writeText(text).then(() => {
+    btn.textContent = 'Copied!';
+    setTimeout(() => btn.textContent = 'Copy', 1500);
+  }).catch(() => alert('Copy failed — select text manually.'));
+}
+
+function setRole(role, btn) {
+  activeRole = role;
+  const labels = { hook:'Hook Architect', narrative:'Narrative Engineer', offer:'Offer Framer', visual:'Visual Brief Writer', script:'Video Script Director' };
+  document.getElementById('roleLabel').textContent = labels[role] || role;
+  document.querySelectorAll('#panel-factory .btn-sm').forEach(b => b.classList.remove('active-filter'));
+  btn.classList.add('active-filter');
+}
+
+// ==================== DESIGN FILES ====================
+
+async function loadDesignFiles() {
+  const el = document.getElementById('designFileList');
+  el.innerHTML = '<div class="empty-state"><span class="spinner"></span> Loading...</div>';
+  setSt('designSt','loading','Fetching staged files...');
+  try {
+    const items = await ghFetch(`/repos/${GH_REPO}/contents/mishstate?per_page=100`);
+    const staging = items.filter(i => i.name.startsWith('staging_'));
+    if (!staging.length) {
+      el.innerHTML = '<div class="empty-state">No staged components yet.</div>';
+    } else {
+      el.innerHTML = staging.map(i => `
+        <div class="file-item">
+          <span>${esc(i.name)}</span>
+          <button class="btn-sm" onclick="commitDesignFile('${esc(i.name)}','${esc(i.sha)}')">Commit</button>
+        </div>`).join('');
+    }
+    hideSt('designSt');
+  } catch(e) {
+    el.innerHTML = '<div class="empty-state">Could not load files.</div>';
+    setSt('designSt','error', `Error: ${e.message}`);
+  }
+}
+
+// FIX #5: real commit — renames staging file to committed
+async function commitDesignFile(filename, sha) {
+  setSt('designSt','loading',`Committing ${filename}…`);
+  try {
+    // read current content
+    const file    = await ghFetch(`/repos/${GH_REPO}/contents/mishstate/${filename}`);
+    const content = file.content; // already base64
+    const newName = filename.replace('staging_','committed_');
+    // write new file
+    await ghFetch(`/repos/${GH_REPO}/contents/mishstate/${newName}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ message: `commit ${filename}`, content })
+    });
+    // delete old staging file
+    await ghFetch(`/repos/${GH_REPO}/contents/mishstate/${filename}`, {
+      method: 'DELETE',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ message: `remove staging ${filename}`, sha: file.sha })
+    });
+    setSt('designSt','success',`✅ ${filename} committed as ${newName}`);
+    loadDesignFiles();
+  } catch(e) {
+    setSt('designSt','error',`Commit failed: ${e.message}`);
+  }
+}
+
+// ==================== FILE UPLOAD (FIX #8) ====================
+
+async function handleFileUpload(event) {
+  const files = Array.from(event.target.files);
+  if (!files.length) return;
+  setSt('filesSt','loading',`Uploading ${files.length} file(s)…`);
+  const results = [];
+  for (const file of files) {
+    try {
+      const arrayBuf = await file.arrayBuffer();
+      const bytes    = new Uint8Array(arrayBuf);
+      let bin = '';
+      bytes.forEach(b => bin += String.fromCharCode(b));
+      const b64 = btoa(bin);
+      const safeName = file.name.replace(/[^a-zA-Z0-9._-]/g,'_');
+      const path = `uploads/${Date.now()}_${safeName}`;
+      let existSha = null;
+      try { const ex = await ghFetch(`/repos/${GH_REPO}/contents/${path}`); existSha = ex.sha; } catch(e) {}
+      await ghFetch(`/repos/${GH_REPO}/contents/${path}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          message: `upload ${safeName}`,
+          content: b64,
+          ...(existSha ? { sha: existSha } : {})
+        })
+      });
+      uploadedFiles.push({ name: file.name, path, size: file.size, type: file.type, time: new Date().toISOString() });
+      results.push({ name: file.name, ok: true });
+    } catch(e) {
+      results.push({ name: file.name, ok: false, err: e.message });
+    }
+  }
+  renderFileList();
+  const ok  = results.filter(r => r.ok).length;
+  const bad = results.filter(r => !r.ok).length;
+  if (bad === 0) setSt('filesSt','success',`✅ ${ok} file(s) uploaded to GitHub.`);
+  else setSt('filesSt','error',`${ok} uploaded, ${bad} failed: ${results.filter(r=>!r.ok).map(r=>r.name).join(', ')}`);
+  // reset input so same file can be re-selected
+  event.target.value = '';
+}
+
+function renderFileList() {
+  const el = document.getElementById('fileList');
+  if (!uploadedFiles.length) {
+    el.innerHTML = '<div class="empty-state">No files uploaded yet.</div>';
+  } else {
+    el.innerHTML = uploadedFiles.map((f,i) => `
+      <div class="file-item">
+        <span>${esc(f.name)} <span style="color:#64748b;font-size:10px">${(f.size/1024).toFixed(1)} KB</span></span>
+        <button class="btn-sm" onclick="removeUploadedFile(${i})">✕</button>
+      </div>`).join('');
+  }
+}
+
+function removeUploadedFile(idx) {
+  uploadedFiles.splice(idx,1);
+  renderFileList();
+}
+
+// ==================== MISSIONS (FIX #1) ====================
+
+async function loadMissions() {
+  const el = document.getElementById('missionsList');
+  el.innerHTML = '<div class="empty-state"><span class="spinner"></span> Loading missions…</div>';
+  try {
+    let items;
+    try {
+      items = await ghFetch(`/repos/${GH_REPO}/contents/mishstate/missions?per_page=100`);
+    } catch(e) {
+      el.innerHTML = '<div class="empty-state">No missions folder yet. Send a project to Showrunner first.</div>';
+      return;
+    }
+    if (!items || !items.length) {
+      el.innerHTML = '<div class="empty-state">No missions yet.</div>';
+      return;
+    }
+    // sort newest first
+    const sorted = items.filter(i => i.name.endsWith('.json')).sort((a,b) => b.name.localeCompare(a.name));
+    if (!sorted.length) { el.innerHTML = '<div class="empty-state">No missions yet.</div>'; return; }
+    // render cards without fetching all content (too slow) — show name + expand on click
+    el.innerHTML = sorted.map(item => {
+      const ts = item.name.replace('mission_','').replace('.json','');
+      const date = isNaN(+ts) ? ts : new Date(+ts).toLocaleString();
+      return `<div class="mission-card" onclick="expandMission(this,'${esc(item.path)}')">
+        <div class="mission-title">🎯 Mission · ${esc(date)}</div>
+        <div class="mission-preview">Tap to expand</div>
+        <div class="mission-expanded"></div>
+      </div>`;
+    }).join('');
+  } catch(e) {
+    el.innerHTML = `<div class="empty-state">Error: ${e.message}</div>`;
+  }
+}
+
+async function expandMission(card, path) {
+  const expanded = card.querySelector('.mission-expanded');
+  if (expanded.style.display === 'block') { expanded.style.display = 'none'; return; }
+  expanded.style.display = 'block';
+  expanded.textContent   = 'Loading…';
+  try {
+    const file = await ghFetch(`/repos/${GH_REPO}/contents/${path}`);
+    const data = JSON.parse(base64ToUtf8(file.content));
+    expanded.textContent = JSON.stringify(data, null, 2);
+  } catch(e) {
+    expanded.textContent = `Error loading: ${e.message}`;
+  }
+}
+
+// ==================== SETTINGS (FIX #6, #13) ====================
+
+function saveProvider() {
+  AI_PROVIDER = document.getElementById('aiProvider').value;
+  localStorage.setItem('mmos_aiprovider', AI_PROVIDER);
+}
+
+function saveSettings() {
+  GEMINI_KEYS   = document.getElementById('geminiKeys').value.trim();
+  DEEPSEEK_KEYS = document.getElementById('deepseekKeys').value.trim();
+  HF_KEYS       = document.getElementById('hfKeys').value.trim();
+  localStorage.setItem('mmos_geminiKeys', GEMINI_KEYS);
+  localStorage.setItem('mmos_dsKeys',     DEEPSEEK_KEYS);
+  localStorage.setItem('mmos_hfKeys',     HF_KEYS);
+
+  const newToken = document.getElementById('settingsGhToken').value.trim();
+  const newRepo  = document.getElementById('settingsGhRepo').value.trim();
+  if (newToken) { GH_TOKEN = newToken; localStorage.setItem('mmos_ghtoken', newToken); }
+  if (newRepo)  { GH_REPO  = newRepo;  localStorage.setItem('mmos_ghrepo',  newRepo);  }
+
+  AI_PROVIDER = document.getElementById('aiProvider').value;
+  localStorage.setItem('mmos_aiprovider', AI_PROVIDER);
+
+  setSt('settingsSt','success','✅ All settings saved.');
+  setTimeout(() => hideSt('settingsSt'), 2000);
+}
+
+// FIX #5: real provider test
+async function testProvider(p) {
+  setSt('settingsSt','loading',`Testing ${p}…`);
+  const prevProvider = AI_PROVIDER;
+  AI_PROVIDER = p;
+  try {
+    const res = await callAI([{ role:'user', content:'Say "OK" and nothing else.' }], 'Reply with only OK.');
+    setSt('settingsSt','success',`✅ ${p} works! Response: "${res.trim().substring(0,60)}"`);
+  } catch(e) {
+    setSt('settingsSt','error',`❌ ${p} failed: ${e.message}`);
+  }
+  AI_PROVIDER = prevProvider;
+}
+
+// ==================== MISC ====================
+
+function switchTab(name, btn) {
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById(`panel-${name}`).classList.add('active');
+  if (name === 'design')   loadDesignFiles();
+  if (name === 'missions') loadMissions();   // FIX #1: load missions on tab switch
+}
+
+function toggleRadial() {
+  document.getElementById('radialMenu').classList.toggle('show');
+}
+
+async function captureClipboard() {
+  document.getElementById('radialMenu').classList.remove('show');
+  try {
+    const text = await navigator.clipboard.readText();
+    if (text) await addShowrunnerMessage('system', `📋 Clipboard captured:\n${text.substring(0,300)}`);
+  } catch(e) {
+    await addShowrunnerMessage('system', '⚠️ Clipboard access denied. Paste manually.');
+  }
+}
+
+function quickGoal() {
+  document.getElementById('radialMenu').classList.remove('show');
+  const goal = prompt('Quick goal:');
+  if (goal) addShowrunnerMessage('system', `🎯 Goal set: ${goal}`);
+}
+
+// ==================== INIT ====================
+window.onload = () => {
+  document.getElementById('aiProvider').value    = AI_PROVIDER;
+  document.getElementById('geminiKeys').value    = GEMINI_KEYS;
+  document.getElementById('deepseekKeys').value  = DEEPSEEK_KEYS;
+  document.getElementById('hfKeys').value        = HF_KEYS;
+  document.getElementById('settingsGhToken').value = GH_TOKEN;
+  document.getElementById('settingsGhRepo').value  = GH_REPO;
+  updateDepartmentDisplays();
+
+  // FIX #7: only auto-connect if both values exist; don't fight display logic
+  if (GH_TOKEN && GH_REPO) {
+    document.getElementById('ghToken').value = GH_TOKEN;
+    document.getElementById('ghRepo').value  = GH_REPO;
+    connectRepo();
+  } else {
+    document.getElementById('setupCard').style.display = 'block';
+    document.getElementById('mainUI').style.display    = 'none';
+  }
+};
+</script>
+</body>
+</html>
