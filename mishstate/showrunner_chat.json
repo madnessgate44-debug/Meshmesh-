@@ -43,5 +43,10 @@
     "role": "user",
     "text": "Build the website",
     "time": "2026-06-15T10:40:25.382Z"
+  },
+  {
+    "role": "system",
+    "text": "⚠️ Error: All Hugging Face tokens failed",
+    "time": "2026-06-15T10:41:11.138Z"
   }
 ]
